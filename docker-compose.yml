@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:17
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+
+  prestart:
+    build:
+      context: ./backend
+    command: /app/scripts/prestart.sh
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+
+  backend:
+    build:
+      context: ./backend
+    command: ./scripts/start-reload.sh
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      prestart:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://backend:80/api/v1/utils/health-check/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  app-db-data:

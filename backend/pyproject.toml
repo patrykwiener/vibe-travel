@@ -1,0 +1,102 @@
+[tool.ruff]
+# Ruff config: https://docs.astral.sh/ruff/settings
+preview = false
+fix = false
+target-version = "py312"
+line-length = 120
+extend-exclude = [
+  "*/migrations/*",
+]
+
+[tool.ruff.format]
+quote-style = "single"
+docstring-code-format = false
+
+[tool.ruff.lint]
+select = [
+  "A",    # flake8-builtins
+  "B",    # flake8-bugbear
+  "C4",   # flake8-comprehensions
+  "C90",  # maccabe
+  "COM",  # flake8-commas
+  "D",    # pydocstyle
+  "DTZ",  # flake8-datetimez
+  "E",    # pycodestyle
+  "ERA",  # flake8-eradicate
+  "EXE",  # flake8-executable
+  "F",    # pyflakes
+  "FBT",  # flake8-boolean-trap
+  "FLY",  # pyflint
+  "FURB", # refurb
+  "G",    # flake8-logging-format
+  "I",    # isort
+  "ICN",  # flake8-import-conventions
+  "ISC",  # flake8-implicit-str-concat
+  "LOG",  # flake8-logging
+  "N",    # pep8-naming
+  "PERF", # perflint
+  "PIE",  # flake8-pie
+  "PL",   # pylint
+  "PT",   # flake8-pytest-style
+  "PTH",  # flake8-use-pathlib
+  "Q",    # flake8-quotes
+  "RET",  # flake8-return
+  "RSE",  # flake8-raise
+  "RUF",  # ruff
+  "S",    # flake8-bandit
+  "SIM",  # flake8-simpify
+  "SLF",  # flake8-self
+  "SLOT", # flake8-slots
+  "T100", # flake8-debugger
+  "TRY",  # tryceratops
+  "UP",   # pyupgrade
+  "W",    # pycodestyle
+  "YTT",  # flake8-2020
+]
+ignore = [
+  "A005",   # allow to shadow stdlib and builtin module names
+  "COM812", # trailing comma, conflicts with `ruff format`
+  # Different doc rules that we don't really care about:
+  "D100",
+  "D104",
+  "D106",
+  "D203",
+  "D212",
+  "D401",
+  "D404",
+  "D405",
+  "ISC001",  # implicit string concat conflicts with `ruff format`
+  "ISC003",  # prefer explicit string concat over implicit concat
+  "PLR09",   # we have our own complexity rules
+  "PLR2004", # do not report magic numbers
+  "PLR6301", # do not require classmethod / staticmethod when self not used
+  "TRY003",  # long exception messages from `tryceratops`
+  "FBT001",  # boolean-typed positional argument in function definition
+  "FBT002",  # boolean default positional argument in function definition
+  "G004",  # do not require logging format strings to be passed as arguments
+  "RUF012", # mutable class attributes should be annotated with `typing.ClassVar`
+  "TRY400", # use `logging.exception` instead of `logging.error`
+]
+external = [ "WPS" ]
+
+# Plugin configs:
+flake8-import-conventions.banned-from = [ "ast" ]
+flake8-quotes.inline-quotes = "single"
+mccabe.max-complexity = 6
+pydocstyle.convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"*/__init__.py" = [
+  "F401", # unused imports
+  "F403", # undefined local with import star
+  "F405", # undefined local with import star usage
+]
+"**/tests/*.py" = [
+  "S101", # asserts
+  "S106", # hardcoded passwords
+  "S404", # subprocess calls are for tests
+  "S603", # do not require `shell=True`
+  "S607", # partial executable paths
+  "SLF001",
+  "PT018", # assertion should be broken down into multiple parts
+]

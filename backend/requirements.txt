@@ -1,0 +1,7 @@
+fastapi[standard]==0.115.12
+fastapi-utils[all]==0.8.0
+pydantic-settings==2.9.1
+pytest==8.0.2
+pytest-cov==6.1.1
+ruff==0.11.8
+mypy==1.15.0

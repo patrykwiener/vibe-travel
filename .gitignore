@@ -1,0 +1,9 @@
+.vscode
+.venv
+.coverage
+coverage.xml
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
