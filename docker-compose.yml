@@ -46,9 +46,30 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://backend:80/api/v1/utils/health-check/" ]
-      interval: 10s
+      interval: 1s
       timeout: 5s
       retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_BACKEND_URL=http://backend:8000
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      # Don't mount node_modules to avoid architecture conflicts
+      - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - VITE_BACKEND_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+        restart: true
 
 volumes:
   app-db-data:
