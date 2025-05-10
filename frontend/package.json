@@ -8,15 +8,18 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "generate-client": "npx @hey-api/openapi-ts -i ./openapi.json -o src/client -c @hey-api/client-fetch"
   },
   "dependencies": {
+    "@hey-api/client-fetch": "^0.10.0",
     "flowbite": "^3.1.2",
     "flowbite-vue": "^0.2.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@hey-api/openapi-ts": "^0.67.3",
     "@tailwindcss/vite": "^4.1.6",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/eslint-config-prettier": "^10.2.0",
@@ -28,5 +31,8 @@
     "tailwindcss": "^4.1.6",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-arm64-musl": "4.9.5"
   }
 }

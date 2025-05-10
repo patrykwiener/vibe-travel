@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ENVIRONMENT: Literal['dev', 'prod'] = 'dev'
 
+    FRONTEND_HOST: str = 'http://localhost:5173'
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     @computed_field  # type: ignore[prop-decorator]
@@ -46,7 +47,7 @@ class Settings(BaseSettings):
         This is a list of all origins that are allowed to make CORS requests to the backend.
         It is a combination of the backend CORS origins and the frontend host.
         """
-        return [str(origin).rstrip('/') for origin in self.BACKEND_CORS_ORIGINS]  # + [self.FRONTEND_HOST]
+        return [str(origin).rstrip('/') for origin in self.BACKEND_CORS_ORIGINS] + [self.FRONTEND_HOST]
 
     PROJECT_NAME: str = 'vibe-travel'
     POSTGRES_SERVER: str
