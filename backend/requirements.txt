@@ -8,4 +8,5 @@ ruff==0.11.8
 mypy==1.15.0
 sqlalchemy==2.0.40
 psycopg2-binary==2.9.10
+asyncpg==0.30.0
 alembic==1.15.2

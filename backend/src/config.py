@@ -35,6 +35,16 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ENVIRONMENT: Literal['dev', 'prod'] = 'dev'
 
+    JWT_SECRET_KEY: str = secrets.token_urlsafe(32)
+    JWT_COOKIE_NAME: str = 'vibe-travel-jwt'
+    JWT_COOKIE_PATH: str = '/'
+    JWT_COOKIE_DOMAIN: str | None = None
+    JWT_COOKIE_SECURE: bool = False
+    JWT_COOKIE_HTTPONLY: bool = True
+    JWT_COOKIE_SAMESITE: Literal['lax', 'strict', 'none'] = 'lax'
+    JWT_COOKIE_MAX_AGE: int = 60 * 60 * 24 * 7
+    JWT_LIFETIME_SECONDS: int = 60 * 60 * 24 * 7
+
     FRONTEND_HOST: str = 'http://localhost:5173'
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
@@ -60,6 +70,19 @@ class Settings(BaseSettings):
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> MultiHostUrl:  # noqa: N802
         """Get the SQLAlchemy database URI."""
+        return MultiHostUrl.build(
+            scheme='postgresql+asyncpg',
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def SYNC_SQLALCHEMY_DATABASE_URI(self) -> MultiHostUrl:  # noqa: N802
+        """Get the SQLAlchemy database URI for sync operations."""
         return MultiHostUrl.build(
             scheme='postgresql+psycopg2',
             username=self.POSTGRES_USER,
