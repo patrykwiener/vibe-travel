@@ -10,4 +10,4 @@ done
 echo "PostgreSQL is available"
 
 # Run database migrations if needed (assuming you'll use alembic for migrations)
-# alembic upgrade head
+alembic upgrade head

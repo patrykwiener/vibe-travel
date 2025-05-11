@@ -30,6 +30,7 @@ VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek p
 - przycisk "Generate Plan" uruchamia `POST /notes/:id/plan/generate`
 - synchronizacja z OpenRouter SDK, timeout 5 s
 - wynik to tekst (≤ 5000 znaków) z podziałem na dni/godziny
+- type planu: `AI` (automatycznie generowany), `MANUAL` (ręcznie wprowadzony) lub `HYBRID` (połączenie obu)
 
 3.5 Zarządzanie planem
 - akceptacja propozycji zapisuje plan przez `POST /notes/:id/plan` z `generation_id`
@@ -101,8 +102,9 @@ VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek p
   Kryteria akceptacji:
     - Kliknięcie "Generate Plan" wywołuje `POST /notes/:id/plan/generate`
     - Generacja korzysta z OpenRouter SDK i kończy się w maks. 5 sekundach
-    - AI zwraca tekst planu (≤ 10000 znaków) z podziałem na dni/godziny
+    - AI zwraca tekst planu (≤ 5000 znaków) z podziałem na dni/godziny
     - W przypadku błędu lub timeout użytkownik otrzymuje komunikat "Wystąpił błąd generowania planu"
+    - Przycisk generuje tylko propozycję planu. Jeśli użytkownik nie zaakceptuje, plan nie zostanie zapisany ani przypisany do notatki
 
 - ID: US-006
   Tytuł: Akceptacja i edycja planu
@@ -118,6 +120,8 @@ VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek p
   Kryteria akceptacji:
     - Użytkownik może usunąć odrzucić propozycję planu poprzez naciśniecie przycisku i ponownie kliknąć "Generate Plan"
     - Interfejs czyści poprzedni tekst przed wysłaniem nowego żądania
+    - Do momentu akceptacji propozycji planu, plan nie jest przypisywany do notatki, dlatego nawet po wygenerowaniu nowej propozycji, poprzednia nie jest usuwana do momentu akceptacji nowej propozycji
+    - Użytkownik może odrzucić plan i ponownie kliknąć "Generate Plan", co spowoduje wygenerowanie nowego planu
 
 - ID: US-008
   Tytuł: Ręczne tworzenie planu

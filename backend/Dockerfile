@@ -20,7 +20,8 @@ RUN set -x && \
     python3-dev \
     postgresql-dev \
     linux-headers \
-    curl
+    curl \
+    libpq-dev
 
 # Install Python dependencies
 COPY ./requirements.txt ./requirements.txt

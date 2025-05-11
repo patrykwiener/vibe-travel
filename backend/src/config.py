@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     def SQLALCHEMY_DATABASE_URI(self) -> MultiHostUrl:  # noqa: N802
         """Get the SQLAlchemy database URI."""
         return MultiHostUrl.build(
-            scheme='postgresql+psycopg',
+            scheme='postgresql+psycopg2',
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_SERVER,

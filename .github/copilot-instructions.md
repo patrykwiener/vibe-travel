@@ -10,7 +10,7 @@ VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek p
   - Flowbite 3
 - Backend:
     - Python 3.13
-    - FastAPI with FastAPI Utilities
+    - FastAPI with FastAPI Utilities and FastAPI Users
     - Docker
     - PostgreSQL
 - AI - Komunikacja z modelami przez usługę Openrouter.ai:
@@ -21,6 +21,7 @@ When introducing changes to the project, please follow the structure outlined be
 
 * ./backend - Contains the backend codebase, including FastAPI application and related files.
    * ./backend/src - Contains the source code for the backend application.
+     * /backend/src/alembic - Contains Alembic migration files for database schema changes.
      * ./backend/src/apps - Contains application-specific code, including routers, services, and models.
         * ./backend/src/apps/{app_name}/api.py - Contains the API endpoints for the application.
         * ./backend/src/apps/{app_name}/models.py - Contains the data models for the application.

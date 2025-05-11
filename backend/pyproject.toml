@@ -91,6 +91,9 @@ pydocstyle.convention = "google"
   "F403", # undefined local with import star
   "F405", # undefined local with import star usage
 ]
+"*/all_models.py" = [
+  "F401", # unused imports
+]
 "**/tests/*.py" = [
   "S101", # asserts
   "S106", # hardcoded passwords
@@ -99,4 +102,8 @@ pydocstyle.convention = "google"
   "S607", # partial executable paths
   "SLF001",
   "PT018", # assertion should be broken down into multiple parts
+]
+"**/versions/*.py" = [
+  "D205",
+  "D415",
 ]

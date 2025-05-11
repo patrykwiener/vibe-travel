@@ -34,8 +34,8 @@ lint: ## Run linting
 .PHONY: lint-fix
 lint-fix: ## Fix linting issues
 	docker compose exec backend ./scripts/lint.sh --fix
-	docker compose exec frontend npm run lint:fix
-	docker compose exec frontend npm run format:fix
+	docker compose exec frontend npm run lint --fix
+	docker compose exec frontend npm run format --fix
 
 .PHONY: test
 test: ## Run tests. Usage: make test [path=path/to/test]
@@ -60,3 +60,11 @@ reset-db: ## Reset the database (drops all data)
 .PHONY: generate-openapi-client
 generate-openapi-client: ## Generate OpenAPI client
 	./scripts/generate-client.sh
+
+.PHONY: makemigrations
+makemigrations: ## Create new migrations based on changes to your models
+	docker compose exec backend ./scripts/makemigrations.sh $(msg)
+
+.PHONY: migrate
+migrate: ## Apply migrations
+	docker compose exec backend ./scripts/migrate.sh
