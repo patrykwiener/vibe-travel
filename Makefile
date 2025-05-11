@@ -22,13 +22,20 @@ logs: ## Show logs
 logs-backend: ## Show backend logs
 	docker compose logs -f backend
 
+.PHONY: logs-frontend
+logs-frontend: ## Show frontend logs
+	docker compose logs -f frontend
+
 .PHONY: lint
 lint: ## Run linting
 	docker compose exec backend ./scripts/lint.sh
+	docker compose exec frontend npm run lint
 
 .PHONY: lint-fix
 lint-fix: ## Fix linting issues
 	docker compose exec backend ./scripts/lint.sh --fix
+	docker compose exec frontend npm run lint:fix
+	docker compose exec frontend npm run format:fix
 
 .PHONY: test
 test: ## Run tests. Usage: make test [path=path/to/test]
@@ -49,3 +56,7 @@ init: create-env build up ## Initialize project (create .env, build images, star
 reset-db: ## Reset the database (drops all data)
 	docker compose down -v
 	docker compose up -d db
+
+.PHONY: generate-openapi-client
+generate-openapi-client: ## Generate OpenAPI client
+	./scripts/generate-client.sh

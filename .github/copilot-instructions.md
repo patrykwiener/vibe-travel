@@ -42,6 +42,7 @@ When introducing changes to the project, please follow the structure outlined be
      * ./frontend/src/assets - Contains static assets like images and stylesheets.
 * ./docs - Contains documentation files, including architecture decision records (ADRs), API documentation, and other relevant information.
    * ./docs/adr - Contains architecture decision records (ADRs) for the project.
+* ./scripts - Contains utility scripts for running the application, database migrations, and other tasks.
 
 ## CODING_PRACTICES
 
