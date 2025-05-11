@@ -35,6 +35,11 @@ When introducing changes to the project, please follow the structure outlined be
       * ./backend/tests/{app_name}/integration - Contains integration tests for the backend application.
    * ./backend/scripts - utility script for running the backend application
 * ./frontend - Contains the frontend codebase, including Vue.js application and related files.
+   * ./frontend/src - Contains the source code for the frontend application.
+     * ./frontend/src/components - Contains reusable Vue.js components.
+     * ./frontend/src/views - Contains Vue.js views and pages.
+     * ./frontend/src/router - Contains Vue Router configuration and routes.
+     * ./frontend/src/assets - Contains static assets like images and stylesheets.
 * ./docs - Contains documentation files, including architecture decision records (ADRs), API documentation, and other relevant information.
    * ./docs/adr - Contains architecture decision records (ADRs) for the project.
 
@@ -127,3 +132,42 @@ When introducing changes to the project, please follow the structure outlined be
 - Use pytest function based approach. Don't create classes for tests unless necessary
 - Use pytest.mark.parametrize for parameterized tests
   
+
+# FRONTEND
+
+### Guidelines for VUE 3
+
+#### VUE_CODING_STANDARDS
+
+- Use the Composition API instead of the Options API for better type inference and code reuse
+- Implement <script setup> for more concise component definitions
+- Use Suspense and async components for handling loading states during code-splitting
+- Leverage the defineProps and defineEmits macros for type-safe props and events
+- Use the new defineOptions for additional component options
+- Implement provide/inject for dependency injection instead of prop drilling in deeply nested components
+- Use the Teleport component for portal-like functionality to render UI elsewhere in the DOM
+- Leverage ref over reactive for primitive values to avoid unintended unwrapping
+- Use v-memo for performance optimization in render-heavy list rendering scenarios
+- Implement shallow refs for large objects that don't need deep reactivity
+
+### Guidelines for STYLING
+
+#### TAILWIND
+
+- Use the @layer directive to organize styles into components, utilities, and base layers
+- Implement Just-in-Time (JIT) mode for development efficiency and smaller CSS bundles
+- Use arbitrary values with square brackets (e.g., w-[123px]) for precise one-off designs
+- Leverage the @apply directive in component classes to reuse utility combinations
+- Implement the Tailwind configuration file for customizing theme, plugins, and variants
+- Use component extraction for repeated UI patterns instead of copying utility classes
+- Leverage the theme() function in CSS for accessing Tailwind theme values
+- Implement dark mode with the dark: variant
+- Use responsive variants (sm:, md:, lg:, etc.) for adaptive designs
+- Leverage state variants (hover:, focus:, active:, etc.) for interactive elements
+
+#### FLOWBITE
+- Use Flowbite components for pre-built UI elements and patterns
+- Implement Flowbite's utility classes for consistent styling and spacing
+- Leverage Flowbite's theming capabilities for consistent branding
+- Use Flowbite's documentation and examples for reference and best practices
+- Implement Flowbite's JavaScript components for interactive elements
