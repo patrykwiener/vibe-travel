@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.apps.base.models import Base
 from src.apps.users.models import User
+from src.config import settings
 
 if TYPE_CHECKING:
     from src.apps.plans.models import Plan
@@ -28,23 +29,25 @@ class Note(Base):
         nullable=False,
     )
     title: Mapped[str] = mapped_column(
-        sa.String(length=255),
-        sa.CheckConstraint('length(title) >= 3'),
+        sa.String(length=settings.NOTES_TITLE_MAX_LENGTH),
+        sa.CheckConstraint(f'length(title) >= {settings.NOTES_TITLE_MIN_LENGTH}'),
         nullable=False,
     )
     place: Mapped[str] = mapped_column(
-        sa.String(length=255),
-        sa.CheckConstraint('length(place) >= 3'),
+        sa.String(length=settings.NOTES_PLACE_MAX_LENGTH),
+        sa.CheckConstraint(f'length(place) >= {settings.NOTES_PLACE_MIN_LENGTH}'),
         nullable=False,
     )
     date_from: Mapped[date] = mapped_column(sa.Date, nullable=False)
     date_to: Mapped[date] = mapped_column(sa.Date, nullable=False)
     number_of_people: Mapped[int] = mapped_column(
         sa.Integer,
-        sa.CheckConstraint('number_of_people >= 1 AND number_of_people <= 20'),
+        sa.CheckConstraint(
+            f'number_of_people >= {settings.NOTES_MIN_PEOPLE} AND number_of_people <= {settings.NOTES_MAX_PEOPLE}',
+        ),
         nullable=False,
     )
-    key_ideas: Mapped[str | None] = mapped_column(sa.String(length=2000), nullable=True)
+    key_ideas: Mapped[str | None] = mapped_column(sa.String(length=settings.NOTES_KEY_IDEAS_MAX_LENGTH), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),
         nullable=False,

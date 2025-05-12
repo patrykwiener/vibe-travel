@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.apps.base.models import Base
 from src.apps.plans.enums import PlanStatusEnum, PlanTypeEnum
+from src.config import settings
 
 if TYPE_CHECKING:
     from src.apps.notes.models import Note
@@ -28,7 +29,7 @@ class Plan(Base):
         nullable=False,
     )
     plan_text: Mapped[str] = mapped_column(
-        sa.String(length=5000),
+        sa.String(length=settings.PLANS_TEXT_MAX_LENGTH),
         nullable=False,
     )
     type: Mapped[PlanTypeEnum] = mapped_column(

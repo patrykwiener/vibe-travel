@@ -17,4 +17,3 @@ class PlanStatusEnum(str, enum.Enum):
     PENDING_AI = 'PENDING_AI'
     ACTIVE = 'ACTIVE'
     ARCHIVED = 'ARCHIVED'
-    REJECTED_AI = 'REJECTED_AI'

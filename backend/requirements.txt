@@ -1,6 +1,7 @@
 fastapi[standard]==0.115.12
 fastapi-utils[all]==0.8.0
 fastapi-users[sqlalchemy]==14.0.1
+fastapi-pagination==0.13.1
 pydantic-settings==2.9.1
 pytest==8.0.2
 pytest-cov==6.1.1

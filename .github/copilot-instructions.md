@@ -121,6 +121,7 @@ When introducing changes to the project, please follow the structure outlined be
 - Use FastAPI Utilities for common patterns like authentication, authorization, CORS handling, class-based views, and middleware
 - Ensure that all endpoints are properly documented with descriptions and examples for better usability
 - Use FastAPI's dependency injection system to manage shared resources like database sessions and authentication
+- Name FastAPI schemas in a way that reflects their purpose with suffixes "InSchema" for input and "OutSchema" for output e.g. UserCreateInSchema, UserUpdateInSchema, UserOutSchema
 
 ## TESTING
 

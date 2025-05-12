@@ -7,7 +7,7 @@ CREATE TYPE user_travel_style_enum AS ENUM ('RELAX', 'ADVENTURE', 'CULTURE', 'PA
 CREATE TYPE user_travel_pace_enum AS ENUM ('CALM', 'MODERATE', 'INTENSE');
 CREATE TYPE user_budget_enum AS ENUM ('LOW', 'MEDIUM', 'HIGH');
 CREATE TYPE plan_type_enum AS ENUM ('AI', 'MANUAL', 'HYBRID');
-CREATE TYPE plan_status_enum AS ENUM ('PENDING_AI', 'ACTIVE', 'ARCHIVED', 'REJECTED_AI');
+CREATE TYPE plan_status_enum AS ENUM ('PENDING_AI', 'ACTIVE', 'ARCHIVED');
 ```
 
 ## 2. Tables

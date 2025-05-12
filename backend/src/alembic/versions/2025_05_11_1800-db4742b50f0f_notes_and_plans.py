@@ -46,7 +46,7 @@ def upgrade() -> None:
         sa.Column('type', sa.Enum('AI', 'MANUAL', 'HYBRID', name='plan_type_enum'), nullable=False),
         sa.Column(
             'status',
-            sa.Enum('PENDING_AI', 'ACTIVE', 'ARCHIVED', 'REJECTED_AI', name='plan_status_enum'),
+            sa.Enum('PENDING_AI', 'ACTIVE', 'ARCHIVED', name='plan_status_enum'),
             nullable=False,
         ),
         sa.Column('generation_id', sa.UUID(), nullable=False),

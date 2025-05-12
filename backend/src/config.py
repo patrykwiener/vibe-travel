@@ -31,6 +31,20 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
         extra='ignore',
     )
+
+    # Notes validation settings
+    NOTES_TITLE_MIN_LENGTH: int = 3
+    NOTES_TITLE_MAX_LENGTH: int = 255
+    NOTES_PLACE_MIN_LENGTH: int = 3
+    NOTES_PLACE_MAX_LENGTH: int = 255
+    NOTES_MAX_TRIP_DURATION_DAYS: int = 14
+    NOTES_MIN_PEOPLE: int = 1
+    NOTES_MAX_PEOPLE: int = 20
+    NOTES_KEY_IDEAS_MAX_LENGTH: int = 2000
+
+    # Plans validation settings
+    PLANS_TEXT_MAX_LENGTH: int = 5000
+
     API_V1_STR: str = '/api/v1'
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ENVIRONMENT: Literal['dev', 'prod'] = 'dev'
