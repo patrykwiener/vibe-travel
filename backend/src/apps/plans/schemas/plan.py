@@ -156,5 +156,5 @@ class PlanOutSchema(BaseModel):
                 'created_at': '2025-05-11T11:00:00Z',
                 'updated_at': '2025-05-11T11:05:00Z',
             }
-        }
+        },
     )

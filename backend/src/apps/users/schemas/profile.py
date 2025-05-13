@@ -1,24 +1,8 @@
-"""Pydantic schemas for user and user profile related functionality."""
-
-import uuid
 from datetime import datetime
 
-from fastapi_users import schemas
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.apps.users.enums import UserBudgetEnum, UserTravelPaceEnum, UserTravelStyleEnum
-
-
-class UserRead(schemas.BaseUser[uuid.UUID]):
-    """User read schema."""
-
-
-class UserCreate(schemas.BaseUserCreate):
-    """User create schema."""
-
-
-class UserUpdate(schemas.BaseUserUpdate):
-    """User update schema."""
 
 
 class UserProfileInSchema(BaseModel):

@@ -81,7 +81,6 @@ class NoteUpdateInSchema(NoteCreateInSchema):
     """
 
 
-
 class NoteOutSchema(BaseModel):
     """Schema for detailed note responses.
 

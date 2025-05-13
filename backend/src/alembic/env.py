@@ -6,7 +6,6 @@ from alembic import context
 
 # Import all models to register them with Base.metadata
 from src.alembic.all_models import *  # noqa: F403
-from src.apps.base.models import Base
 from src.config import settings
 
 # this is the Alembic Config object, which provides
@@ -20,7 +19,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = Base.metadata
+target_metadata = Base.metadata  # noqa: F405
 
 config.set_main_option('sqlalchemy.url', str(settings.SYNC_SQLALCHEMY_DATABASE_URI))
 

@@ -8,7 +8,7 @@ from fastapi_users.authentication import (
 )
 
 from src.apps.users.managers import get_user_manager
-from src.apps.users.models import User
+from src.apps.users.models.user import User
 from src.config import settings
 
 cookie_transport = CookieTransport(

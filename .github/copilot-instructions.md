@@ -1,13 +1,15 @@
 # AI Rules for VibeTravels
 
-VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek poprzez zamianę prostych notatek w szczegółowe plany podróży z wykorzystaniem AI. Podstawowe funkcje obejmują zarządzanie notatkami, profil użytkownika z preferencjami turystycznymi oraz integrację z silnikiem AI (OpenRouter).
+VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek poprzez zamianę prostych notatek w szczegółowe
+plany podróży z wykorzystaniem AI. Podstawowe funkcje obejmują zarządzanie notatkami, profil użytkownika z preferencjami
+turystycznymi oraz integrację z silnikiem AI (OpenRouter).
 
 ## Tech stack
 
 - Frontend:
-  - Vue.js 3
-  - Tailwind 4
-  - Flowbite 3
+    - Vue.js 3
+    - Tailwind 4
+    - Flowbite 3
 - Backend:
     - Python 3.13
     - FastAPI with FastAPI Utilities and FastAPI Users
@@ -19,33 +21,47 @@ VibeTravels to aplikacja MVP służąca do planowania angażujących wycieczek p
 
 When introducing changes to the project, please follow the structure outlined below. This will help maintain consistency and organization throughout the codebase.
 
-* ./backend - Contains the backend codebase, including FastAPI application and related files.
-   * ./backend/src - Contains the source code for the backend application.
-     * /backend/src/alembic - Contains Alembic migration files for database schema changes.
-     * ./backend/src/apps - Contains application-specific code, including routers, services, and models.
-        * ./backend/src/apps/{app_name}/api.py - Contains the API endpoints for the application.
-        * ./backend/src/apps/{app_name}/models.py - Contains the data models for the application.
-        * ./backend/src/apps/{app_name}/repositories.py - Contains the repository classes for the application.
-        * ./backend/src/apps/{app_name}/usecases.py - Contains the use case classes for the application implementing business logic.
-        * ./backend/src/apps/{app_name}/services.py - Contains the business logic and service layer for the application.
-        * ./backend/src/apps/{app_name}/schemas.py - Contains the Pydantic schemas for request and response validation.
-        * ./backend/src/apps/{app_name}/utils.py - Contains utility functions and helpers for the application.
-     * ./backend/src/config.py - Contains configuration settings for the backend application.
-     * ./backend/src/main.py - The entry point for the backend application.
-     * ./backend/src/routers.py - Contains the API main routers for the backend application.
-   * ./backend/tests - Contains unit tests for the backend application.
-      * ./backend/tests/{app_name}/unit - Contains unit tests for the backend application.
-      * ./backend/tests/{app_name}/integration - Contains integration tests for the backend application.
-   * ./backend/scripts - utility script for running the backend application
-* ./frontend - Contains the frontend codebase, including Vue.js application and related files.
-   * ./frontend/src - Contains the source code for the frontend application.
-     * ./frontend/src/components - Contains reusable Vue.js components.
-     * ./frontend/src/views - Contains Vue.js views and pages.
-     * ./frontend/src/router - Contains Vue Router configuration and routes.
-     * ./frontend/src/assets - Contains static assets like images and stylesheets.
-* ./docs - Contains documentation files, including architecture decision records (ADRs), API documentation, and other relevant information.
-   * ./docs/adr - Contains architecture decision records (ADRs) for the project.
-* ./scripts - Contains utility scripts for running the application, database migrations, and other tasks.
+* ./backend - Backend codebase (FastAPI).
+    * ./backend/src - Backend source code.
+      * ./backend/src/alembic - Alembic migrations (Database schema evolution).
+      * ./backend/src/apps - Application-specific/Domain modules.
+          * ./backend/src/apps/{app_name}/api.py - API endpoints (FastAPI routers/operations) for this app. Responsible for request/response handling and calling the use case layer.
+          * ./backend/src/apps/{app_name}/models/ - Database models (e.g., SQLAlchemy models).
+          * ./backend/src/apps/{app_name}/repositories/ - Data access logic (abstracting database interactions for CUD operations). May contain interfaces (ABCs) and their implementations.
+          * ./backend/src/apps/{app_name}/usecases/ - Business logic / Application layer commands and queries. Orchestrates interactions between repositories, services, etc.
+            * ./backend/src/apps/{app_name}/usecases/dto/ - Data Transfer Objects (DTOs) used by use cases.
+          * ./backend/src/apps/{app_name}/services/ - Domain services that don't fit repositories (e.g., complex calculations *not* part of core use case orchestration).
+          * ./backend/src/apps/{app_name}/schemas/ - Pydantic models for API request validation and response serialization.
+          * ./backend/src/apps/{app_name}/exceptions.py - Application-specific custom exceptions.
+          * ./backend/src/apps/{app_name}/utils.py - Utility functions specific to this application module.
+      * ./backend/src/common/ - Shared modules/utilities used across multiple applications/domains (e.g., common helpers, shared base classes).
+      * ./backend/src/config.py - Backend configuration loading and management (potentially using Pydantic Settings).
+      * ./backend/src/database.py - Database session/connection setup and management logic. Provides dependencies for database sessions.
+      * ./backend/src/dependencies/ - Central place for defining common dependency injection providers (e.g., getting current user, getting database session, factory functions for use cases/repositories).
+      * ./backend/src/exceptions/ - Global custom exception types for the entire backend.
+      * ./backend/src/interfaces/ - Abstract Base Classes (ABCs) defining interfaces for repositories, services, use cases, etc., promoting loose coupling.
+      * ./backend/src/middleware/ - FastAPI middleware for processing requests globally (e.g., logging, CORS, security checks, request ID).
+      * ./backend/src/security/ - Authentication and Authorization logic (e.g., token handling, password hashing, permission checks, user management utilities).
+      * ./backend/src/services/ - Global or infrastructure services used across the application (similar role to app-specific services, but at a higher level or for cross-cutting concerns). *Consider consolidating app-specific and global services if their roles overlap significantly.*
+      * ./backend/src/tasks/ - Code for background tasks or workers (if needed for async processing outside the request cycle).
+      * ./backend/src/main.py - Backend entry point. Instantiates the FastAPI application, includes routers, applies middleware, sets up event handlers (startup/shutdown).
+      * ./backend/src/routers.py - Main API router where all application-specific `api.py` routers are included.
+    * ./backend/tests - Backend tests.
+        * ./backend/tests/conftest.py - Global test fixtures (e.g., test database setup, client).
+        * ./backend/tests/unit/ - Unit tests (testing individual components in isolation, often using mocks).
+        * ./backend/tests/integration/ - Integration tests (testing interactions between components, e.g., use case with repository, API with use case).
+        * ./backend/tests/e2e/ - End-to-end tests (testing full request/response cycles - optional, might live outside `backend/`).
+        * ./backend/tests/utils.py - Test-specific utility functions/helpers.
+    * ./backend/scripts - Backend utility scripts (e.g., initial setup, data seeding, custom management commands).
+* ./frontend - Frontend codebase (Vue.js).
+    * ./frontend/src - Frontend source code.
+      * ./frontend/src/components - Vue.js components.
+      * ./frontend/src/views - Vue.js views/pages.
+      * ./frontend/src/router - Vue Router configuration.
+      * ./frontend/src/assets - Static assets.
+* ./docs - Documentation (ADRs, API docs).
+    * ./docs/adr - Architecture Decision Records (ADRs).
+* ./scripts - Utility scripts (migrations, tasks).
 
 ## CODING_PRACTICES
 
@@ -54,12 +70,15 @@ When introducing changes to the project, please follow the structure outlined be
 #### SUPPORT_BEGINNER
 
 - When running in agent mode, execute up to 3 actions at a time and ask for approval or course correction afterwards.
-- Write code with clear variable names and include explanatory comments for non-obvious logic. Avoid shorthand syntax and complex patterns.
-- Provide full implementations rather than partial snippets. Include import statements, required dependencies, and initialization code.
+- Write code with clear variable names and include explanatory comments for non-obvious logic. Avoid shorthand syntax
+  and complex patterns.
+- Provide full implementations rather than partial snippets. Include import statements, required dependencies, and
+  initialization code.
 - Add defensive coding patterns and clear error handling. Include validation for user inputs and explicit type checking.
 - Suggest simpler solutions first, then offer more optimized versions with explanations of the trade-offs.
 - Briefly explain why certain approaches are used and link to relevant documentation or learning resources.
-- When suggesting fixes for errors, explain the root cause and how the solution addresses it to build understanding. Ask for confirmation before proceeding.
+- When suggesting fixes for errors, explain the root cause and how the solution addresses it to build understanding. Ask
+  for confirmation before proceeding.
 - Offer introducing basic test cases that demonstrate how the code works and common edge cases to consider.
 
 ### Guidelines for DOCUMENTATION
@@ -75,10 +94,14 @@ When introducing changes to the project, please follow the structure outlined be
 #### ADR
 
 - Create ADRs in /docs/adr/{name}.md for:
-- 1) Major dependency changes
-- 2) Architectural pattern changes
-- 3) New integration patterns
-- 4) Database schema changes
+-
+    1) Major dependency changes
+-
+    2) Architectural pattern changes
+-
+    3) New integration patterns
+-
+    4) Database schema changes
 
 #### CLEAN_ARCHITECTURE
 
@@ -102,11 +125,13 @@ When introducing changes to the project, please follow the structure outlined be
 # BACKEND
 
 ### CLEAN_ARCHITECTURE
+
 - Use the repository pattern to abstract data access and provide a clean interface for data operations
 - Implement the service layer to encapsulate business logic and coordinate between repositories and use cases
 - Use dependency injection to manage dependencies and improve testability
 - Use queries for db data retrieval operations to separate query logic from business logic
-- Use use cases to encapsulate specific business operations and orchestrate interactions between entities and repositories
+- Use use cases to encapsulate specific business operations and orchestrate interactions between entities and
+  repositories
 
 ### Guidelines for STATIC_ANALYSIS
 
@@ -126,11 +151,14 @@ When introducing changes to the project, please follow the structure outlined be
 - Leverage FastAPI's background tasks for non-critical operations that don't need to block the response
 - Implement proper exception handling with HTTPException and custom exception handlers for {{error_scenarios}}
 - Use path operation decorators consistently with appropriate HTTP methods (GET for retrieval, POST for creation, etc.)
-- Use FastAPI's built-in support for OpenAPI and Swagger UI to document endpoints and provide interactive API documentation
-- Use FastAPI Utilities for common patterns like authentication, authorization, CORS handling, class-based views, and middleware
+- Use FastAPI's built-in support for OpenAPI and Swagger UI to document endpoints and provide interactive API
+  documentation
+- Use FastAPI Utilities for common patterns like authentication, authorization, CORS handling, class-based views, and
+  middleware
 - Ensure that all endpoints are properly documented with descriptions and examples for better usability
 - Use FastAPI's dependency injection system to manage shared resources like database sessions and authentication
-- Name FastAPI schemas in a way that reflects their purpose with suffixes "InSchema" for input and "OutSchema" for output e.g. UserCreateInSchema, UserUpdateInSchema, UserOutSchema
+- Name FastAPI schemas in a way that reflects their purpose with suffixes "InSchema" for input and "OutSchema" for
+  output e.g. UserCreateInSchema, UserUpdateInSchema, UserOutSchema
 
 ## TESTING
 
@@ -143,7 +171,6 @@ When introducing changes to the project, please follow the structure outlined be
 - Use unittest.mock.MagicMock, patch, and patch.object for mocking dependencies
 - Use pytest function based approach. Don't create classes for tests unless necessary
 - Use pytest.mark.parametrize for parameterized tests
-  
 
 # FRONTEND
 
@@ -178,6 +205,7 @@ When introducing changes to the project, please follow the structure outlined be
 - Leverage state variants (hover:, focus:, active:, etc.) for interactive elements
 
 #### FLOWBITE
+
 - Use Flowbite components for pre-built UI elements and patterns
 - Implement Flowbite's utility classes for consistent styling and spacing
 - Leverage Flowbite's theming capabilities for consistent branding

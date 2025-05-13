@@ -2,25 +2,11 @@ import uuid
 from datetime import datetime
 
 import sqlalchemy as sa
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.apps.base.models import Base
+from src.apps.common.models import Base
 from src.apps.users.enums import UserBudgetEnum, UserTravelPaceEnum, UserTravelStyleEnum
-
-
-class User(SQLAlchemyBaseUserTableUUID, Base):
-    """User model for the application.
-
-    This model is used to store user information in the database.
-    It inherits from SQLAlchemyBaseUserTableUUID, which provides
-    the basic user table functionality.
-    """
-
-    # Relationships
-    profile: Mapped['UserProfile'] = relationship(
-        'UserProfile', back_populates='user', uselist=False, cascade='all, delete-orphan'
-    )
+from src.apps.users.models.user import User
 
 
 class UserProfile(Base):

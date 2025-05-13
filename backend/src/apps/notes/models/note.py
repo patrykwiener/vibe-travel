@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.apps.base.models import Base
-from src.apps.users.models import User
+from src.apps.common.models import Base
+from src.apps.users.models.user import User
 from src.config import settings
 
 if TYPE_CHECKING:
