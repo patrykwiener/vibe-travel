@@ -13,6 +13,11 @@ export type HttpValidationError = {
 }
 
 /**
+ * User's preferred budget level.
+ */
+export type UserBudgetEnum = 'LOW' | 'MEDIUM' | 'HIGH'
+
+/**
  * User create schema.
  */
 export type UserCreate = {
@@ -21,6 +26,51 @@ export type UserCreate = {
   is_active?: boolean | null
   is_superuser?: boolean | null
   is_verified?: boolean | null
+}
+
+/**
+ * Schema for updating or creating a user profile.
+ *
+ * This schema is used as input for the PUT /profile endpoint to update
+ * the authenticated user's travel preferences.
+ */
+export type UserProfileInSchema = {
+  /**
+   * User's preferred travel style - Can be RELAX, ADVENTURE, CULTURE, PARTY, or null
+   */
+  travel_style?: UserTravelStyleEnum | null
+  /**
+   * User's preferred travel pace - Can be CALM, MODERATE, INTENSE, or null
+   */
+  preferred_pace?: UserTravelPaceEnum | null
+  /**
+   * User's preferred budget - Can be LOW, MEDIUM, HIGH, or null
+   */
+  budget?: UserBudgetEnum | null
+}
+
+/**
+ * Schema for user profile responses.
+ *
+ * This schema is used as output for the GET /profile and PUT /profile endpoints.
+ */
+export type UserProfileOutSchema = {
+  /**
+   * User's preferred travel style
+   */
+  travel_style?: UserTravelStyleEnum | null
+  /**
+   * User's preferred travel pace
+   */
+  preferred_pace?: UserTravelPaceEnum | null
+  /**
+   * User's preferred budget
+   */
+  budget?: UserBudgetEnum | null
+  /**
+   * Timestamp of the last profile update
+   */
+  updated_at: string
 }
 
 /**
@@ -33,6 +83,16 @@ export type UserRead = {
   is_superuser?: boolean
   is_verified?: boolean
 }
+
+/**
+ * User's preferred travel pace.
+ */
+export type UserTravelPaceEnum = 'CALM' | 'MODERATE' | 'INTENSE'
+
+/**
+ * User's preferred travel style.
+ */
+export type UserTravelStyleEnum = 'RELAX' | 'ADVENTURE' | 'CULTURE' | 'PARTY'
 
 /**
  * User update schema.
@@ -350,6 +410,50 @@ export type UsersUsersPatchUserResponses = {
 
 export type UsersUsersPatchUserResponse =
   UsersUsersPatchUserResponses[keyof UsersUsersPatchUserResponses]
+
+export type ProfileUserProfileCbvGetProfileData = {
+  body?: never
+  path?: never
+  query?: never
+  url: '/api/v1/profile/'
+}
+
+export type ProfileUserProfileCbvGetProfileResponses = {
+  /**
+   * Successful Response
+   */
+  200: UserProfileOutSchema
+}
+
+export type ProfileUserProfileCbvGetProfileResponse =
+  ProfileUserProfileCbvGetProfileResponses[keyof ProfileUserProfileCbvGetProfileResponses]
+
+export type ProfileUserProfileCbvUpdateProfileData = {
+  body: UserProfileInSchema
+  path?: never
+  query?: never
+  url: '/api/v1/profile/'
+}
+
+export type ProfileUserProfileCbvUpdateProfileErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError
+}
+
+export type ProfileUserProfileCbvUpdateProfileError =
+  ProfileUserProfileCbvUpdateProfileErrors[keyof ProfileUserProfileCbvUpdateProfileErrors]
+
+export type ProfileUserProfileCbvUpdateProfileResponses = {
+  /**
+   * Successful Response
+   */
+  200: UserProfileOutSchema
+}
+
+export type ProfileUserProfileCbvUpdateProfileResponse =
+  ProfileUserProfileCbvUpdateProfileResponses[keyof ProfileUserProfileCbvUpdateProfileResponses]
 
 export type ClientOptions = {
   baseUrl: `${string}://${string}` | (string & {})

@@ -27,7 +27,7 @@ When introducing changes to the project, please follow the structure outlined be
       * ./backend/src/apps - Application-specific/Domain modules.
           * ./backend/src/apps/{app_name}/api.py - API endpoints (FastAPI routers/operations) for this app. Responsible for request/response handling and calling the use case layer.
           * ./backend/src/apps/{app_name}/models/ - Database models (e.g., SQLAlchemy models).
-          * ./backend/src/apps/{app_name}/repositories/ - Data access logic (abstracting database interactions for CUD operations). May contain interfaces (ABCs) and their implementations.
+          * ./backend/src/apps/{app_name}/repositories/ - Data access logic (abstracting database interactions for CRUD operations).
           * ./backend/src/apps/{app_name}/usecases/ - Business logic / Application layer commands and queries. Orchestrates interactions between repositories, services, etc.
             * ./backend/src/apps/{app_name}/usecases/dto/ - Data Transfer Objects (DTOs) used by use cases.
           * ./backend/src/apps/{app_name}/services/ - Domain services that don't fit repositories (e.g., complex calculations *not* part of core use case orchestration).
@@ -39,7 +39,6 @@ When introducing changes to the project, please follow the structure outlined be
       * ./backend/src/database.py - Database session/connection setup and management logic. Provides dependencies for database sessions.
       * ./backend/src/dependencies/ - Central place for defining common dependency injection providers (e.g., getting current user, getting database session, factory functions for use cases/repositories).
       * ./backend/src/exceptions/ - Global custom exception types for the entire backend.
-      * ./backend/src/interfaces/ - Abstract Base Classes (ABCs) defining interfaces for repositories, services, use cases, etc., promoting loose coupling.
       * ./backend/src/middleware/ - FastAPI middleware for processing requests globally (e.g., logging, CORS, security checks, request ID).
       * ./backend/src/security/ - Authentication and Authorization logic (e.g., token handling, password hashing, permission checks, user management utilities).
       * ./backend/src/services/ - Global or infrastructure services used across the application (similar role to app-specific services, but at a higher level or for cross-cutting concerns). *Consider consolidating app-specific and global services if their roles overlap significantly.*

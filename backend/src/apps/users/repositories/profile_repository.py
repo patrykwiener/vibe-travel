@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from src.apps.users.enums import UserBudgetEnum, UserTravelPaceEnum, UserTravelStyleEnum
 from src.apps.users.models.profile import UserProfile
 
 
@@ -21,3 +22,20 @@ class UserProfileRepository:
         await db.commit()
         await db.refresh(db_profile)
         return db_profile
+
+    async def update(
+        self,
+        db: AsyncSession,
+        profile: UserProfile,
+        travel_style: UserTravelStyleEnum | None,
+        preferred_pace: UserTravelPaceEnum | None,
+        budget: UserBudgetEnum | None,
+    ) -> UserProfile:
+        """Update an existing user profile with the given data."""
+        profile.travel_style = travel_style
+        profile.preferred_pace = preferred_pace
+        profile.budget = budget
+
+        await db.commit()
+        await db.refresh(profile)
+        return profile

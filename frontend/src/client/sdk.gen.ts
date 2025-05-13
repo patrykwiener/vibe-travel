@@ -31,6 +31,11 @@ import type {
   UsersUsersPatchUserData,
   UsersUsersPatchUserResponse,
   UsersUsersPatchUserError,
+  ProfileUserProfileCbvGetProfileData,
+  ProfileUserProfileCbvGetProfileResponse,
+  ProfileUserProfileCbvUpdateProfileData,
+  ProfileUserProfileCbvUpdateProfileResponse,
+  ProfileUserProfileCbvUpdateProfileError,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -245,6 +250,58 @@ export const usersUsersPatchUser = <ThrowOnError extends boolean = false>(
       },
     ],
     url: '/api/v1/users/{id}',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Userprofilecbv.Get Profile
+ * Retrieve the user's profile.
+ */
+export const profileUserProfileCbvGetProfile = <ThrowOnError extends boolean = false>(
+  options?: Options<ProfileUserProfileCbvGetProfileData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    ProfileUserProfileCbvGetProfileResponse,
+    unknown,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/profile/',
+    ...options,
+  })
+}
+
+/**
+ * Userprofilecbv.Update Profile
+ * Update the user's profile.
+ */
+export const profileUserProfileCbvUpdateProfile = <ThrowOnError extends boolean = false>(
+  options: Options<ProfileUserProfileCbvUpdateProfileData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    ProfileUserProfileCbvUpdateProfileResponse,
+    ProfileUserProfileCbvUpdateProfileError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/profile/',
     ...options,
     headers: {
       'Content-Type': 'application/json',

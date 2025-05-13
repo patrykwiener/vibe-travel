@@ -3,10 +3,13 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.users.exceptions import ProfileNotFoundError
+from src.apps.users.models.profile import UserProfile
 from src.apps.users.repositories.profile_repository import UserProfileRepository
 from src.apps.users.usecases.dto.profile_dto import (
     CreateUserProfileOutDTO,
     GetUserProfileOutDTO,
+    UpdateUserProfileInDTO,
+    UpdateUserProfileOutDTO,
 )
 
 
@@ -40,3 +43,37 @@ class CreateUserProfileUseCase:
 
         profile = await self.profile_repository.create(db, user_id=user_id)
         return CreateUserProfileOutDTO.model_validate(profile)
+
+
+class UpdateUserProfileUseCase:
+    """Use case for updating a user profile."""
+
+    def __init__(self, profile_repository: UserProfileRepository):
+        """Initialize the use case with a profile repository."""
+        self.profile_repository = profile_repository
+
+    async def execute(self, db: AsyncSession, input_data: UpdateUserProfileInDTO) -> UpdateUserProfileOutDTO:
+        """
+        Execute the use case to update a user profile.
+
+        This use case will first create a profile if one doesn't exist for the user,
+        then update it with the provided data.
+        """
+        profile = await self._get_profile(db, input_data.user_id)
+
+        updated_profile = await self.profile_repository.update(
+            db=db,
+            profile=profile,
+            travel_style=input_data.travel_style,
+            preferred_pace=input_data.preferred_pace,
+            budget=input_data.budget,
+        )
+
+        return UpdateUserProfileOutDTO.model_validate(updated_profile)
+
+    async def _get_profile(self, db: AsyncSession, user_id: uuid.UUID) -> UserProfile:
+        """Get a user profile by user ID."""
+        profile = await self.profile_repository.get_by_user_id(db, user_id)
+        if profile is None:
+            profile = await self.profile_repository.create(db, user_id=user_id)
+        return profile

@@ -139,10 +139,12 @@ The API is documented using OpenAPI (Swagger UI) and can be accessed at `/api/v1
 - **Authentication**
   - `POST /api/v1/auth/register` - Register a new user
   - `POST /api/v1/auth/login` - Login and get access token
+  - `POST /api/v1/auth/logout` - Logout and invalidate token
 
 - **User Profile**
   - `GET /api/v1/users/me` - Get current user profile
-  - `PUT /api/v1/users/me` - Update user profile
+  - `GET /api/v1/profile` - Get travel preferences
+  - `PUT /api/v1/profile` - Update travel preferences
 
 - **Notes Management**
   - `GET /api/v1/notes` - List all notes (with search and pagination)
