@@ -25,6 +25,8 @@ When introducing changes to the project, please follow the structure outlined be
      * ./backend/src/apps - Contains application-specific code, including routers, services, and models.
         * ./backend/src/apps/{app_name}/api.py - Contains the API endpoints for the application.
         * ./backend/src/apps/{app_name}/models.py - Contains the data models for the application.
+        * ./backend/src/apps/{app_name}/repositories.py - Contains the repository classes for the application.
+        * ./backend/src/apps/{app_name}/usecases.py - Contains the use case classes for the application implementing business logic.
         * ./backend/src/apps/{app_name}/services.py - Contains the business logic and service layer for the application.
         * ./backend/src/apps/{app_name}/schemas.py - Contains the Pydantic schemas for request and response validation.
         * ./backend/src/apps/{app_name}/utils.py - Contains utility functions and helpers for the application.
@@ -98,6 +100,13 @@ When introducing changes to the project, please follow the structure outlined be
 - Use aggregates to enforce consistency boundaries and transactional integrity
 
 # BACKEND
+
+### CLEAN_ARCHITECTURE
+- Use the repository pattern to abstract data access and provide a clean interface for data operations
+- Implement the service layer to encapsulate business logic and coordinate between repositories and use cases
+- Use dependency injection to manage dependencies and improve testability
+- Use queries for db data retrieval operations to separate query logic from business logic
+- Use use cases to encapsulate specific business operations and orchestrate interactions between entities and repositories
 
 ### Guidelines for STATIC_ANALYSIS
 
