@@ -12,7 +12,7 @@ turystycznymi oraz integrację z silnikiem AI (OpenRouter).
     - Flowbite 3
 - Backend:
     - Python 3.13
-    - FastAPI with FastAPI Utilities and FastAPI Users
+    - FastAPI with FastAPI Utilities, FastAPI Users, FastAPI Pagination
     - Docker
     - PostgreSQL
 - AI - Komunikacja z modelami przez usługę Openrouter.ai:
@@ -162,6 +162,8 @@ When introducing changes to the project, please follow the structure outlined be
 - Use FastAPI's dependency injection system to manage shared resources like database sessions and authentication
 - Name FastAPI schemas in a way that reflects their purpose with suffixes "InSchema" for input and "OutSchema" for
   output e.g. UserCreateInSchema, UserUpdateInSchema, UserOutSchema
+- Use FastAPI's built-in support for filtering to handle large datasets efficiently
+- Use FastAPI Pagination for paginated responses (offset-based) to improve performance and reduce data transfer
 
 ## TESTING
 

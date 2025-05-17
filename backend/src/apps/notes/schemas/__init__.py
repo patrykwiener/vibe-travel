@@ -1,7 +1,6 @@
 from .note import (
     NoteCreateInSchema,
     NoteListItemOutSchema,
-    NoteListOutSchema,
     NoteOutSchema,
     NoteUpdateInSchema,
 )
@@ -9,7 +8,6 @@ from .note import (
 __all__ = [
     'NoteCreateInSchema',
     'NoteListItemOutSchema',
-    'NoteListOutSchema',
     'NoteOutSchema',
     'NoteUpdateInSchema',
 ]

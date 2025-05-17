@@ -3,6 +3,7 @@
 from datetime import date
 from uuid import UUID
 
+from sqlalchemy import Select, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,3 +51,22 @@ class NoteRepository:
         else:
             await self.session.refresh(note)
             return note
+
+    def get_notes_query(self, user_id: UUID, search_title: str | None) -> Select:
+        """Constructs a SQLAlchemy query to select notes for a given user."""
+        query = select(Note).where(Note.user_id == user_id)
+
+        if search_title:
+            query = query.where(Note.title.ilike(f'%{search_title}%'))
+
+        return query.order_by(Note.created_at.desc())
+
+    async def list_notes_by_user_id(
+        self,
+        user_id: UUID,
+        search_title: str | None = None,
+    ) -> list[Note]:
+        """Retrieves a list of notes for a given user, optionally filtered by title."""
+        query = self.get_notes_query(user_id=user_id, search_title=search_title)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())

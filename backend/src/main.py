@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
@@ -22,6 +23,7 @@ app = FastAPI(
     redoc_url=f'{settings.API_V1_STR}/redoc',
     generate_unique_id_function=custom_generate_unique_id,
 )
+add_pagination(app)
 
 # Set all CORS enabled origins
 if settings.all_cors_origins:

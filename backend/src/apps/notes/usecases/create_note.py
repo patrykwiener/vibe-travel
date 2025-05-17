@@ -1,5 +1,5 @@
 from src.apps.notes.models.note import Note
-from src.apps.notes.repositories.note import NoteRepository
+from src.apps.notes.repositories.note_repository import NoteRepository
 from src.apps.notes.usecases.dto.create_note import CreateNoteDTO
 
 
