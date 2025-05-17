@@ -1,16 +1,13 @@
 import uuid
 from datetime import date, datetime
-from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.apps.common.models import Base
+from src.apps.plans.models.plan import Plan
 from src.apps.users.models.user import User
 from src.config import settings
-
-if TYPE_CHECKING:
-    from src.apps.plans.models import Plan
 
 
 class Note(Base):
@@ -62,7 +59,7 @@ class Note(Base):
 
     # Relationships
     user: Mapped[User] = relationship('User', backref='notes')
-    plans: Mapped[list['Plan']] = relationship('Plan', back_populates='note', cascade='all, delete-orphan')
+    plans: Mapped[list['Plan']] = relationship(back_populates='note', cascade='all, delete-orphan')
 
     # Table constraints
     __table_args__ = (sa.UniqueConstraint('user_id', 'title', name='unique_user_title'),)

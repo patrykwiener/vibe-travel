@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.users.repositories.profile_repository import UserProfileRepository
 from src.apps.users.usecases.profile_usecases import (
@@ -8,11 +9,14 @@ from src.apps.users.usecases.profile_usecases import (
     GetUserProfileUseCase,
     UpdateUserProfileUseCase,
 )
+from src.database import get_async_session
 
 
-def get_profile_repository() -> UserProfileRepository:
+def get_profile_repository(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> UserProfileRepository:
     """Get a UserProfileRepository instance."""
-    return UserProfileRepository()
+    return UserProfileRepository(session=session)
 
 
 def get_user_profile_use_case(

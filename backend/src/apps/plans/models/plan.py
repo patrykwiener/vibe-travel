@@ -10,7 +10,7 @@ from src.apps.plans.enums import PlanStatusEnum, PlanTypeEnum
 from src.config import settings
 
 if TYPE_CHECKING:
-    from src.apps.notes.models import Note
+    from src.apps.notes.models.note import Note  # pragma: no cover
 
 
 class Plan(Base):
@@ -59,4 +59,4 @@ class Plan(Base):
     )
 
     # Relationships
-    note: Mapped['Note'] = relationship('Note', back_populates='plans')
+    note: Mapped['Note'] = relationship(back_populates='plans')

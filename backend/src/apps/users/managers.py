@@ -36,8 +36,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_register(self, user: User, request: Request | None = None) -> None:
         """Called after a user registers."""
-        async with self.user_db.session as session:
-            await self.create_user_profile_use_case.execute(db=session, user_id=user.id)
+        await self.create_user_profile_use_case.execute(user_id=user.id)
 
 
 async def get_user_manager(

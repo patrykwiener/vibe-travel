@@ -125,7 +125,9 @@ When introducing changes to the project, please follow the structure outlined be
 
 ### CLEAN_ARCHITECTURE
 
-- Use the repository pattern to abstract data access and provide a clean interface for data operations
+- Use the repository pattern to abstract data access and provide a clean interface for data operations. 
+  Repositories methods should explicitly require model fields values as arguments in order to avoid passing 
+  a dictionary or object with all fields.
 - Implement the service layer to encapsulate business logic and coordinate between repositories and use cases
 - Use dependency injection to manage dependencies and improve testability
 - Use queries for db data retrieval operations to separate query logic from business logic
@@ -149,6 +151,8 @@ When introducing changes to the project, please follow the structure outlined be
 - Use async endpoints for I/O-bound operations to improve throughput for {{high_load_endpoints}}
 - Leverage FastAPI's background tasks for non-critical operations that don't need to block the response
 - Implement proper exception handling with HTTPException and custom exception handlers for {{error_scenarios}}
+- Custom exceptions should inherit from Base*Error and Exception classes to maintain a consistent error hierarchy. 
+- Custom exceptions should be caught in api.py and converted to HTTPException with appropriate status codes.
 - Use path operation decorators consistently with appropriate HTTP methods (GET for retrieval, POST for creation, etc.)
 - Use FastAPI's built-in support for OpenAPI and Swagger UI to document endpoints and provide interactive API
   documentation

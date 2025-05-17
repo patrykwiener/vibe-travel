@@ -10,22 +10,24 @@ from src.apps.users.models.profile import UserProfile
 class UserProfileRepository:
     """Repository for accessing and manipulating user profile data."""
 
-    async def get_by_user_id(self, db: AsyncSession, user_id: uuid.UUID) -> UserProfile | None:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_by_user_id(self, user_id: uuid.UUID) -> UserProfile | None:
         """Get a user profile by user ID."""
-        result = await db.execute(select(UserProfile).where(UserProfile.user_id == user_id))
+        result = await self.session.execute(select(UserProfile).where(UserProfile.user_id == user_id))
         return result.scalars().first()
 
-    async def create(self, db: AsyncSession, user_id: uuid.UUID) -> UserProfile:
+    async def create(self, user_id: uuid.UUID) -> UserProfile:
         """Create a new user profile."""
         db_profile = UserProfile(user_id=user_id)
-        db.add(db_profile)
-        await db.commit()
-        await db.refresh(db_profile)
+        self.session.add(db_profile)
+        await self.session.commit()
+        await self.session.refresh(db_profile)
         return db_profile
 
     async def update(
         self,
-        db: AsyncSession,
         profile: UserProfile,
         travel_style: UserTravelStyleEnum | None,
         preferred_pace: UserTravelPaceEnum | None,
@@ -36,6 +38,6 @@ class UserProfileRepository:
         profile.preferred_pace = preferred_pace
         profile.budget = budget
 
-        await db.commit()
-        await db.refresh(profile)
+        await self.session.commit()
+        await self.session.refresh(profile)
         return profile

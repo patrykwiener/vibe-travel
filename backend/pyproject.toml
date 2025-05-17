@@ -58,8 +58,10 @@ ignore = [
   "COM812", # trailing comma, conflicts with `ruff format`
   # Different doc rules that we don't really care about:
   "D100",
+  "D101",  # missing docstring in public classes
   "D104",
   "D106",
+  "D107",  # missing docstring in __init__ methods
   "D203",
   "D212",
   "D401",
