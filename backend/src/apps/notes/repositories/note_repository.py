@@ -7,7 +7,7 @@ from sqlalchemy import Select, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.notes.exceptions import NoteTitleConflictError
+from src.apps.notes.exceptions import NoteNotFoundError, NoteTitleConflictError
 from src.apps.notes.models.note import Note
 
 
@@ -70,3 +70,25 @@ class NoteRepository:
         query = self.get_notes_query(user_id=user_id, search_title=search_title)
         result = await self.session.execute(query)
         return list(result.scalars().all())
+
+    async def get_by_id(self, note_id: int, user_id: UUID) -> Note:
+        """Retrieve a note by its ID and user ID.
+
+        Args:
+            note_id: The ID of the note to retrieve.
+            user_id: The ID of the user who owns the note.
+
+        Returns:
+            The note if found and owned by the user.
+
+        Raises:
+            NoteNotFoundError: If the note does not exist or doesn't belong to the user.
+        """
+        query = select(Note).where(Note.id == note_id, Note.user_id == user_id)
+        result = await self.session.execute(query)
+        note = result.scalar_one_or_none()
+
+        if note is None:
+            raise NoteNotFoundError(note_id=note_id)
+
+        return note

@@ -6,8 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi_pagination import LimitOffsetPage, LimitOffsetParams, paginate
 from fastapi_utils.cbv import cbv
 
-from src.apps.notes.dependencies import get_create_note_use_case, get_list_notes_use_case
-from src.apps.notes.exceptions import NoteTitleConflictError
+from src.apps.notes.dependencies import (
+    get_create_note_use_case,
+    get_get_note_use_case,
+    get_list_notes_use_case,
+)
+from src.apps.notes.exceptions import NoteNotFoundError, NoteTitleConflictError
 from src.apps.notes.schemas.note import (
     NoteCreateInSchema,
     NoteListItemOutSchema,
@@ -15,7 +19,9 @@ from src.apps.notes.schemas.note import (
 )
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
 from src.apps.notes.usecases.dto.create_note import CreateNoteDTO
+from src.apps.notes.usecases.dto.get_note import GetNoteInDTO
 from src.apps.notes.usecases.dto.list_notes import ListNotesInDTO
+from src.apps.notes.usecases.get_note import GetNoteUseCase
 from src.apps.notes.usecases.list_notes import ListNotesUseCase
 from src.apps.users.auth import current_active_user
 from src.apps.users.models.user import User
@@ -28,6 +34,7 @@ class NoteCBV:
     current_user: User = Depends(current_active_user)
     create_note_use_case: CreateNoteUseCase = Depends(get_create_note_use_case)
     list_notes_use_case: ListNotesUseCase = Depends(get_list_notes_use_case)
+    get_note_use_case: GetNoteUseCase = Depends(get_get_note_use_case)
 
     @notes_router.post(
         '/',
@@ -75,3 +82,37 @@ class NoteCBV:
         )
         notes = await self.list_notes_use_case.execute(input_dto)
         return paginate(notes.items, params=pagination_params)
+
+    @notes_router.get(
+        '/{note_id}',
+        response_model=NoteOutSchema,
+        status_code=status.HTTP_200_OK,
+        summary='Get note details',
+        description='Allows authenticated users to retrieve the details of a specific travel note they own.',
+        responses={
+            status.HTTP_404_NOT_FOUND: {
+                'description': 'Note not found or user does not have permission',
+                'content': {
+                    'application/json': {
+                        'example': {'detail': 'Note with ID 123 not found.'},
+                    },
+                },
+            },
+        },
+    )
+    async def get_note_by_id(
+        self,
+        note_id: int,
+    ) -> NoteOutSchema:
+        """Get a specific note by ID for the authenticated user."""
+        input_dto = GetNoteInDTO(
+            note_id=note_id,
+            user_id=self.current_user.id,
+        )
+
+        try:
+            note_dto = await self.get_note_use_case.execute(input_dto)
+        except NoteNotFoundError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+        return NoteOutSchema.model_validate(note_dto)

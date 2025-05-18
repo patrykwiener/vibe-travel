@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.notes.repositories.note_repository import NoteRepository
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
+from src.apps.notes.usecases.get_note import GetNoteUseCase
 from src.apps.notes.usecases.list_notes import ListNotesUseCase
 from src.database import get_async_session
 
@@ -29,3 +30,10 @@ async def get_list_notes_use_case(
 ) -> AsyncGenerator[ListNotesUseCase, None]:
     """Dependency to get a ListNotesUseCase instance."""
     yield ListNotesUseCase(note_repository)
+
+
+async def get_get_note_use_case(
+    note_repository: Annotated[NoteRepository, Depends(get_note_repository)],
+) -> AsyncGenerator[GetNoteUseCase, None]:
+    """Dependency to get a GetNoteUseCase instance."""
+    yield GetNoteUseCase(note_repository)
