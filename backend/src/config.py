@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # Plans validation settings
     PLANS_TEXT_MAX_LENGTH: int = 5000
 
+    # OpenRouter settings
+    PLAN_GENERATION_TIMEOUT_SECONDS: int = 5
+
     API_V1_STR: str = '/api/v1'
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ENVIRONMENT: Literal['dev', 'prod'] = 'dev'

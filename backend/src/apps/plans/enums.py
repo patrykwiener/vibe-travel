@@ -1,5 +1,3 @@
-"""Enums used for plan-related functionality."""
-
 import enum
 
 

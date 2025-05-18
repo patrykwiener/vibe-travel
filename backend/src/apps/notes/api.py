@@ -205,7 +205,7 @@ class NoteCBV:
                     user_id=self.current_user.id,
                 )
             )
-        except NoteNotFoundError as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+        except NoteNotFoundError as exc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)

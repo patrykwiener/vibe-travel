@@ -234,8 +234,7 @@
     -   `201 Created`: Plan proposal generated successfully.
 -   **Error Codes**:
     -   `401 Unauthorized`: User not authenticated.
-    -   `403 Forbidden`: User does not own this note.
-    -   `404 Not Found`: Note with the given ID not found.
+    -   `404 Not Found`: Note with the given ID not found or user does not own the note.
     -   `500 Internal Server Error`: Error during AI generation.
     -   `503 Service Unavailable`: AI service (OpenRouter) timeout or unavailable.
     -   `504 Gateway Timeout`: AI service took too long (respecting 5s timeout).
