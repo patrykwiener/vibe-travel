@@ -2,12 +2,13 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi_pagination import LimitOffsetPage, LimitOffsetParams, paginate
 from fastapi_utils.cbv import cbv
 
 from src.apps.notes.dependencies import (
     get_create_note_use_case,
+    get_delete_note_use_case,
     get_get_note_use_case,
     get_list_notes_use_case,
     get_update_note_use_case,
@@ -20,7 +21,9 @@ from src.apps.notes.schemas.note import (
     NoteUpdateInSchema,
 )
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
+from src.apps.notes.usecases.delete_note import DeleteNoteUseCase
 from src.apps.notes.usecases.dto.create_note import CreateNoteDTO
+from src.apps.notes.usecases.dto.delete_note import DeleteNoteInDTO
 from src.apps.notes.usecases.dto.get_note import GetNoteInDTO
 from src.apps.notes.usecases.dto.list_notes import ListNotesInDTO
 from src.apps.notes.usecases.dto.update_note import UpdateNoteInDTO
@@ -40,6 +43,7 @@ class NoteCBV:
     list_notes_use_case: ListNotesUseCase = Depends(get_list_notes_use_case)
     get_note_use_case: GetNoteUseCase = Depends(get_get_note_use_case)
     update_note_use_case: UpdateNoteUseCase = Depends(get_update_note_use_case)
+    delete_note_use_case: DeleteNoteUseCase = Depends(get_delete_note_use_case)
 
     @notes_router.post(
         '/',
@@ -172,3 +176,36 @@ class NoteCBV:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
 
         return NoteOutSchema.model_validate(updated_note)
+
+    @notes_router.delete(
+        '/{note_id}',
+        status_code=status.HTTP_204_NO_CONTENT,
+        summary='Delete a note',
+        description='Allows authenticated users to delete an existing travel note they own.',
+        responses={
+            status.HTTP_404_NOT_FOUND: {
+                'description': 'Note not found or user does not have permission',
+                'content': {
+                    'application/json': {
+                        'example': {'detail': 'Note with ID 123 not found.'},
+                    },
+                },
+            },
+        },
+    )
+    async def delete_note(
+        self,
+        note_id: int,
+    ) -> Response:
+        """Delete an existing note for the authenticated user."""
+        try:
+            await self.delete_note_use_case.execute(
+                DeleteNoteInDTO(
+                    note_id=note_id,
+                    user_id=self.current_user.id,
+                )
+            )
+        except NoteNotFoundError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+        return Response(status_code=status.HTTP_204_NO_CONTENT)

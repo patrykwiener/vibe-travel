@@ -18,9 +18,13 @@ class UpdateNoteUseCase:
             NoteNotFoundError: If the note is not found or does not belong to the user.
             NoteTitleConflictError: If updating the title causes a conflict with an existing note.
         """
-        updated_note = await self.note_repository.update(
+        note = await self.note_repository.get_by_id(
             note_id=input_dto.id,
             user_id=input_dto.user_id,
+            for_update=True,
+        )
+        updated_note = await self.note_repository.update_note_fields(
+            note=note,
             title=input_dto.title,
             place=input_dto.place,
             date_from=input_dto.date_from,

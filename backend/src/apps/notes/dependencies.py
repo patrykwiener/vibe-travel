@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.notes.repositories.note_repository import NoteRepository
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
+from src.apps.notes.usecases.delete_note import DeleteNoteUseCase
 from src.apps.notes.usecases.get_note import GetNoteUseCase
 from src.apps.notes.usecases.list_notes import ListNotesUseCase
 from src.apps.notes.usecases.update_note import UpdateNoteUseCase
@@ -45,3 +46,10 @@ async def get_update_note_use_case(
 ) -> AsyncGenerator[UpdateNoteUseCase, None]:
     """Dependency to get an UpdateNoteUseCase instance."""
     yield UpdateNoteUseCase(note_repository)
+
+
+async def get_delete_note_use_case(
+    note_repository: Annotated[NoteRepository, Depends(get_note_repository)],
+) -> AsyncGenerator[DeleteNoteUseCase, None]:
+    """Dependency to get a DeleteNoteUseCase instance."""
+    yield DeleteNoteUseCase(note_repository)

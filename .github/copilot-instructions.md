@@ -130,9 +130,13 @@ When introducing changes to the project, please follow the structure outlined be
   a dictionary or object with all fields.
 - Implement the service layer to encapsulate business logic and coordinate between repositories and use cases
 - Use dependency injection to manage dependencies and improve testability
-- Use queries for db data retrieval operations to separate query logic from business logic
 - Use use cases to encapsulate specific business operations and orchestrate interactions between entities and
   repositories
+- Implement DTOs to transfer data between layers and ensure separation of concerns. Usercases should return DTOs
+  and expect DTOs as input.
+- Database related custom exceptions should be raises in the repository layer and can be caught in the use case
+  layer or propagate further. Use cases should raise application specific exceptions that are caught in the API 
+  layer and converted to HTTPException with appropriate status codes.
 
 ### Guidelines for STATIC_ANALYSIS
 

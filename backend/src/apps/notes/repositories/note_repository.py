@@ -71,13 +71,22 @@ class NoteRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def get_by_id(self, note_id: int, user_id: UUID) -> Note:
+    async def get_by_id(self, note_id: int, user_id: UUID, for_update: bool = False) -> Note:
         """Retrieve a note by its ID and user ID.
+
+        Args:
+            note_id: The ID of the note to retrieve
+            user_id: The ID of the user who owns the note
+            for_update: If True, adds a FOR UPDATE lock to prevent concurrent modification
 
         Raises:
             NoteNotFoundError: If the note does not exist or doesn't belong to the user.
         """
         query = select(Note).where(Note.id == note_id, Note.user_id == user_id)
+
+        if for_update:
+            query = query.with_for_update()
+
         result = await self.session.execute(query)
         note = result.scalar_one_or_none()
 
@@ -86,10 +95,9 @@ class NoteRepository:
 
         return note
 
-    async def update(
+    async def update_note_fields(
         self,
-        note_id: int,
-        user_id: UUID,
+        note: Note,
         title: str,
         place: str,
         date_from: date,
@@ -97,12 +105,24 @@ class NoteRepository:
         number_of_people: int,
         key_ideas: str | None = None,
     ) -> Note:
-        """Update an existing note in the database.
+        """Update the fields of a note and commit changes.
+
+        Args:
+            note: The note object to update
+            title: New title for the note
+            place: New place for the note
+            date_from: New start date
+            date_to: New end date
+            number_of_people: New number of people
+            key_ideas: New key ideas
+
+        Returns:
+            The updated note
 
         Raises:
-            NoteNotFoundError: If the note does not exist or doesn't belong to the user.
+            NoteTitleConflictError: If a note with the same title already exists for the user
         """
-        note = await self.get_by_id(note_id=note_id, user_id=user_id)
+        user_id = str(note.user_id)
 
         note.title = title
         note.place = place
@@ -115,7 +135,16 @@ class NoteRepository:
             await self.session.commit()
         except IntegrityError as e:
             await self.session.rollback()
-            raise NoteTitleConflictError(title=title, user_id=str(user_id)) from e
+            raise NoteTitleConflictError(title=title, user_id=user_id) from e
         else:
             await self.session.refresh(note)
             return note
+
+    async def delete(self, note: Note) -> None:
+        """Delete a note from the database.
+
+        Args:
+            note: The note object to delete
+        """
+        await self.session.delete(note)
+        await self.session.commit()
