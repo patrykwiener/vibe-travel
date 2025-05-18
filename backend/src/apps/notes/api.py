@@ -10,19 +10,23 @@ from src.apps.notes.dependencies import (
     get_create_note_use_case,
     get_get_note_use_case,
     get_list_notes_use_case,
+    get_update_note_use_case,
 )
 from src.apps.notes.exceptions import NoteNotFoundError, NoteTitleConflictError
 from src.apps.notes.schemas.note import (
     NoteCreateInSchema,
     NoteListItemOutSchema,
     NoteOutSchema,
+    NoteUpdateInSchema,
 )
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
 from src.apps.notes.usecases.dto.create_note import CreateNoteDTO
 from src.apps.notes.usecases.dto.get_note import GetNoteInDTO
 from src.apps.notes.usecases.dto.list_notes import ListNotesInDTO
+from src.apps.notes.usecases.dto.update_note import UpdateNoteInDTO
 from src.apps.notes.usecases.get_note import GetNoteUseCase
 from src.apps.notes.usecases.list_notes import ListNotesUseCase
+from src.apps.notes.usecases.update_note import UpdateNoteUseCase
 from src.apps.users.auth import current_active_user
 from src.apps.users.models.user import User
 
@@ -35,6 +39,7 @@ class NoteCBV:
     create_note_use_case: CreateNoteUseCase = Depends(get_create_note_use_case)
     list_notes_use_case: ListNotesUseCase = Depends(get_list_notes_use_case)
     get_note_use_case: GetNoteUseCase = Depends(get_get_note_use_case)
+    update_note_use_case: UpdateNoteUseCase = Depends(get_update_note_use_case)
 
     @notes_router.post(
         '/',
@@ -116,3 +121,54 @@ class NoteCBV:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
         return NoteOutSchema.model_validate(note_dto)
+
+    @notes_router.put(
+        '/{note_id}',
+        response_model=NoteOutSchema,
+        status_code=status.HTTP_200_OK,
+        summary='Update a note',
+        description='Allows authenticated users to update an existing travel note they own.',
+        responses={
+            status.HTTP_404_NOT_FOUND: {
+                'description': 'Note not found or user does not have permission',
+                'content': {
+                    'application/json': {
+                        'example': {'detail': 'Note with ID 123 not found.'},
+                    },
+                },
+            },
+            status.HTTP_409_CONFLICT: {
+                'description': 'Note title conflict',
+                'content': {
+                    'application/json': {
+                        'example': {'detail': 'Note title already exists.'},
+                    },
+                },
+            },
+        },
+    )
+    async def update_note(
+        self,
+        note_id: int,
+        note_in: NoteUpdateInSchema,
+    ) -> NoteOutSchema:
+        """Update an existing note for the authenticated user."""
+        try:
+            updated_note = await self.update_note_use_case.execute(
+                UpdateNoteInDTO(
+                    id=note_id,
+                    user_id=self.current_user.id,
+                    title=note_in.title,
+                    place=note_in.place,
+                    date_from=note_in.date_from,
+                    date_to=note_in.date_to,
+                    number_of_people=note_in.number_of_people,
+                    key_ideas=note_in.key_ideas,
+                )
+            )
+        except NoteNotFoundError as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+        except NoteTitleConflictError as e:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
+
+        return NoteOutSchema.model_validate(updated_note)

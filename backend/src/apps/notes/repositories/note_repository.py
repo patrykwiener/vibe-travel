@@ -74,13 +74,6 @@ class NoteRepository:
     async def get_by_id(self, note_id: int, user_id: UUID) -> Note:
         """Retrieve a note by its ID and user ID.
 
-        Args:
-            note_id: The ID of the note to retrieve.
-            user_id: The ID of the user who owns the note.
-
-        Returns:
-            The note if found and owned by the user.
-
         Raises:
             NoteNotFoundError: If the note does not exist or doesn't belong to the user.
         """
@@ -92,3 +85,37 @@ class NoteRepository:
             raise NoteNotFoundError(note_id=note_id)
 
         return note
+
+    async def update(
+        self,
+        note_id: int,
+        user_id: UUID,
+        title: str,
+        place: str,
+        date_from: date,
+        date_to: date,
+        number_of_people: int,
+        key_ideas: str | None = None,
+    ) -> Note:
+        """Update an existing note in the database.
+
+        Raises:
+            NoteNotFoundError: If the note does not exist or doesn't belong to the user.
+        """
+        note = await self.get_by_id(note_id=note_id, user_id=user_id)
+
+        note.title = title
+        note.place = place
+        note.date_from = date_from
+        note.date_to = date_to
+        note.number_of_people = number_of_people
+        note.key_ideas = key_ideas
+
+        try:
+            await self.session.commit()
+        except IntegrityError as e:
+            await self.session.rollback()
+            raise NoteTitleConflictError(title=title, user_id=str(user_id)) from e
+        else:
+            await self.session.refresh(note)
+            return note

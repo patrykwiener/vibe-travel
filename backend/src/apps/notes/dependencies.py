@@ -8,6 +8,7 @@ from src.apps.notes.repositories.note_repository import NoteRepository
 from src.apps.notes.usecases.create_note import CreateNoteUseCase
 from src.apps.notes.usecases.get_note import GetNoteUseCase
 from src.apps.notes.usecases.list_notes import ListNotesUseCase
+from src.apps.notes.usecases.update_note import UpdateNoteUseCase
 from src.database import get_async_session
 
 
@@ -37,3 +38,10 @@ async def get_get_note_use_case(
 ) -> AsyncGenerator[GetNoteUseCase, None]:
     """Dependency to get a GetNoteUseCase instance."""
     yield GetNoteUseCase(note_repository)
+
+
+async def get_update_note_use_case(
+    note_repository: Annotated[NoteRepository, Depends(get_note_repository)],
+) -> AsyncGenerator[UpdateNoteUseCase, None]:
+    """Dependency to get an UpdateNoteUseCase instance."""
+    yield UpdateNoteUseCase(note_repository)
