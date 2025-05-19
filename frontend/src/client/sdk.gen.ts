@@ -7,8 +7,37 @@ import {
   urlSearchParamsBodySerializer,
 } from '@hey-api/client-fetch'
 import type {
-  UtilsUtilsViewHealthCheckData,
-  UtilsUtilsViewHealthCheckResponse,
+  NotesNoteCbvListNotesData,
+  NotesNoteCbvListNotesResponse,
+  NotesNoteCbvListNotesError,
+  NotesNoteCbvCreateNoteData,
+  NotesNoteCbvCreateNoteResponse,
+  NotesNoteCbvCreateNoteError,
+  NotesNoteCbvDeleteNoteData,
+  NotesNoteCbvDeleteNoteResponse,
+  NotesNoteCbvDeleteNoteError,
+  NotesNoteCbvGetNoteByIdData,
+  NotesNoteCbvGetNoteByIdResponse,
+  NotesNoteCbvGetNoteByIdError,
+  NotesNoteCbvUpdateNoteData,
+  NotesNoteCbvUpdateNoteResponse,
+  NotesNoteCbvUpdateNoteError,
+  NotesPlanRouterGeneratePlanData,
+  NotesPlanRouterGeneratePlanResponse,
+  NotesPlanRouterGeneratePlanError,
+  NotesPlanRouterGetActivePlanData,
+  NotesPlanRouterGetActivePlanResponse,
+  NotesPlanRouterGetActivePlanError,
+  NotesPlanRouterCreateOrAcceptPlanData,
+  NotesPlanRouterCreateOrAcceptPlanResponse,
+  NotesPlanRouterUpdatePlanData,
+  NotesPlanRouterUpdatePlanResponse,
+  NotesPlanRouterUpdatePlanError,
+  ProfileUserProfileCbvGetProfileData,
+  ProfileUserProfileCbvGetProfileResponse,
+  ProfileUserProfileCbvUpdateProfileData,
+  ProfileUserProfileCbvUpdateProfileResponse,
+  ProfileUserProfileCbvUpdateProfileError,
   UsersAuthJwtLoginData,
   UsersAuthJwtLoginResponse,
   UsersAuthJwtLoginError,
@@ -31,11 +60,8 @@ import type {
   UsersUsersPatchUserData,
   UsersUsersPatchUserResponse,
   UsersUsersPatchUserError,
-  ProfileUserProfileCbvGetProfileData,
-  ProfileUserProfileCbvGetProfileResponse,
-  ProfileUserProfileCbvUpdateProfileData,
-  ProfileUserProfileCbvUpdateProfileResponse,
-  ProfileUserProfileCbvUpdateProfileError,
+  UtilsUtilsViewHealthCheckData,
+  UtilsUtilsViewHealthCheckResponse,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -57,19 +83,286 @@ export type Options<
 }
 
 /**
- * Utilsview.Health Check
- * Health check endpoint for Docker.
+ * List user's notes
+ * Allows authenticated users to list their travel notes with pagination and search by title.
  */
-export const utilsUtilsViewHealthCheck = <ThrowOnError extends boolean = false>(
-  options?: Options<UtilsUtilsViewHealthCheckData, ThrowOnError>,
+export const notesNoteCbvListNotes = <ThrowOnError extends boolean = false>(
+  options?: Options<NotesNoteCbvListNotesData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    UtilsUtilsViewHealthCheckResponse,
+    NotesNoteCbvListNotesResponse,
+    NotesNoteCbvListNotesError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/',
+    ...options,
+  })
+}
+
+/**
+ * Create a new note
+ * Allows authenticated users to create a new travel note.
+ */
+export const notesNoteCbvCreateNote = <ThrowOnError extends boolean = false>(
+  options: Options<NotesNoteCbvCreateNoteData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    NotesNoteCbvCreateNoteResponse,
+    NotesNoteCbvCreateNoteError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Delete a note
+ * Allows authenticated users to delete an existing travel note they own.
+ */
+export const notesNoteCbvDeleteNote = <ThrowOnError extends boolean = false>(
+  options: Options<NotesNoteCbvDeleteNoteData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).delete<
+    NotesNoteCbvDeleteNoteResponse,
+    NotesNoteCbvDeleteNoteError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}',
+    ...options,
+  })
+}
+
+/**
+ * Get note details
+ * Allows authenticated users to retrieve the details of a specific travel note they own.
+ */
+export const notesNoteCbvGetNoteById = <ThrowOnError extends boolean = false>(
+  options: Options<NotesNoteCbvGetNoteByIdData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    NotesNoteCbvGetNoteByIdResponse,
+    NotesNoteCbvGetNoteByIdError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}',
+    ...options,
+  })
+}
+
+/**
+ * Update a note
+ * Allows authenticated users to update an existing travel note they own.
+ */
+export const notesNoteCbvUpdateNote = <ThrowOnError extends boolean = false>(
+  options: Options<NotesNoteCbvUpdateNoteData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    NotesNoteCbvUpdateNoteResponse,
+    NotesNoteCbvUpdateNoteError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Generate an AI-powered travel plan based on a note
+ * Generates a plan proposal based on the content of the specified note and user preferences.
+ */
+export const notesPlanRouterGeneratePlan = <ThrowOnError extends boolean = false>(
+  options: Options<NotesPlanRouterGeneratePlanData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    NotesPlanRouterGeneratePlanResponse,
+    NotesPlanRouterGeneratePlanError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}/plan/generate',
+    ...options,
+  })
+}
+
+/**
+ * Get the active plan for a note
+ * Retrieves the most recently updated active plan for the specified note.
+ */
+export const notesPlanRouterGetActivePlan = <ThrowOnError extends boolean = false>(
+  options: Options<NotesPlanRouterGetActivePlanData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    NotesPlanRouterGetActivePlanResponse,
+    NotesPlanRouterGetActivePlanError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}/plan',
+    ...options,
+  })
+}
+
+/**
+ * Create or accept a travel plan for a note
+ * Creates a new travel plan or accepts/modifies an AI-generated plan proposal.
+ */
+export const notesPlanRouterCreateOrAcceptPlan = <ThrowOnError extends boolean = false>(
+  options: Options<NotesPlanRouterCreateOrAcceptPlanData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    NotesPlanRouterCreateOrAcceptPlanResponse,
     unknown,
     ThrowOnError
   >({
-    url: '/api/v1/utils/health-check',
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}/plan',
     ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Update an existing active plan for a note
+ * Updates the text of an existing active plan for the specified note.
+ */
+export const notesPlanRouterUpdatePlan = <ThrowOnError extends boolean = false>(
+  options: Options<NotesPlanRouterUpdatePlanData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    NotesPlanRouterUpdatePlanResponse,
+    NotesPlanRouterUpdatePlanError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/notes/{note_id}/plan',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Userprofilecbv.Get Profile
+ * Retrieve the user's profile.
+ */
+export const profileUserProfileCbvGetProfile = <ThrowOnError extends boolean = false>(
+  options?: Options<ProfileUserProfileCbvGetProfileData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    ProfileUserProfileCbvGetProfileResponse,
+    unknown,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/profile/',
+    ...options,
+  })
+}
+
+/**
+ * Userprofilecbv.Update Profile
+ * Update the user's profile.
+ */
+export const profileUserProfileCbvUpdateProfile = <ThrowOnError extends boolean = false>(
+  options: Options<ProfileUserProfileCbvUpdateProfileData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    ProfileUserProfileCbvUpdateProfileResponse,
+    ProfileUserProfileCbvUpdateProfileError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        in: 'cookie',
+        name: 'vibe-travel-jwt',
+        type: 'apiKey',
+      },
+    ],
+    url: '/api/v1/profile/',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
   })
 }
 
@@ -259,53 +552,18 @@ export const usersUsersPatchUser = <ThrowOnError extends boolean = false>(
 }
 
 /**
- * Userprofilecbv.Get Profile
- * Retrieve the user's profile.
+ * Utilsview.Health Check
+ * Health check endpoint for Docker.
  */
-export const profileUserProfileCbvGetProfile = <ThrowOnError extends boolean = false>(
-  options?: Options<ProfileUserProfileCbvGetProfileData, ThrowOnError>,
+export const utilsUtilsViewHealthCheck = <ThrowOnError extends boolean = false>(
+  options?: Options<UtilsUtilsViewHealthCheckData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    ProfileUserProfileCbvGetProfileResponse,
+    UtilsUtilsViewHealthCheckResponse,
     unknown,
     ThrowOnError
   >({
-    security: [
-      {
-        in: 'cookie',
-        name: 'vibe-travel-jwt',
-        type: 'apiKey',
-      },
-    ],
-    url: '/api/v1/profile/',
+    url: '/api/v1/utils/health-check',
     ...options,
-  })
-}
-
-/**
- * Userprofilecbv.Update Profile
- * Update the user's profile.
- */
-export const profileUserProfileCbvUpdateProfile = <ThrowOnError extends boolean = false>(
-  options: Options<ProfileUserProfileCbvUpdateProfileData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).put<
-    ProfileUserProfileCbvUpdateProfileResponse,
-    ProfileUserProfileCbvUpdateProfileError,
-    ThrowOnError
-  >({
-    security: [
-      {
-        in: 'cookie',
-        name: 'vibe-travel-jwt',
-        type: 'apiKey',
-      },
-    ],
-    url: '/api/v1/profile/',
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
   })
 }
