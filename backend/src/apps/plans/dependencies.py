@@ -10,6 +10,7 @@ from src.apps.plans.services.plan_generation_service import PlanGenerationServic
 from src.apps.plans.usecases.create_or_accept_plan_usecase import CreateOrAcceptPlanUseCase
 from src.apps.plans.usecases.generate_plan_usercase import GeneratePlanUseCase
 from src.apps.plans.usecases.get_active_plan_usecase import GetActivePlanUseCase
+from src.apps.plans.usecases.update_plan_usecase import UpdatePlanUseCase
 from src.apps.users.dependencies import get_profile_repository
 from src.apps.users.repositories.profile_repository import UserProfileRepository
 from src.config import settings
@@ -58,6 +59,17 @@ def get_active_plan_usecase(
 ) -> GetActivePlanUseCase:
     """Get an instance of the get active plan use case."""
     return GetActivePlanUseCase(
+        plan_repository=plan_repository,
+        note_repository=note_repository,
+    )
+
+
+def get_update_plan_usecase(
+    plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    note_repository: Annotated[NoteRepository, Depends(get_note_repository)],
+) -> UpdatePlanUseCase:
+    """Get an instance of the update plan use case."""
+    return UpdatePlanUseCase(
         plan_repository=plan_repository,
         note_repository=note_repository,
     )

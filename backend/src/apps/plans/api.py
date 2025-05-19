@@ -6,6 +6,7 @@ from src.apps.plans.dependencies import (
     get_active_plan_usecase,
     get_create_or_accept_plan_usecase,
     get_generate_plan_usecase,
+    get_update_plan_usecase,
 )
 from src.apps.plans.exceptions import (
     ActivePlanNotFoundError,
@@ -15,11 +16,17 @@ from src.apps.plans.exceptions import (
     PlanGenerationError,
     PlanNotFoundError,
 )
-from src.apps.plans.schemas.plan import PlanCreateInSchema, PlanGenerateOutSchema, PlanOutSchema
+from src.apps.plans.schemas.plan import PlanCreateInSchema, PlanGenerateOutSchema, PlanOutSchema, PlanUpdateInSchema
 from src.apps.plans.usecases.create_or_accept_plan_usecase import CreateOrAcceptPlanUseCase
-from src.apps.plans.usecases.dto.plan_dtos import GeneratePlanInDTO, GetActivePlanInDTO, PlanCreateInDTO
+from src.apps.plans.usecases.dto.plan_dtos import (
+    GeneratePlanInDTO,
+    GetActivePlanInDTO,
+    PlanCreateInDTO,
+    UpdatePlanInDTO,
+)
 from src.apps.plans.usecases.generate_plan_usercase import GeneratePlanUseCase
 from src.apps.plans.usecases.get_active_plan_usecase import GetActivePlanUseCase
+from src.apps.plans.usecases.update_plan_usecase import UpdatePlanUseCase
 from src.apps.users.auth import current_active_user
 from src.apps.users.models.user import User
 
@@ -34,6 +41,7 @@ class PlanRouter:
     generate_plan_usecase: GeneratePlanUseCase = Depends(get_generate_plan_usecase)
     create_or_accept_plan_usecase: CreateOrAcceptPlanUseCase = Depends(get_create_or_accept_plan_usecase)
     get_active_plan_usecase: GetActivePlanUseCase = Depends(get_active_plan_usecase)
+    update_plan_usecase: UpdatePlanUseCase = Depends(get_update_plan_usecase)
 
     @plan_router.post(
         '/{note_id}/plan/generate',
@@ -65,7 +73,7 @@ class PlanRouter:
         input_dto = GeneratePlanInDTO(note_id=note_id, user_id=self.current_user.id)
 
         try:
-            result = await self.generate_plan_usecase.execute(input_dto)
+            plan_proposal = await self.generate_plan_usecase.execute(input_dto)
         except NoteNotFoundError as exc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -87,11 +95,7 @@ class PlanRouter:
                 detail=str(exc),
             ) from exc
 
-        return PlanGenerateOutSchema(
-            generation_id=result.generation_id,
-            plan_text=result.plan_text,
-            status=result.status,
-        )
+        return PlanGenerateOutSchema.model_validate(plan_proposal)
 
     @plan_router.post(
         '/{note_id}/plan',
@@ -141,7 +145,7 @@ class PlanRouter:
             422: If the input data is invalid
         """
         try:
-            result = await self.create_or_accept_plan_usecase.execute(
+            plan = await self.create_or_accept_plan_usecase.execute(
                 PlanCreateInDTO(
                     note_id=note_id,
                     user_id=self.current_user.id,
@@ -165,16 +169,7 @@ class PlanRouter:
                 detail=f'An active plan already exists for note {note_id}',
             ) from exc
 
-        return PlanOutSchema(
-            id=result.id,
-            note_id=result.note_id,
-            plan_text=result.plan_text,
-            type=result.type,
-            status=result.status,
-            generation_id=result.generation_id,
-            created_at=result.created_at,
-            updated_at=result.updated_at,
-        )
+        return PlanOutSchema.model_validate(plan)
 
     @plan_router.get(
         '/{note_id}/plan',
@@ -226,13 +221,64 @@ class PlanRouter:
                 detail=f'Note with ID {note_id} not found',
             ) from exc
 
-        return PlanOutSchema(
-            id=plan.id,
-            note_id=plan.note_id,
-            plan_text=plan.plan_text,
-            type=plan.type,
-            status=plan.status,
-            generation_id=plan.generation_id,
-            created_at=plan.created_at,
-            updated_at=plan.updated_at,
-        )
+        return PlanOutSchema.model_validate(plan)
+
+    @plan_router.put(
+        '/{note_id}/plan',
+        response_model=PlanOutSchema,
+        status_code=status.HTTP_200_OK,
+        summary='Update an existing active plan for a note',
+        description='Updates the text of an existing active plan for the specified note.',
+        responses={
+            status.HTTP_200_OK: {
+                'description': 'Successfully updated the active plan',
+                'model': PlanOutSchema,
+            },
+            status.HTTP_404_NOT_FOUND: {
+                'description': 'Note not found or no active plan exists for the note',
+            },
+        },
+    )
+    async def update_plan(
+        self,
+        note_id: int,
+        plan_data: PlanUpdateInSchema,
+    ) -> PlanOutSchema:
+        """
+        Update an existing active plan for a note.
+
+        This endpoint allows users to update the text of an existing active plan.
+        If the plan was originally AI-generated (type is 'AI'), its type will be
+        changed to 'HYBRID' to reflect the manual modifications.
+
+        Args:
+            note_id: The ID of the note whose plan is being updated
+            plan_data: The updated plan data containing the new plan text
+
+        Returns:
+            The updated plan with all its details
+
+        Raises:
+            404: If the note doesn't exist, doesn't belong to the user, or has no active plan
+            422: If the input data is invalid (e.g., plan text too long)
+        """
+        try:
+            plan = await self.update_plan_usecase.execute(
+                input_dto=UpdatePlanInDTO(
+                    note_id=note_id,
+                    user_id=self.current_user.id,
+                    plan_text=plan_data.plan_text,
+                ),
+            )
+        except NoteNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'Note with ID {note_id} not found',
+            ) from exc
+        except ActivePlanNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'No active plan found for note with ID {note_id}',
+            ) from exc
+
+        return PlanOutSchema.model_validate(plan)

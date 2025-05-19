@@ -73,9 +73,9 @@ class Plan(Base):
 
         self.status = PlanStatusEnum.ACTIVE
 
-    def convert_to_hybrid(self, new_plan_text: str) -> None:
+    def accept_ai_proposal_as_hybrid(self, new_plan_text: str) -> None:
         """
-        Convert a pending AI plan to a hybrid plan with user modifications.
+        Accept a pending AI plan and convert it to a hybrid plan.
 
         Args:
             new_plan_text: The new plan text provided by the user
@@ -84,11 +84,25 @@ class Plan(Base):
             ValueError: If plan is not in PENDING_AI status
         """
         if self.status != PlanStatusEnum.PENDING_AI:
-            raise ValueError(f'Cannot convert plan with status {self.status} to hybrid')
+            raise ValueError(f'Cannot accept plan with status {self.status} to hybrid')
 
         self.plan_text = new_plan_text
         self.type = PlanTypeEnum.HYBRID
         self.status = PlanStatusEnum.ACTIVE
+
+    def update(self, new_plan_text: str) -> None:
+        """
+        Update an existing plan.
+
+        Args:
+            new_plan_text: The new plan text provided by the user
+        """
+        if self.status != PlanStatusEnum.ACTIVE:
+            raise ValueError(f'Cannot update plan with status {self.status}')
+
+        self.plan_text = new_plan_text
+        if self.type == PlanTypeEnum.AI:
+            self.type = PlanTypeEnum.HYBRID
 
     @classmethod
     def create_manual(cls, note_id: int, plan_text: str) -> Self:

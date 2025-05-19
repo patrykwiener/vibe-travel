@@ -48,7 +48,7 @@ class CreateHybridPlanStrategy(PlanStrategy):
             for_update=True,
         )
 
-        plan.convert_to_hybrid(new_plan_text=plan_text)
+        plan.accept_ai_proposal_as_hybrid(new_plan_text=plan_text)
         return await self.plan_repository.update_plan(plan)
 
 
