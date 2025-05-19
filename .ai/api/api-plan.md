@@ -263,8 +263,7 @@
     -   `204 No Content`: No plan exists for this note yet.
 -   **Error Codes**:
     -   `401 Unauthorized`: User not authenticated.
-    -   `403 Forbidden`: User does not own this note.
-    -   `404 Not Found`: Note with the given ID not found, or no plan associated and 204 is not used.
+    -   `404 Not Found`: Note with the given ID not found, or no plan associated and 204 is not used or user does not own the note.
 
 #### `POST /notes/{note_id}/plan`
 -   **Description**: Create/Accept a plan for a note.
@@ -295,8 +294,7 @@
 -   **Error Codes**:
     -   `400 Bad Request`: Invalid input (e.g., missing `plan_text` for manual, or `generation_id` not found/invalid).
     -   `401 Unauthorized`: User not authenticated.
-    -   `403 Forbidden`: User does not own this note.
-    -   `404 Not Found`: Note or `generation_id` not found.
+    -   `404 Not Found`: Note or `generation_id` not found or user does not own the note.
     -   `409 Conflict`: An active plan already exists and system doesn't allow overwrite via POST (PUT should be used for update).
     -   `422 Unprocessable Entity`: Validation error (e.g. `plan_text` too long).
 
@@ -316,8 +314,7 @@
 -   **Error Codes**:
     -   `400 Bad Request`: Invalid input data.
     -   `401 Unauthorized`: User not authenticated.
-    -   `403 Forbidden`: User does not own this note.
-    -   `404 Not Found`: Note or active plan for the note not found.
+    -   `404 Not Found`: Note or active plan for the note not found or user does not own the note.
     -   `422 Unprocessable Entity`: Validation error (e.g. `plan_text` too long).
 
 ## 3. Authentication and Authorization

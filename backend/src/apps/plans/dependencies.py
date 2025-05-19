@@ -7,6 +7,7 @@ from src.apps.notes.dependencies import get_note_repository
 from src.apps.notes.repositories.note_repository import NoteRepository
 from src.apps.plans.repositories.plan_repository import PlanRepository
 from src.apps.plans.services.plan_generation_service import PlanGenerationService
+from src.apps.plans.usecases.create_or_accept_plan_usecase import CreateOrAcceptPlanUseCase
 from src.apps.plans.usecases.generate_plan_usercase import GeneratePlanUseCase
 from src.apps.users.dependencies import get_profile_repository
 from src.apps.users.repositories.profile_repository import UserProfileRepository
@@ -36,4 +37,15 @@ def get_generate_plan_usecase(
         note_repository=note_repository,
         user_profile_repository=user_profile_repository,
         plan_generation_service=plan_generation_service,
+    )
+
+
+def get_create_or_accept_plan_usecase(
+    plan_repository: Annotated[PlanRepository, Depends(get_plan_repository)],
+    note_repository: Annotated[NoteRepository, Depends(get_note_repository)],
+) -> CreateOrAcceptPlanUseCase:
+    """Get an instance of the create or accept plan use case."""
+    return CreateOrAcceptPlanUseCase(
+        plan_repository=plan_repository,
+        note_repository=note_repository,
     )

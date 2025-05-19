@@ -128,6 +128,8 @@ When introducing changes to the project, please follow the structure outlined be
 - Use the repository pattern to abstract data access and provide a clean interface for data operations. 
   Repositories methods should explicitly require model fields values as arguments in order to avoid passing 
   a dictionary or object with all fields.
+- Repositories should be responsible for data access and persistence, while use cases should handle business logic
+  and coordinate between repositories and entities
 - Implement the service layer to encapsulate business logic and coordinate between repositories and use cases
 - Use dependency injection to manage dependencies and improve testability
 - Use use cases to encapsulate specific business operations and orchestrate interactions between entities and

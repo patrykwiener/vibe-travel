@@ -1,0 +1,126 @@
+# API Endpoint Implementation Plan: Create/Accept Plan
+
+## 1. Endpoint Overview
+This document outlines the implementation plan for the `POST /notes/{note_id}/plan` API endpoint. This endpoint allows users to create a new travel plan for a note or accept/modify an AI-generated plan proposal. The behavior of the endpoint varies based on the provided `generation_id` and `plan_text` in the request body, supporting manual, AI-accepted, and hybrid plan creation scenarios.
+
+## 2. Request Details
+-   **HTTP Method**: `POST`
+-   **URL Path**: `/notes/{note_id}/plan`
+-   **Path Parameters**:
+    -   `note_id` (integer, required): The unique identifier of the note for which the plan is being created or accepted.
+-   **Request Body**: JSON object conforming to `PlanCreateInSchema`.
+    -   `generation_id` (UUID, optional): The ID of an AI-generated plan. If provided, the operation targets this existing plan proposal.
+    -   `plan_text` (string, optional): The textual content of the plan. Max length is defined by `settings.PLANS_TEXT_MAX_LENGTH`.
+    -   *Constraint*: At least `generation_id` or `plan_text` (or both) must be provided. This is validated by `PlanCreateInSchema`.
+-   **Headers**:
+    -   `Cookie`: Must contain a valid JWT for authentication (handled by FastAPI Users).
+
+## 3. Used DTOs and Models
+-   **Input DTO**: `PlanCreateInSchema` (defined in `backend/src/apps/plans/schemas/plan.py`)
+-   **Output DTO**: `PlanOutSchema` (defined in `backend/src/apps/plans/schemas/plan.py`)
+-   **Database Models**:
+    -   `Plan` (defined in `backend/src/apps/plans/models/plan.py`)
+    -   `Note` (defined in `backend/src/apps/notes/models/note.py`)
+
+## 4. Response Details
+-   **Success Response**:
+    -   **Code**: `201 Created`
+    -   **Body**: JSON object conforming to `PlanOutSchema`, representing the created or accepted/updated plan.
+-   **Error Responses**:
+    -   `400 Bad Request`: If the request is malformed in a way not covered by 422, or for specific semantic errors as per API spec (e.g. "missing plan_text for manual" if not resulting in 422 from schema).
+    -   `401 Unauthorized`: If the user is not authenticated (JWT missing or invalid).
+    -   `404 Not Found`:
+        -   If the `note_id` does not correspond to an existing note owned by the authenticated user.
+        -   If `generation_id` is provided but no matching `PENDING_AI` plan is found for the given `note_id`.
+    -   `409 Conflict`: If an `ACTIVE` plan already exists for the specified `note_id`.
+        -   This is a business rule violation indicating that the user cannot create a new plan; however, a user can accept an AI plan if it is in `PENDING_AI` status or accept a hybrid plan.
+    -   `422 Unprocessable Entity`: If request body validation fails (e.g., `plan_text` exceeds max length, `generation_id` has invalid format, or neither `generation_id` nor `plan_text` is provided).
+    -   `500 Internal Server Error`: For any unexpected errors on the server side.
+
+## 5. Data Flow and Logic
+The core logic will reside in a use case, orchestrated by the API endpoint.
+
+1.  **Authentication & Authorization**:
+    *   FastAPI Users middleware verifies the JWT from the cookie.
+    *   The `current_user` is injected into the endpoint.
+2.  **Initial Validation & Checks (Use Case)**:
+    *   Retrieve the `Note` using `note_id` and `current_user.id` to ensure existence and ownership. If not found or not owned, raise an exception leading to a `404 Not Found`.
+    *   Check if an `ACTIVE` plan already exists for this `note_id`. If so, raise an exception leading to a `409 Conflict`. However, if there is a plan `generation_id` provided and the plan is with `PENDING_AI` state, it can be accepted regardless of the existing other active plan.
+3.  **Scenario-Based Processing (Use Case)**:
+    *   **Case 1: Accept AI Plan** (`generation_id` provided, `plan_text` is `None`):
+        1.  Fetch the `Plan` record where `generation_id` matches, `note_id` matches, and `status` is `PENDING_AI`.
+        2.  If not found, raise an exception leading to a `404 Not Found`.
+        3.  Update the fetched plan's `status` to `ACTIVE`. The `type` remains `AI`.
+        4.  Save the updated plan.
+    *   **Case 2: Hybrid Plan** (`generation_id` and `plan_text` provided):
+        1.  Fetch the `Plan` record as in Case 1.
+        2.  If not found, raise an exception leading to a `404 Not Found`.
+        3.  Update the fetched plan's `plan_text` with the provided value.
+        4.  Update its `type` to `HYBRID`.
+        5.  Update its `status` to `ACTIVE`.
+        6.  Save the updated plan.
+    *   **Case 3: Manual Plan** (`plan_text` provided, `generation_id` is `None`):
+        1.  Create a new `Plan` record associated with the `note_id`.
+        2.  Set `plan_text` to the provided value.
+        3.  Set `type` to `MANUAL`.
+        4.  Set `status` to `ACTIVE`.
+        5.  A new `generation_id` will be automatically generated by the database model's default.
+        6.  Save the new plan.
+4.  **Response**:
+    *   If successful, the API endpoint returns the created/updated plan (as `PlanOutSchema`) with a `201 Created` status.
+    *   If any business rule is violated or an error occurs, an appropriate error response is returned.
+
+## 6. Security Considerations
+-   **Authentication**: Enforced by FastAPI Users via JWT in cookies. Unauthenticated requests will receive a `401 Unauthorized`.
+-   **Authorization**: The use case must verify that the `note_id` belongs to the authenticated `current_user`. This prevents users from accessing or modifying plans for notes they do not own.
+-   **Input Validation**:
+    -   `PlanCreateInSchema` handles structural validation, type checking, and presence of required fields (e.g., `plan_text` max length). This mitigates risks like oversized payloads.
+    -   Business logic validation within the use case handles checks like existence of `note_id` and `generation_id`.
+-   **IDOR Prevention**: By strictly checking `note_id` against `current_user.id` and ensuring `generation_id` (if provided) is linked to that `note_id`.
+-   **SQL Injection**: Mitigated by using SQLAlchemy ORM and parameterized queries handled by repositories.
+
+## 7. Error Handling
+Custom exceptions will be defined and raised in the use case/repository layers and caught in the API layer to be converted into appropriate HTTP responses:
+-   `NoteNotFoundError` (or similar) -> `HTTPException(status_code=404, detail="Note not found or not owned by user.")`
+-   `PlanNotFoundError` (for `generation_id` not found) -> `HTTPException(status_code=404, detail="Plan proposal not found.")`
+-   `PlanConflictError` -> `HTTPException(status_code=409, detail="An active plan already exists for this note.")`
+-   Pydantic `ValidationError` -> `422 Unprocessable Entity` (handled by FastAPI).
+
+## 8. Performance Considerations
+-   **Database Queries**:
+    -   Ensure efficient querying for `Note` by `id` and `user_id`.
+    -   Ensure efficient querying for `Plan` by `note_id` and `status`, and by `generation_id`.
+    -   Indexes should exist on `note.user_id`, `plan.note_id`, `plan.status`, `plan.generation_id`.
+-   **Transaction Management**: The operation (checking for active plan, then creating/updating) should ideally be atomic to prevent race conditions. Use database transactions if multiple write operations are involved per request. For example, when updating a plan, the read (fetch plan) and write (update plan) should be consistent.
+
+## 9. Implementation Steps
+1.  **Prerequisite**: Ensure `PlanCreateInSchema` has a robust `model_validator` (Pydantic v2) to check that at least `generation_id` or `plan_text` is provided.
+2.  **Define Custom Exceptions** (if not already existing):
+    -   In `backend/src/apps/plans/exceptions.py`: `PlanNotFoundError`, `PlanConflictError`.
+    -   Ensure a suitable `NoteNotFoundError` exists (e.g., in `backend/src/apps/notes/exceptions.py`).
+3.  **Update/Implement Repositories**:
+    -   `backend/src/apps/notes/repositories/note_repository.py`:
+        -   Ensure `get_by_id_and_user_id(note_id: int, user_id: UUID) -> Note | None` is implemented.
+    -   `backend/src/apps/plans/repositories/plan_repository.py`:
+        -   Implement `get_by_generation_id_and_note_id_and_status(generation_id: UUID, note_id: int, status: PlanStatusEnum) -> Plan | None`.
+        -   Implement `get_active_by_note_id(note_id: int) -> Plan | None`.
+        -   Ensure `save(plan: Plan) -> Plan` (for updates) and `create(...) -> Plan` methods are robust.
+4. **Implement Models methods**:
+    -   Ensure `Plan` model has a method to set its status and type correctly.
+5. **Implement usecase dtos**:
+    -   In `backend/src/apps/plans/usecases/dto/plan_dtos.py`, ensure `PlanCreateInDTO` and `PlanCreateOutDTO` are defined with appropriate fields.
+6.  **Implement Use Case**:
+    -   Create `backend/src/apps/plans/usecases/create_or_accept_plan_usecase.py`.
+    -   Implement `CreateOrAcceptPlanUseCase` class with an `execute` method containing the business logic described in "Data Flow and Logic", injecting repositories.
+7.  **Implement API Endpoint**:
+    -   In `backend/src/apps/plans/api.py`:
+        -   Add a new route `POST /notes/{note_id}/plan`.
+        -   Inject dependencies: `current_user: User`, `use_case: CreateOrAcceptPlanUseCase`.
+        -   Call `use_case.execute(...)`.
+        -   Implement try-except blocks to catch custom exceptions and map them to `HTTPException`s with correct status codes and details.
+        -   Return `PlanOutSchema` with `status_code=201`.
+8.  **Update Main Router**:
+    -   Ensure the plans API router is included in `backend/src/routes.py` (or `main.py`).
+9.  **Documentation**:
+    -   Ensure OpenAPI documentation (Swagger UI) is automatically updated via FastAPI's docstrings and schema definitions.
+    -   Update any relevant external API documentation if applicable.

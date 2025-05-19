@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -60,3 +60,70 @@ class Plan(Base):
 
     # Relationships
     note: Mapped['Note'] = relationship(back_populates='plans')
+
+    def accept_ai_proposal(self) -> None:
+        """
+        Accept a pending AI plan.
+
+        Raises:
+            ValueError: If plan is not in PENDING_AI status
+        """
+        if self.status != PlanStatusEnum.PENDING_AI:
+            raise ValueError(f'Cannot accept plan with status {self.status}')
+
+        self.status = PlanStatusEnum.ACTIVE
+
+    def convert_to_hybrid(self, new_plan_text: str) -> None:
+        """
+        Convert a pending AI plan to a hybrid plan with user modifications.
+
+        Args:
+            new_plan_text: The new plan text provided by the user
+
+        Raises:
+            ValueError: If plan is not in PENDING_AI status
+        """
+        if self.status != PlanStatusEnum.PENDING_AI:
+            raise ValueError(f'Cannot convert plan with status {self.status} to hybrid')
+
+        self.plan_text = new_plan_text
+        self.type = PlanTypeEnum.HYBRID
+        self.status = PlanStatusEnum.ACTIVE
+
+    @classmethod
+    def create_manual(cls, note_id: int, plan_text: str) -> Self:
+        """
+        Create a new manual plan.
+
+        Args:
+            note_id: ID of the note this plan is for
+            plan_text: The content of the plan
+
+        Returns:
+            A new Plan instance (not yet persisted)
+        """
+        return cls(
+            note_id=note_id,
+            plan_text=plan_text,
+            status=PlanStatusEnum.ACTIVE,
+            type=PlanTypeEnum.MANUAL,
+        )
+
+    @classmethod
+    def create_ai(cls, note_id: int, plan_text: str) -> Self:
+        """
+        Create a new AI-generated plan.
+
+        Args:
+            note_id: ID of the note this plan is for
+            plan_text: The content of the plan
+
+        Returns:
+            A new Plan instance (not yet persisted)
+        """
+        return cls(
+            note_id=note_id,
+            plan_text=plan_text,
+            status=PlanStatusEnum.PENDING_AI,
+            type=PlanTypeEnum.AI,
+        )

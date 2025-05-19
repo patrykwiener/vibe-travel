@@ -1,9 +1,10 @@
 """Pydantic schemas for plans related functionality."""
 
 from datetime import datetime
+from typing import Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.apps.plans.enums import PlanStatusEnum, PlanTypeEnum
 from src.config import settings
@@ -59,14 +60,12 @@ class PlanCreateInSchema(BaseModel):
         max_length=settings.PLANS_TEXT_MAX_LENGTH,
     )
 
-    @field_validator('plan_text', 'generation_id')
-    @classmethod
-    def validate_fields_provided(cls, v, info):
+    @model_validator(mode='after')
+    def validate_at_least_one_field(self) -> Self:
         """Validate that at least one of generation_id or plan_text is provided."""
-        values = info.data
-        if values.get('generation_id') is None and values.get('plan_text') is None:
-            raise ValueError('Either generation_id or plan_text must be provided')
-        return v
+        if not self.generation_id and not self.plan_text:
+            raise ValueError('At least one of generation_id or plan_text must be provided')
+        return self
 
     model_config = ConfigDict(
         json_schema_extra={

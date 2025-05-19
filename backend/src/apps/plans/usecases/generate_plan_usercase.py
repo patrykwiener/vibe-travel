@@ -55,7 +55,7 @@ class GeneratePlanUseCase:
             note_id=input_dto.note_id,
         )
 
-        plan = await self._store_plan(
+        plan = await self._store_plan_proposal(
             note_id=input_dto.note_id,
             plan_text=plan_text,
         )
@@ -102,13 +102,19 @@ class GeneratePlanUseCase:
         except Exception as exc:
             raise PlanGenerationError(note_id, str(exc)) from exc
 
-    async def _store_plan(self, note_id: int, plan_text: str) -> Plan:
-        """Store the generated plan in the database."""
-        return await self.plan_repository.create_plan_proposal(
-            note_id=note_id,
-            plan_text=plan_text,
+    async def _store_plan_proposal(self, note_id: int, plan_text: str) -> Plan:
+        """Store the generated plan proposal in the database."""
+        return await self.plan_repository.create(
+            plan=Plan.create_ai(
+                note_id=note_id,
+                plan_text=plan_text,
+            )
         )
 
     def _create_output_dto(self, plan: Plan) -> GeneratePlanOutDTO:
         """Create the output DTO from the plan entity."""
-        return GeneratePlanOutDTO(generation_id=plan.generation_id, plan_text=plan.plan_text, status=plan.status)
+        return GeneratePlanOutDTO(
+            generation_id=plan.generation_id,
+            plan_text=plan.plan_text,
+            status=plan.status,
+        )

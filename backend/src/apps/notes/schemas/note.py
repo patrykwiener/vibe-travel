@@ -1,6 +1,7 @@
 """Pydantic schemas for notes related functionality."""
 
 from datetime import date, datetime
+from typing import Self
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -48,7 +49,7 @@ class NoteCreateInSchema(BaseModel):
     )
 
     @model_validator(mode='after')
-    def validate_dates(self) -> 'NoteCreateInSchema':
+    def validate_dates(self) -> Self:
         """Validate that date_from <= date_to and duration <= 14 days."""
         if self.date_from > self.date_to:
             raise ValueError('Start date must be before or equal to end date')
