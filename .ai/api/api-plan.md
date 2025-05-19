@@ -240,7 +240,7 @@
     -   `504 Gateway Timeout`: AI service took too long (respecting 5s timeout).
 
 #### `GET /notes/{note_id}/plan`
--   **Description**: Retrieve the current plan (active or pending) associated with a note.
+-   **Description**: Retrieve the current plan (active) associated with a note. Current active plan is the one with status `ACTIVE` and with latest `updated_at` timestamp.
 -   **HTTP Method**: `GET`
 -   **URL Path**: `/notes/{note_id}/plan`
 -   **Request Payload**: None

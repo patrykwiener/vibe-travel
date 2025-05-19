@@ -46,6 +46,15 @@ class PlanNotFoundError(PlanBaseError):
         super().__init__(self.message)
 
 
+class ActivePlanNotFoundError(PlanBaseError):
+    """Raised when an active plan is not found."""
+
+    def __init__(self, note_id: int):
+        self.note_id = note_id
+        self.message = f'No active plan found for note {note_id}'
+        super().__init__(self.message)
+
+
 class PlanConflictError(PlanBaseError):
     """Raised when an active plan already exists for a note."""
 

@@ -41,3 +41,23 @@ class PlanCreateOutDTO(BaseModel):
     generation_id: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class GetActivePlanInDTO(BaseModel):
+    """Input DTO for retrieving an active plan."""
+
+    note_id: int
+    user_id: UUID
+
+
+class GetActivePlanOutDTO(BaseModel):
+    """Output DTO for retrieving an active plan."""
+
+    id: int
+    note_id: int
+    plan_text: str
+    type: PlanTypeEnum
+    status: PlanStatusEnum
+    generation_id: UUID
+    created_at: datetime
+    updated_at: datetime
