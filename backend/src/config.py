@@ -45,8 +45,17 @@ class Settings(BaseSettings):
     # Plans validation settings
     PLANS_TEXT_MAX_LENGTH: int = 5000
 
+    # AI generation settings
+    USE_MOCK_AI: bool = False
+    MOCK_AI_GENERATION_TIME_SECONDS: int = 1
+
     # OpenRouter settings
-    PLAN_GENERATION_TIMEOUT_SECONDS: int = 5
+    OPENROUTER_API_KEY: str
+    OPENROUTER_MODEL: str
+    OPENROUTER_MAX_TOKENS: int = 2000
+    OPENROUTER_TEMPERATURE: float = 0.7
+    OPENROUTER_API_URL: str = 'https://openrouter.ai/api/v1'
+    OPENROUTER_TIMEOUT_SECONDS: int = 5
 
     API_V1_STR: str = '/api/v1'
     SECRET_KEY: str = secrets.token_urlsafe(32)

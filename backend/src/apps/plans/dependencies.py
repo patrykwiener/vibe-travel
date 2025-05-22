@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.notes.dependencies import get_note_repository
 from src.apps.notes.repositories.note_repository import NoteRepository
+from src.apps.plans.adapters.travel_plan_prompt_adapter import TravelPlanPromptAdapter
 from src.apps.plans.repositories.plan_repository import PlanRepository
 from src.apps.plans.services.plan_generation_service import PlanGenerationService
 from src.apps.plans.usecases.create_or_accept_plan_usecase import CreateOrAcceptPlanUseCase
@@ -15,6 +16,8 @@ from src.apps.users.dependencies import get_profile_repository
 from src.apps.users.repositories.profile_repository import UserProfileRepository
 from src.config import settings
 from src.database import get_async_session
+from src.dependencies import get_ai_service
+from src.insfrastructure.ai.interfaces import AIModelService
 
 
 def get_plan_repository(session: Annotated[AsyncSession, Depends(get_async_session)]) -> PlanRepository:
@@ -22,9 +25,20 @@ def get_plan_repository(session: Annotated[AsyncSession, Depends(get_async_sessi
     return PlanRepository(session)
 
 
-def get_plan_generation_service() -> PlanGenerationService:
+def get_prompt_adapter() -> TravelPlanPromptAdapter:
+    """Get an instance of the travel plan prompt adapter."""
+    return TravelPlanPromptAdapter(model=settings.OPENROUTER_MODEL)
+
+
+def get_plan_generation_service(
+    ai_service: Annotated[AIModelService, Depends(get_ai_service)],
+    prompt_adapter: Annotated[TravelPlanPromptAdapter, Depends(get_prompt_adapter)],
+) -> PlanGenerationService:
     """Get an instance of the plan generation service."""
-    return PlanGenerationService(timeout_seconds=settings.PLAN_GENERATION_TIMEOUT_SECONDS)
+    return PlanGenerationService(
+        ai_service=ai_service,
+        prompt_adapter=prompt_adapter,
+    )
 
 
 def get_generate_plan_usecase(
@@ -39,6 +53,7 @@ def get_generate_plan_usecase(
         note_repository=note_repository,
         user_profile_repository=user_profile_repository,
         plan_generation_service=plan_generation_service,
+        plan_max_length=settings.PLANS_TEXT_MAX_LENGTH,
     )
 
 

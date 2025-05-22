@@ -2,11 +2,13 @@ from uuid import UUID
 
 from src.apps.notes.models.note import Note
 from src.apps.notes.repositories.note_repository import NoteRepository
-from src.apps.plans.exceptions import AIServiceTimeoutError, AIServiceUnavailableError, PlanGenerationError
 from src.apps.plans.models.plan import Plan
 from src.apps.plans.repositories.plan_repository import PlanRepository
 from src.apps.plans.services.plan_generation_service import PlanGenerationService
 from src.apps.plans.usecases.dto.plan_dtos import GeneratePlanInDTO, GeneratePlanOutDTO
+from src.apps.plans.usecases.dto.plan_generation_dto import TravelPlanGenerationDTO
+from src.apps.users.exceptions import ProfileNotFoundError
+from src.apps.users.models.profile import UserProfile
 from src.apps.users.repositories.profile_repository import UserProfileRepository
 
 
@@ -19,11 +21,13 @@ class GeneratePlanUseCase:
         note_repository: NoteRepository,
         user_profile_repository: UserProfileRepository,
         plan_generation_service: PlanGenerationService,
+        plan_max_length: int,
     ):
         self.plan_repository = plan_repository
         self.note_repository = note_repository
         self.user_profile_repository = user_profile_repository
         self.plan_generation_service = plan_generation_service
+        self.plan_max_length = plan_max_length
 
     async def execute(self, input_dto: GeneratePlanInDTO) -> GeneratePlanOutDTO:
         """
@@ -39,20 +43,17 @@ class GeneratePlanUseCase:
             NoteNotFoundError: If the note doesn't exist
             UserProfileNotFoundError: If the user profile doesn't exist
             PlanGenerationError: If there's an error during plan generation
-            AIServiceTimeoutError: If the AI service times out
-            AIServiceUnavailableError: If the AI service is unavailable
         """
         note = await self._get_note(
             note_id=input_dto.note_id,
             user_id=input_dto.user_id,
         )
 
-        user_preferences = await self._get_user_preferences(user_id=input_dto.user_id)
+        user_profile = await self._get_user_profile(user_id=input_dto.user_id)
 
         plan_text = await self._generate_plan_text(
-            note_content=note.title,
-            user_preferences=user_preferences,
-            note_id=input_dto.note_id,
+            note=note,
+            user_profile=user_profile,
         )
 
         plan = await self._store_plan_proposal(
@@ -71,36 +72,36 @@ class GeneratePlanUseCase:
         """
         return await self.note_repository.get_by_id(note_id=note_id, user_id=user_id)
 
-    async def _get_user_preferences(self, user_id: UUID) -> dict:
+    async def _get_user_profile(self, user_id: UUID) -> UserProfile:
         """Retrieve user preferences for plan generation."""
-        return await self.user_profile_repository.get_user_preferences(user_id=user_id)
+        user_profile = await self.user_profile_repository.get_by_user_id(user_id=user_id)
+        if user_profile is None:
+            raise ProfileNotFoundError
+        return user_profile
 
-    async def _generate_plan_text(self, note_content: str, user_preferences: dict, note_id: int) -> str:
+    async def _generate_plan_text(self, note: Note, user_profile: UserProfile) -> str:
         """
         Generate plan text using the AI service.
 
         Args:
-            note_content: Content of the note
-            user_preferences: User travel preferences
-            note_id: ID of the note (for error reporting)
+            note: The note object
+            user_profile: User profile containing travel preferences
 
         Returns:
             Generated plan text
 
         Raises:
-            AIServiceTimeoutError: If the AI service times out
-            AIServiceUnavailableError: If the AI service is unavailable
-            PlanGenerationError: If there's a general error during plan generation
+            PlanGenerationError: If there's an error during plan generation
         """
-        try:
-            return await self.plan_generation_service.generate_plan(
-                note_content=note_content,
-                user_preferences=user_preferences,
-            )
-        except (AIServiceTimeoutError, AIServiceUnavailableError):
-            raise
-        except Exception as exc:
-            raise PlanGenerationError(note_id, str(exc)) from exc
+        travel_plan_dto = TravelPlanGenerationDTO.from_note_and_profile(
+            note=note,
+            user_profile=user_profile,
+            max_length=self.plan_max_length,
+        )
+
+        return await self.plan_generation_service.generate_plan(
+            travel_plan_dto=travel_plan_dto,
+        )
 
     async def _store_plan_proposal(self, note_id: int, plan_text: str) -> Plan:
         """Store the generated plan proposal in the database."""

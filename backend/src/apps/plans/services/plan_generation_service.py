@@ -1,47 +1,55 @@
-import asyncio
+from typing import TYPE_CHECKING
+
+from src.apps.plans.exceptions import PlanGenerationError
+from src.apps.plans.interfaces.prompt_adapter import AbstractTravelPlanPromptAdapter
+from src.insfrastructure.ai.exceptions import AIBaseError
+from src.insfrastructure.ai.interfaces import AIModelService
+
+if TYPE_CHECKING:
+    from src.apps.plans.usecases.dto.plan_generation_dto import TravelPlanGenerationDTO
 
 
 class PlanGenerationService:
     """Service for generating travel plans using AI."""
 
-    def __init__(self, timeout_seconds: int = 5):
-        self.timeout_seconds = timeout_seconds
+    def __init__(
+        self,
+        ai_service: AIModelService,
+        prompt_adapter: AbstractTravelPlanPromptAdapter,
+    ) -> None:
+        self._ai_service = ai_service
+        self._prompt_adapter = prompt_adapter
 
-    async def generate_plan(self, note_content: str, user_preferences: dict | None = None) -> str:
+    async def generate_plan(
+        self,
+        travel_plan_dto: 'TravelPlanGenerationDTO',
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> str:
         """
-        Generate a travel plan based on note content and user preferences.
-
-        This is a mock implementation that simulates AI generation.
-        In the future, this will be replaced with actual OpenRouter SDK integration.
+        Generate a travel plan based on note travel information and user preferences.
 
         Args:
-            note_content: The content of the note to generate a plan from
-            user_preferences: Optional user preferences to consider when generating the plan
+            travel_plan_dto: Combined DTO with note information and user preferences
+            max_tokens: Optional max tokens override
+            temperature: Optional temperature override for creativity
 
         Returns:
             The generated travel plan text
 
         Raises:
-            AIServiceTimeoutError: If the AI service takes too long to respond
-            AIServiceUnavailableError: If the AI service is unavailable
+            PlanGenerationError: If there is an error generating the plan
         """
-        # Simulate successful processing time
-        await asyncio.sleep(1.0)
-
-        # Mock plan text
-        return """# Travel Plan
-## Day 1
-* Morning: Visit the main attractions in the city
-* Afternoon: Explore local culture
-* Evening: Dinner at a local restaurant
-
-## Day 2
-* Morning: Guided tour
-* Afternoon: Free time for shopping
-* Evening: Experience local nightlife
-
-## Day 3
-* Morning: Relaxation time
-* Afternoon: Museum visit
-* Evening: Farewell dinner
-"""
+        prompt = self._prompt_adapter.build_prompt(
+            travel_plan_dto=travel_plan_dto,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        try:
+            return await self._ai_service.generate_completion(prompt)
+        except AIBaseError as ai_error:
+            raise PlanGenerationError(note_id=travel_plan_dto.note_id, message=ai_error.message) from ai_error
+        except Exception as exc:
+            raise PlanGenerationError(
+                note_id=travel_plan_dto.note_id, message=f'Unexpected error during plan generation: {exc!s}'
+            ) from exc

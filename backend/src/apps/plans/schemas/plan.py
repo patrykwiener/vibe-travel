@@ -30,13 +30,14 @@ class PlanGenerateOutSchema(BaseModel):
     )
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             'example': {
                 'generation_id': '550e8400-e29b-41d4-a716-446655440000',
                 'plan_text': 'Day 1: Morning - Eiffel Tower...',
                 'status': 'PENDING_AI',
             }
-        }
+        },
     )
 
 
@@ -68,12 +69,13 @@ class PlanCreateInSchema(BaseModel):
         return self
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             'example': {
                 'generation_id': '550e8400-e29b-41d4-a716-446655440000',
                 'plan_text': 'Day 1: Morning - Eiffel Tower...',
             }
-        }
+        },
     )
 
 
@@ -90,11 +92,12 @@ class PlanUpdateInSchema(BaseModel):
     )
 
     model_config = ConfigDict(
+        from_attributes=True,
         json_schema_extra={
             'example': {
                 'plan_text': 'Updated plan text: Day 1: Morning - Visit the Louvre...',
             }
-        }
+        },
     )
 
 

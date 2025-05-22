@@ -16,6 +16,7 @@ turystycznymi oraz integrację z silnikiem AI (OpenRouter).
     - Docker
     - PostgreSQL
 - AI - Komunikacja z modelami przez usługę Openrouter.ai:
+    - OpenAI SDK
 
 ## Project Strcture
 

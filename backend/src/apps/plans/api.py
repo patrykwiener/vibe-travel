@@ -10,8 +10,6 @@ from src.apps.plans.dependencies import (
 )
 from src.apps.plans.exceptions import (
     ActivePlanNotFoundError,
-    AIServiceTimeoutError,
-    AIServiceUnavailableError,
     PlanConflictError,
     PlanGenerationError,
     PlanNotFoundError,
@@ -57,12 +55,6 @@ class PlanRouter:
             status.HTTP_404_NOT_FOUND: {
                 'description': 'Note not found or not owned by current user',
             },
-            status.HTTP_503_SERVICE_UNAVAILABLE: {
-                'description': 'AI service is currently unavailable',
-            },
-            status.HTTP_504_GATEWAY_TIMEOUT: {
-                'description': 'AI service request timed out',
-            },
             status.HTTP_500_INTERNAL_SERVER_ERROR: {
                 'description': 'Failed to generate plan due to internal error',
             },
@@ -77,16 +69,6 @@ class PlanRouter:
         except NoteNotFoundError as exc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=str(exc),
-            ) from exc
-        except AIServiceTimeoutError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-                detail=str(exc),
-            ) from exc
-        except AIServiceUnavailableError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=str(exc),
             ) from exc
         except PlanGenerationError as exc:

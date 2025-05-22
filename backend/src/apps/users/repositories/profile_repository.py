@@ -41,23 +41,3 @@ class UserProfileRepository:
         await self.session.commit()
         await self.session.refresh(profile)
         return profile
-
-    async def get_user_preferences(self, user_id: uuid.UUID) -> dict:
-        """Get a user's travel preferences.
-
-        Args:
-            user_id: ID of the user
-
-        Returns:
-            Dictionary containing user travel preferences
-        """
-        profile = await self.get_by_user_id(user_id)
-
-        if profile is None:
-            return {}
-
-        return {
-            'travel_style': profile.travel_style,
-            'budget': profile.budget,
-            'preferred_pace': profile.preferred_pace,
-        }
