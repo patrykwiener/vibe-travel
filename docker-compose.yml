@@ -59,13 +59,27 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
-      # Don't mount node_modules to avoid architecture conflicts
-      - /app/node_modules
+      # Selective mounts for development
+      # Source code and assets (frequently changed)
+      - ./frontend/public:/app/public
+      - ./frontend/src:/app/src
+      
+      # Configuration files (occasionally changed)
+      - ./frontend/env.d.ts:/app/env.d.ts
+      - ./frontend/eslint.config.js:/app/eslint.config.js
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/openapi-ts.config.ts:/app/openapi-ts.config.ts
+      - ./frontend/openapi.json:/app/openapi.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      
+      # IMPORTANT: node_modules is NOT mounted from the host
+      # It's built into the image to ensure consistent dependency resolution
     env_file:
       - .env
     environment:
       - VITE_BACKEND_URL=http://backend:8000
+      - NODE_ENV=development
     depends_on:
       backend:
         condition: service_healthy

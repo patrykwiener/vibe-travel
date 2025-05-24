@@ -30,11 +30,13 @@ logs-frontend: ## Show frontend logs
 lint: ## Run linting
 	docker compose exec backend ./scripts/lint.sh
 	docker compose exec frontend npm run lint
+	docker compose exec frontend npm run type-check
 
 .PHONY: lint-fix
 lint-fix: ## Fix linting issues
 	docker compose exec backend ./scripts/lint.sh --fix
 	docker compose exec frontend npm run lint --fix
+	docker compose exec frontend npm run type-check
 	docker compose exec frontend npm run format --fix
 
 .PHONY: test

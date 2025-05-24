@@ -563,14 +563,6 @@ export type NotesPlanRouterGeneratePlanErrors = {
    * Failed to generate plan due to internal error
    */
   500: unknown
-  /**
-   * AI service is currently unavailable
-   */
-  503: unknown
-  /**
-   * AI service request timed out
-   */
-  504: unknown
 }
 
 export type NotesPlanRouterGeneratePlanError =
