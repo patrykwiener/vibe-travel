@@ -2,6 +2,8 @@ Frontend:
 - Vue.js 3
 - Tailwind 4
 - Flowbite 3
+- Typescript
+- backend-based OpenAPI-generated API client
 
 Backend:
 - FastAPI

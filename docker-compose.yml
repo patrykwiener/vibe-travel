@@ -72,6 +72,8 @@ services:
       - ./frontend/openapi.json:/app/openapi.json
       - ./frontend/tsconfig.json:/app/tsconfig.json
       - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/.prettierrc.json:/app/.prettierrc.json
+      - ./frontend/.prettierignore:/app/.prettierignore
       
       # IMPORTANT: node_modules is NOT mounted from the host
       # It's built into the image to ensure consistent dependency resolution

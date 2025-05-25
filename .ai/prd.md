@@ -28,7 +28,7 @@ VibeTravels is an MVP application for planning engaging trips by transforming si
 
 3.4 Plan Generation
 - "Generate Plan" button triggers `POST /notes/:id/plan/generate`
-- synchronization with OpenRouter SDK, 5s timeout
+- synchronization with OpenRouter SDK, 60s timeout
 - result is text (≤ 5000 characters) with a breakdown by days/hours
 - plan type: `AI` (automatically generated), `MANUAL` (manually entered), or `HYBRID` (combination of both)
 
@@ -101,7 +101,7 @@ VibeTravels is an MVP application for planning engaging trips by transforming si
   Description: As a user, I want to generate a plan proposal based on a note and preferences to receive a detailed trip itinerary.
   Acceptance Criteria:
     - Clicking "Generate Plan" calls `POST /notes/:id/plan/generate`.
-    - Generation uses OpenRouter SDK and completes within a maximum of 5 seconds.
+    - Generation uses OpenRouter SDK and completes within a maximum of 60 seconds.
     - AI returns plan text (≤ 5000 characters) with a breakdown by days/hours.
     - In case of an error or timeout, the user receives a message "An error occurred while generating the plan."
     - The button only generates a plan proposal. If the user does not accept it, the plan will not be saved or assigned to the note.
@@ -128,7 +128,7 @@ VibeTravels is an MVP application for planning engaging trips by transforming si
   Description: As a user, I want to manually enter a plan if I am not using AI.
   Acceptance Criteria:
     - The absence of a generation_id in the request means manual plan saving.
-    - The user can enter a plan up to 10000 characters long.
+    - The user can enter a plan up to 5000 characters long.
     - The manual plan is saved via `POST /notes/:id/plan` and displayed in the note view.
 
 - ID: US-009

@@ -10,6 +10,7 @@ turystycznymi oraz integrację z silnikiem AI (OpenRouter).
     - Vue.js 3
     - Tailwind 4
     - Flowbite 3
+    - Typescript
 - Backend:
     - Python 3.13
     - FastAPI with FastAPI Utilities, FastAPI Users, FastAPI Pagination
@@ -222,4 +223,4 @@ When introducing changes to the project, please follow the structure outlined be
 - Implement Flowbite's utility classes for consistent styling and spacing
 - Leverage Flowbite's theming capabilities for consistent branding
 - Use Flowbite's documentation and examples for reference and best practices
-- Implement Flowbite's JavaScript components for interactive elements
+- Implement Flowbite's Typescript components for interactive elements
