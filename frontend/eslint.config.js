@@ -1,62 +1,79 @@
-import { defineConfig, globalIgnores } from 'eslint/config'
-import globals from 'globals'
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 import typescript from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
+import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import globals from 'globals'
 
-export default defineConfig([
+export default [
+  // Global ignores
   {
-    name: 'app/files-to-lint',
-    files: ['**/*.{js,mjs,jsx,ts,tsx,vue}'],
+    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/client/*.gen.ts'],
   },
 
-  // Ignore build outputs and auto-generated files
-  globalIgnores([
-    '**/dist/**', 
-    '**/dist-ssr/**', 
-    '**/coverage/**', 
-    '**/src/client/*.gen.ts'
-  ]),
+  // Base configuration for all files
+  js.configs.recommended,
 
+  // TypeScript files configuration
   {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
       parser: typescriptParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        extraFileExtensions: ['.vue'],
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
       },
     },
-  },
-  
-  // Apply TypeScript rules to TypeScript files
-  {
-    files: ['**/*.{ts,tsx,vue}'],
     plugins: {
-      '@typescript-eslint': typescript
+      '@typescript-eslint': typescript,
     },
     rules: {
       ...typescript.configs.recommended.rules,
     },
   },
 
-  js.configs.recommended,
+  // Vue files configuration
   ...pluginVue.configs['flat/essential'],
   {
     files: ['**/*.vue'],
     languageOptions: {
       parser: pluginVue.parser,
       parserOptions: {
+        parser: typescriptParser, // Use TypeScript parser for <script> blocks
         ecmaVersion: 'latest',
         sourceType: 'module',
         extraFileExtensions: ['.vue'],
       },
+      globals: {
+        ...globals.browser,
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescript,
+      vue: pluginVue,
+    },
+    rules: {
+      ...typescript.configs.recommended.rules,
     },
   },
+
+  // JavaScript files configuration
+  {
+    files: ['**/*.{js,mjs,jsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+  },
+
+  // Prettier formatting skip
   skipFormatting,
-])
+]

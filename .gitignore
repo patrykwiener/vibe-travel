@@ -3,6 +3,7 @@
 .vscode
 .venv
 .coverage
+.DS_Store
 coverage.xml
 node_modules/
 /test-results/
