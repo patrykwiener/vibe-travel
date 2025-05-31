@@ -57,7 +57,7 @@ export class LoginBadCredentialsError extends BadRequestError {
   }
 }
 
-/** 
+/**
  * Register user already exists error (400)
  */
 export class UserAlreadyExistsError extends BadRequestError {

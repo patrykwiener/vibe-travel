@@ -159,8 +159,8 @@ const handleRegister = async (event: Event) => {
               !passwordValid
                 ? 'opacity-50 cursor-not-allowed'
                 : passwordsMatch
-                ? 'border-gray-300 focus:ring-primary-600 focus:border-primary-600 dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                : 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-500 dark:focus:border-red-500',
+                  ? 'border-gray-300 focus:ring-primary-600 focus:border-primary-600 dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                  : 'border-red-500 focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-500 dark:focus:border-red-500',
             ]"
             required
           />

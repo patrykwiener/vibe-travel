@@ -54,7 +54,7 @@ const handleLogout = () => {
             VibeTravels
           </span>
         </a>
-        
+
         <!-- Navigation and User menu (order-2) -->
         <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
           <!-- Desktop Navigation Links -->
@@ -64,7 +64,8 @@ const handleLogout = () => {
               class="text-base font-medium transition-colors duration-200"
               :class="{
                 'text-primary-700 dark:text-primary-500': $route.path === '/',
-                'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/'
+                'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500':
+                  $route.path !== '/',
               }"
               :aria-current="$route.path === '/' ? 'page' : undefined"
             >
@@ -78,7 +79,8 @@ const handleLogout = () => {
                 class="text-base font-medium transition-colors duration-200"
                 :class="{
                   'text-primary-700 dark:text-primary-500': $route.path.startsWith('/notes'),
-                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': !$route.path.startsWith('/notes')
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500':
+                    !$route.path.startsWith('/notes'),
                 }"
                 :aria-current="$route.path.startsWith('/notes') ? 'page' : undefined"
               >
@@ -93,7 +95,8 @@ const handleLogout = () => {
                 class="text-base font-medium transition-colors duration-200"
                 :class="{
                   'text-primary-700 dark:text-primary-500': $route.path === '/login',
-                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/login'
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500':
+                    $route.path !== '/login',
                 }"
                 :aria-current="$route.path === '/login' ? 'page' : undefined"
               >
@@ -104,7 +107,8 @@ const handleLogout = () => {
                 class="text-base font-medium transition-colors duration-200"
                 :class="{
                   'text-primary-700 dark:text-primary-500': $route.path === '/register',
-                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/register'
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500':
+                    $route.path !== '/register',
                 }"
                 :aria-current="$route.path === '/register' ? 'page' : undefined"
               >
@@ -112,10 +116,13 @@ const handleLogout = () => {
               </router-link>
             </template>
           </div>
-          
+
           <!-- Separator line (only on desktop when authenticated) -->
-          <div v-if="authStore.isAuthenticated" class="hidden md:block h-6 w-px bg-gray-300 dark:bg-gray-600 mr-6"></div>
-          
+          <div
+            v-if="authStore.isAuthenticated"
+            class="hidden md:block h-6 w-px bg-gray-300 dark:bg-gray-600 mr-6"
+          ></div>
+
           <!-- User Menu Dropdown (only when authenticated) -->
           <div v-if="authStore.isAuthenticated" class="relative" ref="userMenuRef">
             <button
@@ -128,19 +135,23 @@ const handleLogout = () => {
               data-dropdown-placement="bottom"
             >
               <span class="sr-only">Open user menu</span>
-              <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+              <div
+                class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm"
+              >
                 {{ authStore.user?.email?.charAt(0).toUpperCase() }}
               </div>
             </button>
             <!-- Dropdown menu -->
             <div
-              :class="{ 'hidden': !isUserMenuOpen }"
+              :class="{ hidden: !isUserMenuOpen }"
               class="z-50 absolute right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600"
               id="user-dropdown"
             >
               <div class="px-4 py-3">
                 <span class="block text-sm text-gray-900 dark:text-white">Signed in as</span>
-                <span class="block text-sm text-gray-500 dark:text-gray-400">{{ authStore.user?.email }}</span>
+                <span class="block text-sm text-gray-500 dark:text-gray-400">{{
+                  authStore.user?.email
+                }}</span>
               </div>
               <ul class="py-2" aria-labelledby="user-menu-button">
                 <li>
@@ -166,7 +177,7 @@ const handleLogout = () => {
               </ul>
             </div>
           </div>
-          
+
           <!-- Mobile menu toggle -->
           <button
             @click="toggleMobileMenu"
@@ -194,10 +205,10 @@ const handleLogout = () => {
             </svg>
           </button>
         </div>
-        
+
         <!-- Mobile Navigation menu -->
         <div
-          :class="{ 'hidden': !isMobileMenuOpen }"
+          :class="{ hidden: !isMobileMenuOpen }"
           class="items-center justify-between w-full md:hidden md:w-auto"
           id="navbar-user"
         >
@@ -210,7 +221,8 @@ const handleLogout = () => {
                 class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                 :class="{
                   'text-white bg-primary-700': $route.path === '/',
-                  'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/'
+                  'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700':
+                    $route.path !== '/',
                 }"
                 :aria-current="$route.path === '/' ? 'page' : undefined"
                 @click="isMobileMenuOpen = false"
@@ -227,7 +239,8 @@ const handleLogout = () => {
                   class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                   :class="{
                     'text-white bg-primary-700': $route.path.startsWith('/notes'),
-                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': !$route.path.startsWith('/notes')
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700':
+                      !$route.path.startsWith('/notes'),
                   }"
                   :aria-current="$route.path.startsWith('/notes') ? 'page' : undefined"
                   @click="isMobileMenuOpen = false"
@@ -245,7 +258,8 @@ const handleLogout = () => {
                   class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                   :class="{
                     'text-white bg-primary-700': $route.path === '/login',
-                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/login'
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700':
+                      $route.path !== '/login',
                   }"
                   :aria-current="$route.path === '/login' ? 'page' : undefined"
                   @click="isMobileMenuOpen = false"
@@ -259,7 +273,8 @@ const handleLogout = () => {
                   class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                   :class="{
                     'text-white bg-primary-700': $route.path === '/register',
-                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/register'
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700':
+                      $route.path !== '/register',
                   }"
                   :aria-current="$route.path === '/register' ? 'page' : undefined"
                   @click="isMobileMenuOpen = false"

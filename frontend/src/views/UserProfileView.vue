@@ -49,11 +49,11 @@ onMounted(async () => {
 // Handle form submission
 const handleSubmit = async (event: Event) => {
   event.preventDefault()
-  
+
   isSaving.value = true
   localError.value = null
   successMessage.value = null
-  
+
   try {
     await authStore.updateProfile(travelStyle.value, preferredPace.value, budget.value)
     successMessage.value = 'Profile updated successfully!'

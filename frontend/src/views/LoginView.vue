@@ -13,7 +13,7 @@ const localError = ref<string | null>(null)
 const handleLogin = async (event: Event) => {
   event.preventDefault()
   localError.value = null // Clear previous errors
-  
+
   try {
     await authStore.login(email.value, password.value)
   } catch (error) {
