@@ -10,6 +10,7 @@ import {
   LoginBadCredentialsError,
   BadRequestError,
   UnknownError,
+  UserAlreadyExistsError,
 } from './api-errors'
 
 /**
@@ -61,6 +62,9 @@ export class ApiErrorHandler {
     if (status == 400) {
       if (detail === 'LOGIN_BAD_CREDENTIALS') {
         return new LoginBadCredentialsError(originalError)
+      }
+      if (detail === 'REGISTER_USER_ALREADY_EXISTS') {
+        return new UserAlreadyExistsError(originalError)
       }
       return new BadRequestError(originalError, detail)
     }

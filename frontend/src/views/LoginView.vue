@@ -2,15 +2,27 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+import { ApiError } from '@/utils/api-errors'
 
 const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
+const localError = ref<string | null>(null)
 
 const handleLogin = async (event: Event) => {
   event.preventDefault()
-  await authStore.login(email.value, password.value)
+  localError.value = null // Clear previous errors
+  
+  try {
+    await authStore.login(email.value, password.value)
+  } catch (error) {
+    if (error instanceof ApiError) {
+      localError.value = error.userMessage
+    } else {
+      localError.value = 'An unexpected error occurred. Please try again.'
+    }
+  }
 }
 </script>
 
@@ -25,7 +37,7 @@ const handleLogin = async (event: Event) => {
       <form @submit="handleLogin" class="space-y-4 md:space-y-6">
         <!-- Error Alert - Following Flowbite alert standards -->
         <div
-          v-if="authStore.error"
+          v-if="localError"
           class="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
           role="alert"
         >
@@ -41,7 +53,7 @@ const handleLogin = async (event: Event) => {
             />
           </svg>
           <span class="sr-only">Error</span>
-          <div>{{ authStore.error }}</div>
+          <div>{{ localError }}</div>
         </div>
 
         <!-- Email Field -->

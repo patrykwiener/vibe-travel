@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import type { UserTravelStyleEnum, UserTravelPaceEnum, UserBudgetEnum } from '@/client/types.gen'
+import { ApiError } from '@/utils/api-errors'
 
 const authStore = useAuthStore()
 
@@ -11,6 +12,8 @@ const preferredPace = ref<UserTravelPaceEnum | null>(null)
 const budget = ref<UserBudgetEnum | null>(null)
 const isLoading = ref(false)
 const isSaving = ref(false)
+const localError = ref<string | null>(null)
+const successMessage = ref<string | null>(null)
 
 // Computed for last updated display
 const lastUpdated = computed(() => {
@@ -23,6 +26,7 @@ const lastUpdated = computed(() => {
 // Load profile data on mount
 onMounted(async () => {
   isLoading.value = true
+  localError.value = null
   try {
     await authStore.fetchProfile()
     if (authStore.profile) {
@@ -32,6 +36,11 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load profile:', error)
+    if (error instanceof ApiError) {
+      localError.value = error.userMessage
+    } else {
+      localError.value = 'Failed to load profile. Please try again.'
+    }
   } finally {
     isLoading.value = false
   }
@@ -40,16 +49,21 @@ onMounted(async () => {
 // Handle form submission
 const handleSubmit = async (event: Event) => {
   event.preventDefault()
-
+  
   isSaving.value = true
+  localError.value = null
+  successMessage.value = null
+  
   try {
     await authStore.updateProfile(travelStyle.value, preferredPace.value, budget.value)
-
-    // Show success message (could be enhanced with toast notification)
-    console.log('Profile updated successfully!')
+    successMessage.value = 'Profile updated successfully!'
   } catch (error) {
     console.error('Failed to update profile:', error)
-    // Error handling is already done in the store
+    if (error instanceof ApiError) {
+      localError.value = error.userMessage
+    } else {
+      localError.value = 'Failed to update profile. Please try again.'
+    }
   } finally {
     isSaving.value = false
   }
@@ -144,12 +158,20 @@ const handleSubmit = async (event: Event) => {
             </p>
           </div>
 
+          <!-- Success message display -->
+          <div
+            v-if="successMessage"
+            class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400"
+          >
+            {{ successMessage }}
+          </div>
+
           <!-- Error message display -->
           <div
-            v-if="authStore.error"
+            v-if="localError"
             class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
           >
-            {{ authStore.error }}
+            {{ localError }}
           </div>
 
           <button
