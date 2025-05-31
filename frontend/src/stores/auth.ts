@@ -10,7 +10,6 @@ import {
   profileUserProfileCbvUpdateProfile,
 } from '@/client/sdk.gen'
 import { apiCall } from '@/utils/api-interceptor'
-import { ApiError } from '@/utils/api-errors'
 import type {
   UserRead,
   UserCreate,
@@ -33,7 +32,6 @@ export const useAuthStore = defineStore('auth', () => {
   const profile = ref<UserProfile | null>(null)
   const isAuthenticated = ref(false)
   const isLoading = ref(false)
-  const error = ref<string | null>(null)
 
   // Load authentication state from localStorage on initialization
   const initializeAuth = async () => {
@@ -80,12 +78,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const clearAuthStateIncludingErrors = () => {
     clearAuthState()
-    error.value = null
   }
 
   const login = async (email: string, password: string) => {
     isLoading.value = true
-    error.value = null
 
     const loginData: Login = {
       username: email, // Backend expects 'username' field for email
@@ -99,14 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
       await apiCall(() => usersAuthJwtLogin({ body: loginData }))
     } catch (e) {
       isLoading.value = false
-      if (e instanceof ApiError) {
-        error.value = e.userMessage
-      } else {
-        console.error('Login error:', e)
-        error.value = 'Authentication failed. Please try again.'
-      }
       clearAuthState()
-      return
+      throw e // Let component handle the error
     }
 
     try {
@@ -131,13 +121,12 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (e) {
       isLoading.value = false
       console.error('Error fetching user data after login:', e)
-      error.value = 'Login successful but failed to load user data. Please refresh the page.'
+      throw new Error('Login successful but failed to load user data. Please refresh the page.')
     }
   }
 
   const logout = async () => {
     isLoading.value = true
-    error.value = null
 
     try {
       // Call backend logout to clear HTTP-only cookies
@@ -157,30 +146,26 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const register = async (email: string, password: string) => {
-    const result = await withErrorHandling(
-      async () => {
-        const registerData: UserCreate = {
-          email: email,
-          password: password,
-        }
+    isLoading.value = true
 
-        const userData = await apiCall(() => usersRegisterRegister({ body: registerData }))
+    const registerData: UserCreate = {
+      email: email,
+      password: password,
+    }
 
-        // After successful registration, redirect to login page as per requirement
-        router.push({ name: 'login' })
-        return userData
-      },
-      {
-        onError: (apiError) => {
-          error.value = apiError.userMessage
-        },
-        onSuccess: () => {
-          error.value = null
-        },
-      },
-    )
+    let userData: User | null = null
+    try {
+      userData = await apiCall(() => usersRegisterRegister({ body: registerData }))
+    } catch (e) {
+      isLoading.value = false
+      clearAuthState()
+      throw e // Let component handle the error
+    }
 
-    return result
+    // After successful registration, redirect to login page as per requirement
+    router.push({ name: 'login' })
+    isLoading.value = false
+    return userData
   }
 
   // Profile management
@@ -189,53 +174,30 @@ export const useAuthStore = defineStore('auth', () => {
     preferredPace?: UserTravelPaceEnum | null,
     budget?: UserBudgetEnum | null,
   ): Promise<UserProfileOutSchema | null> => {
-    const result = await withErrorHandling(
-      async () => {
-        const profileData: UserProfileInSchema = {
-          travel_style: travelStyle,
-          preferred_pace: preferredPace,
-          budget: budget,
-        }
+    isLoading.value = true
 
-        const updatedProfile = await apiCall(() =>
-          profileUserProfileCbvUpdateProfile({ body: profileData }),
-        )
+    const profileData: UserProfileInSchema = {
+      travel_style: travelStyle,
+      preferred_pace: preferredPace,
+      budget: budget,
+    }
 
-        profile.value = updatedProfile
-        return updatedProfile
-      },
-      {
-        onError: (apiError) => {
-          error.value = apiError.userMessage
-          throw apiError
-        },
-        onSuccess: () => {
-          error.value = null
-        },
-      },
+    const updatedProfile = await apiCall(() =>
+      profileUserProfileCbvUpdateProfile({ body: profileData }),
     )
 
-    return result || null
+    profile.value = updatedProfile
+    isLoading.value = false
+    return updatedProfile
   }
 
   const fetchProfile = async (): Promise<UserProfileOutSchema | null> => {
     if (!isAuthenticated.value || !user.value) return null
 
-    try {
-      const profileData = await apiCall(() => profileUserProfileCbvGetProfile())
-      profile.value = profileData
-      return profileData
-    } catch (e) {
-      if (e instanceof ApiError) {
-        error.value = e.userMessage
-      }  else {
-        console.error('Error fetching profile:', e)
-        error.value = 'Failed to load profile. Please try again later.'
-      }
-      return null
-    }
+    const profileData = await apiCall(() => profileUserProfileCbvGetProfile())
+    profile.value = profileData
+    return profileData
   }
-
 
   // Initialize auth on store creation
   initializeAuth()
@@ -244,7 +206,6 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     profile,
     isLoading,
-    error,
     isAuthenticated,
     login,
     logout,
