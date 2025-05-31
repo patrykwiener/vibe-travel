@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { createErrorNavigationGuard } from './navigation-guards'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,25 +60,7 @@ const router = createRouter({
   ],
 })
 
-// Navigation Guard
-router.beforeEach((to, _from, next) => {
-  // Get authentication status from localStorage for SSR-friendly checks
-  // since Pinia store might not be initialized yet
-  const token = localStorage.getItem('token')
-  const isAuthenticated = !!token
-
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirect to login if the route requires authentication and the user is not authenticated
-    next({
-      name: 'login',
-      query: { redirect: to.fullPath }, // Store the attempted URL for later redirection
-    })
-  } else if ((to.name === 'login' || to.name === 'register') && isAuthenticated) {
-    // Redirect to notes if user is already logged in and tries to access login/register
-    next({ name: 'notes' })
-  } else {
-    next()
-  }
-})
+// Navigation Guard with Error Handling
+router.beforeEach(createErrorNavigationGuard())
 
 export default router

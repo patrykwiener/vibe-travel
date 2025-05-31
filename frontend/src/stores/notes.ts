@@ -45,7 +45,7 @@ export const useNotesStore = defineStore('notes', () => {
   })
 
   const fetchNotes = async () => {
-    if (!authStore.token) return
+    if (!authStore.isAuthenticated) return
 
     isLoading.value = true
     error.value = null
@@ -88,7 +88,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const fetchPlans = async () => {
-    if (!authStore.token) return
+    if (!authStore.isAuthenticated) return
 
     isLoading.value = true
     error.value = null
@@ -122,7 +122,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const createNote = async (title: string, content: string, tags?: string[]) => {
-    if (!authStore.token || !authStore.user) return null
+    if (!authStore.isAuthenticated || !authStore.user) return null
 
     isLoading.value = true
     error.value = null
@@ -157,7 +157,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const updateNote = async (id: string, updates: Partial<Note>) => {
-    if (!authStore.token) return false
+    if (!authStore.isAuthenticated) return false
 
     isLoading.value = true
     error.value = null
@@ -187,7 +187,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const deleteNote = async (id: string) => {
-    if (!authStore.token) return false
+    if (!authStore.isAuthenticated) return false
 
     isLoading.value = true
     error.value = null
@@ -210,7 +210,7 @@ export const useNotesStore = defineStore('notes', () => {
   }
 
   const generatePlan = async (noteId: string) => {
-    if (!authStore.token || !authStore.user) return null
+    if (!authStore.isAuthenticated || !authStore.user) return null
 
     isLoading.value = true
     error.value = null

@@ -17,23 +17,38 @@ const handleLogin = async (event: Event) => {
 <template>
   <AuthLayout>
     <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-      <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+      <h1
+        class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white"
+      >
         Sign in to your account
       </h1>
       <form @submit="handleLogin" class="space-y-4 md:space-y-6">
+        <!-- Error Alert - Following Flowbite alert standards -->
         <div
           v-if="authStore.error"
-          class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+          class="flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
           role="alert"
         >
-          {{ authStore.error }}
+          <svg
+            class="flex-shrink-0 inline w-4 h-4 mr-3"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+            />
+          </svg>
+          <span class="sr-only">Error</span>
+          <div>{{ authStore.error }}</div>
         </div>
 
+        <!-- Email Field -->
         <div>
-          <label
-            for="email"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Your email</label>
+          <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Your email</label
+          >
           <input
             v-model="email"
             type="email"
@@ -44,11 +59,12 @@ const handleLogin = async (event: Event) => {
             required
           />
         </div>
+
+        <!-- Password Field -->
         <div>
-          <label
-            for="password"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Password</label>
+          <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Password</label
+          >
           <input
             v-model="password"
             type="password"
@@ -76,7 +92,8 @@ const handleLogin = async (event: Event) => {
           <a
             href="#"
             class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
-          >Forgot password?</a>
+            >Forgot password?</a
+          >
         </div>
         <button
           type="submit"
@@ -108,7 +125,8 @@ const handleLogin = async (event: Event) => {
           <router-link
             to="/register"
             class="font-medium text-primary-600 hover:underline dark:text-primary-500"
-          >Sign up</router-link>
+            >Sign up</router-link
+          >
         </p>
       </form>
     </div>

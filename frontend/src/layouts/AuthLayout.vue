@@ -2,7 +2,6 @@
 import { initFlowbite } from 'flowbite'
 import { onMounted } from 'vue'
 
-// Initialize Flowbite when component is mounted
 onMounted(() => {
   initFlowbite()
 })
@@ -19,7 +18,7 @@ onMounted(() => {
         <img class="w-8 h-8 mr-2" src="/src/assets/logo.jpeg" alt="VibeTravels Logo" />
         VibeTravels
       </a>
-      
+
       <!-- Auth card container -->
       <div
         class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700"
@@ -27,7 +26,7 @@ onMounted(() => {
         <!-- Content slot -->
         <slot></slot>
       </div>
-      
+
       <!-- Decorative background element -->
       <div class="mt-8 text-center">
         <p class="text-sm text-gray-500 dark:text-gray-400">
