@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { initFlowbite } from 'flowbite'
-import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -9,6 +8,11 @@ const authStore = useAuthStore()
 // Initialize Flowbite when component is mounted
 onMounted(() => {
   initFlowbite()
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 // Mobile menu state
@@ -17,9 +21,25 @@ const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
+// User dropdown menu state
+const isUserMenuOpen = ref(false)
+const userMenuRef = ref<HTMLElement | null>(null)
+
+const toggleUserMenu = () => {
+  isUserMenuOpen.value = !isUserMenuOpen.value
+}
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    isUserMenuOpen.value = false
+  }
+}
+
 // Handle logout
 const handleLogout = () => {
   authStore.logout()
+  isUserMenuOpen.value = false
 }
 </script>
 
@@ -30,49 +50,170 @@ const handleLogout = () => {
       <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="/src/assets/logo.jpeg" class="h-8" alt="VibeTravels Logo" />
-          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-blue-200">
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
             VibeTravels
           </span>
         </a>
-        <button
-          @click="toggleMobileMenu"
-          type="button"
-          class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-          aria-controls="navbar-default"
-          :aria-expanded="isMobileMenuOpen"
-        >
-          <span class="sr-only">Open main menu</span>
-          <svg
-            class="w-5 h-5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 17 14"
+        
+        <!-- Navigation and User menu (order-2) -->
+        <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+          <!-- Desktop Navigation Links -->
+          <div class="hidden md:flex md:items-center md:space-x-8 md:mr-6">
+            <router-link
+              to="/"
+              class="text-base font-medium transition-colors duration-200"
+              :class="{
+                'text-primary-700 dark:text-primary-500': $route.path === '/',
+                'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/'
+              }"
+              :aria-current="$route.path === '/' ? 'page' : undefined"
+            >
+              Home
+            </router-link>
+
+            <!-- Links visible only to authenticated users -->
+            <template v-if="authStore.isAuthenticated">
+              <router-link
+                to="/notes"
+                class="text-base font-medium transition-colors duration-200"
+                :class="{
+                  'text-primary-700 dark:text-primary-500': $route.path.startsWith('/notes'),
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': !$route.path.startsWith('/notes')
+                }"
+                :aria-current="$route.path.startsWith('/notes') ? 'page' : undefined"
+              >
+                Notes
+              </router-link>
+            </template>
+
+            <!-- Links visible only to guests -->
+            <template v-else>
+              <router-link
+                to="/login"
+                class="text-base font-medium transition-colors duration-200"
+                :class="{
+                  'text-primary-700 dark:text-primary-500': $route.path === '/login',
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/login'
+                }"
+                :aria-current="$route.path === '/login' ? 'page' : undefined"
+              >
+                Sign In
+              </router-link>
+              <router-link
+                to="/register"
+                class="text-base font-medium transition-colors duration-200"
+                :class="{
+                  'text-primary-700 dark:text-primary-500': $route.path === '/register',
+                  'text-gray-700 hover:text-primary-700 dark:text-gray-300 dark:hover:text-primary-500': $route.path !== '/register'
+                }"
+                :aria-current="$route.path === '/register' ? 'page' : undefined"
+              >
+                Sign Up
+              </router-link>
+            </template>
+          </div>
+          
+          <!-- Separator line (only on desktop when authenticated) -->
+          <div v-if="authStore.isAuthenticated" class="hidden md:block h-6 w-px bg-gray-300 dark:bg-gray-600 mr-6"></div>
+          
+          <!-- User Menu Dropdown (only when authenticated) -->
+          <div v-if="authStore.isAuthenticated" class="relative" ref="userMenuRef">
+            <button
+              @click="toggleUserMenu"
+              type="button"
+              class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+              id="user-menu-button"
+              :aria-expanded="isUserMenuOpen"
+              data-dropdown-toggle="user-dropdown"
+              data-dropdown-placement="bottom"
+            >
+              <span class="sr-only">Open user menu</span>
+              <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                {{ authStore.user?.email?.charAt(0).toUpperCase() }}
+              </div>
+            </button>
+            <!-- Dropdown menu -->
+            <div
+              :class="{ 'hidden': !isUserMenuOpen }"
+              class="z-50 absolute right-0 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600"
+              id="user-dropdown"
+            >
+              <div class="px-4 py-3">
+                <span class="block text-sm text-gray-900 dark:text-white">Signed in as</span>
+                <span class="block text-sm text-gray-500 dark:text-gray-400">{{ authStore.user?.email }}</span>
+              </div>
+              <ul class="py-2" aria-labelledby="user-menu-button">
+                <li>
+                  <router-link
+                    to="/profile"
+                    @click="isUserMenuOpen = false"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                    :class="{
+                      'bg-gray-100 dark:bg-gray-600': $route.path === '/profile',
+                    }"
+                  >
+                    Profile
+                  </router-link>
+                </li>
+                <li>
+                  <button
+                    @click="handleLogout"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                  >
+                    Sign out
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Mobile menu toggle -->
+          <button
+            @click="toggleMobileMenu"
+            data-collapse-toggle="navbar-user"
+            type="button"
+            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+            aria-controls="navbar-user"
+            :aria-expanded="isMobileMenuOpen"
           >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M1 1h15M1 7h15M1 13h15"
-            />
-          </svg>
-        </button>
+            <span class="sr-only">Open main menu</span>
+            <svg
+              class="w-5 h-5"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 17 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M1 1h15M1 7h15M1 13h15"
+              />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Mobile Navigation menu -->
         <div
-          :class="{ hidden: !isMobileMenuOpen, 'w-full': true }"
-          class="md:block md:w-auto"
-          id="navbar-default"
+          :class="{ 'hidden': !isMobileMenuOpen }"
+          class="items-center justify-between w-full md:hidden md:w-auto"
+          id="navbar-user"
         >
           <ul
-            class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700"
+            class="flex flex-col font-medium p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
           >
             <li>
               <router-link
                 to="/"
-                class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-blue-200 md:dark:hover:text-primary-300 dark:hover:bg-gray-700 dark:hover:text-blue-100 md:dark:hover:bg-transparent"
+                class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                 :class="{
-                  'md:text-primary-700 font-medium dark:md:text-primary-300': $route.path === '/',
+                  'text-white bg-primary-700': $route.path === '/',
+                  'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/'
                 }"
+                :aria-current="$route.path === '/' ? 'page' : undefined"
+                @click="isMobileMenuOpen = false"
               >
                 Home
               </router-link>
@@ -83,34 +224,16 @@ const handleLogout = () => {
               <li>
                 <router-link
                   to="/notes"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-blue-200 md:dark:hover:text-primary-300 dark:hover:bg-gray-700 dark:hover:text-blue-100 md:dark:hover:bg-transparent"
+                  class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
                   :class="{
-                    'md:text-primary-700 font-medium dark:md:text-primary-300':
-                      $route.path.startsWith('/notes'),
+                    'text-white bg-primary-700': $route.path.startsWith('/notes'),
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': !$route.path.startsWith('/notes')
                   }"
+                  :aria-current="$route.path.startsWith('/notes') ? 'page' : undefined"
+                  @click="isMobileMenuOpen = false"
                 >
                   My Notes
                 </router-link>
-              </li>
-              <li>
-                <router-link
-                  to="/profile"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-blue-200 md:dark:hover:text-primary-300 dark:hover:bg-gray-700 dark:hover:text-blue-100 md:dark:hover:bg-transparent"
-                  :class="{
-                    'md:text-primary-700 font-medium dark:md:text-primary-300':
-                      $route.path === '/profile',
-                  }"
-                >
-                  Profile
-                </router-link>
-              </li>
-              <li>
-                <button
-                  @click="handleLogout"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-white md:dark:hover:text-primary-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                >
-                  Logout
-                </button>
               </li>
             </template>
 
@@ -119,8 +242,13 @@ const handleLogout = () => {
               <li>
                 <router-link
                   to="/login"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-white md:dark:hover:text-primary-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                  :class="{ 'md:text-primary-700 font-medium': $route.path === '/login' }"
+                  class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
+                  :class="{
+                    'text-white bg-primary-700': $route.path === '/login',
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/login'
+                  }"
+                  :aria-current="$route.path === '/login' ? 'page' : undefined"
+                  @click="isMobileMenuOpen = false"
                 >
                   Login
                 </router-link>
@@ -128,8 +256,13 @@ const handleLogout = () => {
               <li>
                 <router-link
                   to="/register"
-                  class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 md:p-0 dark:text-white md:dark:hover:text-primary-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-                  :class="{ 'md:text-primary-700 font-medium': $route.path === '/register' }"
+                  class="block py-3 px-4 text-base font-semibold rounded-md transition-colors duration-200"
+                  :class="{
+                    'text-white bg-primary-700': $route.path === '/register',
+                    'text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700': $route.path !== '/register'
+                  }"
+                  :aria-current="$route.path === '/register' ? 'page' : undefined"
+                  @click="isMobileMenuOpen = false"
                 >
                   Register
                 </router-link>
