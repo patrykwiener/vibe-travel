@@ -56,10 +56,18 @@ When introducing changes to the project, please follow the structure outlined be
     * ./backend/scripts - Backend utility scripts (e.g., initial setup, data seeding, custom management commands).
 * ./frontend - Frontend codebase (Vue.js).
     * ./frontend/src - Frontend source code.
-      * ./frontend/src/components - Vue.js components.
-      * ./frontend/src/views - Vue.js views/pages.
-      * ./frontend/src/router - Vue Router configuration.
       * ./frontend/src/assets - Static assets.
+      * ./frontend/src/client - OpenAPI-generated API client (from backend OpenAPI spec).
+      * ./frontend/src/components - Vue.js components.
+      * ./frontend/src/composables - Vue.js composables (reusable logic).
+      * ./frontend/src/layouts - Vue.js layouts (e.g., AuthLayout, BaseLayout).
+      * ./frontend/src/router - Vue Router configuration.
+      * ./frontend/src/store - Vuex store (state management).
+        * ./frontend/src/store/auth - Authentication store (manages user session, login, registration).
+        * ./frontend/src/store/notes - Notes store (manages notes state).
+        * ./frontend/src/store/profile - User profile store (manages user preferences).
+      * ./frontend/src/utils - Utility functions and helpers like API configuration, error handling, etc.
+      * ./frontend/src/views - Vue.js views/pages.
 * ./docs - Documentation (ADRs, API docs).
     * ./docs/adr - Architecture Decision Records (ADRs).
 * ./scripts - Utility scripts (migrations, tasks).
