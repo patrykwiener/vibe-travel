@@ -5,6 +5,7 @@
 OpenRouter Service is an infrastructure service component responsible for communication with OpenRouter.ai, providing access to various AI models (OpenAI, Anthropic, Google, etc.) for converting simple travel notes into detailed travel plans. The service uses OpenAI SDK for type-safe communication with the API.
 
 Key responsibilities:
+
 - Managing communication with OpenRouter API through OpenAI SDK
 - Structuring chat completion messages
 - Error handling and timeout management
@@ -74,18 +75,19 @@ async def generate_plan(
     """
 ```
 
-
 ## 4. Private Methods and Fields
 
 ### 4.1 Fields
+
 - `client: AsyncOpenAI` - OpenAI SDK client configured for OpenRouter
 - `_model: str` - Model ID
 - `_max_tokens: int` - Default max tokens
 - `_temperature: float` - Default temperature
 
 ### 4.2 Methods
+
 - `_build_messages()` - Builds chat completion messages from prompt and preferences
-- `_handle_api_error()` - Maps OpenAI SDK errors to our domain exceptions 
+- `_handle_api_error()` - Maps OpenAI SDK errors to our domain exceptions
 - `_validate_response()` - Validates completion response
 
 ## 5. Error Handling
@@ -99,7 +101,7 @@ The service implements comprehensive error handling:
 
 2. **API Errors**
    - Authentication failures (401)
-   - Rate limiting (429) 
+   - Rate limiting (429)
    - Server errors (500+)
 
 3. **Timeouts**
@@ -116,6 +118,7 @@ The service implements comprehensive error handling:
    - Financial limits reached
 
 Custom exceptions:
+
 - `AIServiceTimeoutError`
 - `AIServiceUnavailableError`
 - `PlanGenerationError`
@@ -152,6 +155,7 @@ Custom exceptions:
 ### 1. Environment Setup
 
 a) Update config.py:
+
 ```python
 # OpenRouter settings
 OPENROUTER_API_KEY: str
@@ -162,7 +166,9 @@ OPENROUTER_TEMPERATURE: float = 0.7
 ```
 
 b) Update requirements.txt:
-```
+
+```python
+# requirements.txt
 pydantic-ai>=1.0.0
 aiohttp>=3.9.1
 ```

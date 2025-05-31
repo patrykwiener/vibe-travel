@@ -1,5 +1,6 @@
 <!-- filepath: /Users/patrykwiener/Code/10xdevs/vibe-travel/.ai/diagrams/journey.md -->
 <user_journey_analysis>
+
 1. Enumerated user flows:
    - Access as an unauthenticated user (redirect to login or registration page)
    - Login process (successful and unsuccessful attempts)
@@ -35,6 +36,7 @@
 </user_journey_analysis>
 
 <mermaid_diagram>
+
 ```mermaid
 stateDiagram-v2
 
@@ -91,4 +93,5 @@ state "Authenticated" as Authenticated {
 Authenticated --> [*]
 Unauthenticated --> [*]
 ```
+
 </mermaid_diagram>

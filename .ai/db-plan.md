@@ -13,6 +13,7 @@ CREATE TYPE plan_status_enum AS ENUM ('PENDING_AI', 'ACTIVE', 'ARCHIVED');
 ## 2. Tables
 
 ### Table: `user`
+
 (Managed by FastAPI Users, extended with custom fields. Assumes FastAPI Users default table structure with a UUID primary key named `id`.)
 
 | Column Name      | Data Type                | Constraints                                  | Description                               |
@@ -26,9 +27,10 @@ CREATE TYPE plan_status_enum AS ENUM ('PENDING_AI', 'ACTIVE', 'ARCHIVED');
 | `created_at`     | `TIMESTAMP WITH TIME ZONE`| `DEFAULT NOW()`, `NOT NULL`                 | Timestamp of user creation                |
 | `updated_at`     | `TIMESTAMP WITH TIME ZONE`| `DEFAULT NOW()`, `NOT NULL`                 | Timestamp of last user update             |
 
-
 ### Table: `user_profile`
+
 (Assuming this is managed by FastAPI Users, but if not, it can be added as a separate table.)
+
 | Column Name      | Data Type                | Constraints                                  | Description                               |
 |------------------|--------------------------|----------------------------------------------|-------------------------------------------|
 | `id`             | `INTEGER`                   | `PRIMARY KEY`                                | User's unique identifier (from FastAPI Users) |
@@ -71,35 +73,37 @@ CREATE TYPE plan_status_enum AS ENUM ('PENDING_AI', 'ACTIVE', 'ARCHIVED');
 
 ## 3. Relationships
 
-*   **User to Note**: One-to-Many (`user.id` -> `Note.user_id`)
-    *   A user can have multiple notes.
-    *   A note belongs to exactly one user.
-    *   Deletion of a user cascades to delete their notes.
-*   **Note to Plan**: One-to-Many (`Note.id` -> `Plan.note_id`)
-    *   A note can have multiple plans (e.g., different versions, rejected AI suggestions, one active plan).
-    *   A plan belongs to exactly one note.
-    *   Deletion of a note cascades to delete its associated plans.
+* **User to Note**: One-to-Many (`user.id` -> `Note.user_id`)
+  * A user can have multiple notes.
+  * A note belongs to exactly one user.
+  * Deletion of a user cascades to delete their notes.
+* **Note to Plan**: One-to-Many (`Note.id` -> `Plan.note_id`)
+  * A note can have multiple plans (e.g., different versions, rejected AI suggestions, one active plan).
+  * A plan belongs to exactly one note.
+  * Deletion of a note cascades to delete its associated plans.
 
 ## 4. Indexes
 
-### On `Note` table:
-*   `CREATE INDEX idx_note_user_id ON "Note"(user_id);` (Implicitly created for FK, but good to note)
-*   `CREATE INDEX idx_note_title_lower ON "Note"(LOWER(title));` (For case-insensitive partial search on title - Decision #10)
+### On `Note` table
 
-### On `Plan` table:
-*   `CREATE INDEX idx_plan_note_id ON "Plan"(note_id);` (Implicitly created for FK, but good to note)
-*   `CREATE UNIQUE INDEX idx_plan_unique_active_note ON "Plan"(note_id) WHERE status = 'ACTIVE';` (Ensures only one active plan per note - Decision #7)
-*   `CREATE INDEX idx_plan_generation_id ON "Plan"(generation_id);` (Implicitly created for UNIQUE constraint, but good to note)
+* `CREATE INDEX idx_note_user_id ON "Note"(user_id);` (Implicitly created for FK, but good to note)
+* `CREATE INDEX idx_note_title_lower ON "Note"(LOWER(title));` (For case-insensitive partial search on title - Decision #10)
+
+### On `Plan` table
+
+* `CREATE INDEX idx_plan_note_id ON "Plan"(note_id);` (Implicitly created for FK, but good to note)
+* `CREATE UNIQUE INDEX idx_plan_unique_active_note ON "Plan"(note_id) WHERE status = 'ACTIVE';` (Ensures only one active plan per note - Decision #7)
+* `CREATE INDEX idx_plan_generation_id ON "Plan"(generation_id);` (Implicitly created for UNIQUE constraint, but good to note)
 
 ## 5. Row-Level Security (RLS)
 
-*   As per Decision #11, Row-Level Security (RLS) will be implemented at the application layer (FastAPI) rather than directly in PostgreSQL for this MVP. The application logic will ensure users can only access and modify their own data.
+* As per Decision #11, Row-Level Security (RLS) will be implemented at the application layer (FastAPI) rather than directly in PostgreSQL for this MVP. The application logic will ensure users can only access and modify their own data.
 
 ## 6. Additional Considerations and Best Practices
 
-*   **UUID Generation**: FastAPI Users also typically uses UUIDs for user IDs.
-*   **Timestamp Updates**: Trigger for automatic updates of `updated_at` fields will be provided in the SQLalchemy
-*   **FastAPI Users Table**: The schema for the `user` table assumes common fields provided by `fastapi-users`. The exact column names and types might vary slightly based on the specific `fastapi-users` backend (e.g., SQLAlchemy). The `created_at` and `updated_at` fields are good practice to add if not already managed by `fastapi-users`.
-*   **Constraints Naming**: Constraints are explicitly named (e.g., `unique_user_title`, `date_check`) for better manageability.
-*   **Normalization**: The schema is designed with normalization in mind (appears to be in 3NF).
-*   **PRD Field Lengths**: The `VARCHAR(255)` for `title` and `place` in the `Note` table, and `TEXT` for `key_ideas` and `plan_text` with `CHECK` constraints for length, align with PRD requirements.
+* **UUID Generation**: FastAPI Users also typically uses UUIDs for user IDs.
+* **Timestamp Updates**: Trigger for automatic updates of `updated_at` fields will be provided in the SQLalchemy
+* **FastAPI Users Table**: The schema for the `user` table assumes common fields provided by `fastapi-users`. The exact column names and types might vary slightly based on the specific `fastapi-users` backend (e.g., SQLAlchemy). The `created_at` and `updated_at` fields are good practice to add if not already managed by `fastapi-users`.
+* **Constraints Naming**: Constraints are explicitly named (e.g., `unique_user_title`, `date_check`) for better manageability.
+* **Normalization**: The schema is designed with normalization in mind (appears to be in 3NF).
+* **PRD Field Lengths**: The `VARCHAR(255)` for `title` and `place` in the `Note` table, and `TEXT` for `key_ideas` and `plan_text` with `CHECK` constraints for length, align with PRD requirements.

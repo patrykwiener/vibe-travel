@@ -14,6 +14,7 @@ The authentication system requires the following new pages:
 - **AuthLayout**: Layout wrapper for authentication pages
 
 The application will have two distinct layout states:
+
 - **Authenticated Layout**: Shows navigation with access to Notes, Profile, etc. and includes a logout option
 - **Unauthenticated Layout**: Shows only login/register options
 
@@ -35,12 +36,14 @@ App.vue
 ### 1.3 Component Responsibilities
 
 #### AuthLayout.vue
+
 - Provides a consistent layout for authentication-related views
 - Contains the VibeTravels logo and branding elements
 - Centers the authentication form
 - Adds decorative elements specific to the authentication flow
 
 #### LoginView.vue
+
 - Email input field with validation
 - Password input field with validation
 - "Remember me" checkbox
@@ -49,6 +52,7 @@ App.vue
 - Error message display area
 
 #### RegisterView.vue
+
 - Email input field with validation
 - Password input field with validation
 - Password confirmation field with validation
@@ -57,6 +61,7 @@ App.vue
 - Error message display area
 
 #### NavigationBar.vue
+
 - Application logo
 - Navigation links (Notes, Profile)
 - User information display
@@ -92,15 +97,18 @@ Route guards will prevent access to protected routes for unauthenticated users.
 ### 1.6 Validation and Error Handling
 
 #### Login Form Validation
+
 - Email: required, valid email format
 - Password: required, minimum 8 characters
 
 #### Registration Form Validation
+
 - Email: required, valid email format, unique (checked on submission)
 - Password: required, minimum 8 characters
 - Password confirmation: must match password
 
 #### Error Messages
+
 - Invalid login credentials: "Invalid email or password."
 - Registration email already exists: "An account with this email already exists."
 - Registration validation errors: Field-specific error messages
@@ -109,6 +117,7 @@ Route guards will prevent access to protected routes for unauthenticated users.
 ### 1.7 User Scenarios
 
 #### Successful Login Flow
+
 1. User navigates to `/login`
 2. User enters valid email and password
 3. User clicks "Login"
@@ -119,6 +128,7 @@ Route guards will prevent access to protected routes for unauthenticated users.
 8. User is redirected to the main application (notes list)
 
 #### Failed Login Flow
+
 1. User navigates to `/login`
 2. User enters invalid credentials
 3. User clicks "Login"
@@ -129,6 +139,7 @@ Route guards will prevent access to protected routes for unauthenticated users.
 8. User remains on login page
 
 #### Registration Flow
+
 1. User navigates to `/register`
 2. User enters email and password
 3. User clicks "Register"
@@ -150,6 +161,7 @@ The backend authentication is already implemented using FastAPI Users, which pro
 - `GET /api/v1/users/me` - Get current user information
 
 All these endpoints are already covered by the OpenAPI-generated client library in `/frontend/src/client/sdk.gen.ts`, which provides type-safe functions like:
+
 - `usersRegisterRegister()` - for user registration
 - `usersAuthJwtLogin()` - for user login
 - `usersAuthJwtLogout()` - for user logout

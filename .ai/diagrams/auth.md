@@ -1,12 +1,14 @@
 # Authentication Architecture Diagram
 
 <authentication_analysis>
+
 # Authentication Analysis for VibeTravels
 
 ## 1. Authentication Flows
+
 Based on the provided documents and code analysis, the following authentication flows were identified:
 
-1. **Registration Flow**: 
+1. **Registration Flow**:
    - New user registration through `/api/v1/users/auth/register`
    - Email and password validation
    - User profile creation (handled by `on_after_register` hook)
@@ -29,7 +31,7 @@ Based on the provided documents and code analysis, the following authentication 
    - Redirection to login page
 
 5. **Current User Information Flow**:
-   - Retrieving current user data through `/api/v1/users/me` 
+   - Retrieving current user data through `/api/v1/users/me`
    - Used for displaying user information and verifying authentication status
 
 ## 2. Main Actors and Interactions
@@ -41,7 +43,7 @@ Based on the provided documents and code analysis, the following authentication 
    - Automatically sends JWT cookie with requests
 
 2. **Backend (FastAPI)**:
-   - Processes authentication requests 
+   - Processes authentication requests
    - Validates credentials against database
    - Issues JWT tokens upon successful authentication
    - Protects resources with authentication middleware
