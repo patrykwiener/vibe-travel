@@ -93,9 +93,9 @@ const handleSubmit = async () => {
 
 <template>
   <div
-    class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 bg-gray-100 dark:bg-gray-800 min-h-screen"
+    class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 bg-gray-50 dark:bg-gray-900 min-h-screen"
   >
-    <div class="mx-auto max-w-2xl p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+    <div class="mx-auto max-w-2xl p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 border dark:border-gray-700">
       <!-- Header -->
       <div class="mb-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Travel Preferences</h2>

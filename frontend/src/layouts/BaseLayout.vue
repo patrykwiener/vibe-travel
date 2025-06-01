@@ -44,9 +44,9 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-800">
+  <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
     <!-- Navbar -->
-    <nav class="bg-white border-gray-200 dark:bg-gray-900 sticky top-0 z-40 shadow-md">
+    <nav class="bg-white border-gray-200 dark:bg-gray-800 sticky top-0 z-40 shadow-lg border-b dark:border-gray-700">
       <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="/src/assets/logo.jpeg" class="h-8" alt="VibeTravels Logo" />
@@ -213,7 +213,7 @@ const handleLogout = () => {
           id="navbar-user"
         >
           <ul
-            class="flex flex-col font-medium p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+            class="flex flex-col font-medium p-4 mt-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-700"
           >
             <li>
               <router-link
@@ -294,7 +294,7 @@ const handleLogout = () => {
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-900 mt-auto">
+    <footer class="bg-white dark:bg-gray-800 mt-auto border-t dark:border-gray-700">
       <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
         <div class="md:flex md:justify-between">
           <div class="mb-6 md:mb-0">
