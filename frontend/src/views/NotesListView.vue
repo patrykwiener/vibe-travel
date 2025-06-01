@@ -1,19 +1,22 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Travel Notes</h1>
-          <CreateNoteButton variant="header" @click="createNote" />
-        </div>
-      </div>
-    </div>
-
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <!-- Search Bar -->
-      <div class="mb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Travel Notes</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Manage your travel ideas and transform them into amazing trip plans
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <CreateNoteButton variant="header" @click="createNote" />
+          </div>
+        </div>
+
+        <!-- Search Bar -->
         <SearchInput
           v-model="searchQuery"
           :is-loading="isSearchingCombined"
