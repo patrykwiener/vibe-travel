@@ -1,186 +1,192 @@
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import { useNotesStore } from '@/stores/notes'
-
-const notesStore = useNotesStore()
-
-// Fetch notes when component is mounted
-onMounted(() => {
-  notesStore.fetchNotes()
-  notesStore.fetchPlans()
-})
-</script>
-
 <template>
-  <div
-    class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 bg-gray-100 dark:bg-gray-800 min-h-screen"
-  >
-    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-      <div>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Your Travel Notes</h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Manage your travel ideas and generate detailed plans
-        </p>
-      </div>
-      <div class="mt-4 md:mt-0">
-        <router-link
-          to="/notes/new"
-          class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-        >
-          Create New Note
-        </router-link>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Travel Notes</h1>
+          <CreateNoteButton variant="header" @click="createNote" />
+        </div>
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="mb-6">
-      <label for="search" class="sr-only">Search</label>
-      <div class="relative">
-        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-          <svg
-            class="w-4 h-4 text-gray-500 dark:text-gray-400"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 20 20"
-          >
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Search Bar -->
+      <div class="mb-6">
+        <SearchInput
+          v-model="searchQuery"
+          :is-loading="isSearchingCombined"
+          placeholder="Search notes by title..."
+          @clear="clearSearch"
+        />
+      </div>
+
+      <!-- Loading State for Initial Load or Search -->
+      <div v-if="isInitialLoading" class="flex justify-center py-12">
+        <LoadingSpinner size="lg" text="Loading your notes..." />
+      </div>
+
+      <!-- Loading State for Search -->
+      <div v-else-if="isSearchingCombined" class="flex justify-center py-12">
+        <LoadingSpinner size="lg" text="Searching notes..." />
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center py-12">
+        <div class="text-red-600 dark:text-red-400 mb-4">
+          <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
-              stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+              d="M12 9v2m0 4h.01m-6.938 4h13.876c1.1 0 2.094-.654 2.52-1.668a2.45 2.45 0 000-2.664L13.042 4.668C12.616 3.654 11.622 3 10.522 3H9.478c-1.1 0-2.094.654-2.52 1.668L.542 17.332a2.45 2.45 0 000 2.664C.968 21.346 1.962 22 3.062 22z"
             />
           </svg>
+          <p class="text-lg font-medium text-gray-900 dark:text-white">Failed to load notes</p>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ error }}</p>
         </div>
-        <input
-          type="search"
-          id="search"
-          class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-          placeholder="Search by title..."
+        <button
+          @click="retryLoad"
+          class="px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+
+      <!-- Notes Content -->
+      <div v-else-if="!isSearchingCombined">
+        <!-- Empty State -->
+        <EmptyStateMessage
+          v-if="notes.length === 0 && !isLoading"
+          :type="searchQuery ? 'no-search-results' : 'no-notes'"
+          :search-query="searchQuery"
+          @create-note="createNote"
+          @clear-search="clearSearch"
         />
-      </div>
-    </div>
 
-    <!-- Notes Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Example Note Card -->
-      <div
-        class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-      >
-        <div class="p-5">
-          <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Weekend in Paris
-          </h5>
-          <div class="mb-3 text-sm text-gray-700 dark:text-gray-400 space-y-1">
-            <div><span class="font-medium">Place:</span> Paris, France</div>
-            <div><span class="font-medium">Dates:</span> 10-12 Jun 2025</div>
-            <div><span class="font-medium">People:</span> 2</div>
+        <!-- Notes Grid -->
+        <div v-else>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+            <NoteCard v-for="note in notes" :key="note.id" :note="note" />
           </div>
-          <router-link
-            to="/notes/1"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            View Details
-            <svg
-              class="w-3.5 h-3.5 ms-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
-          </router-link>
-        </div>
-      </div>
 
-      <!-- Example Note Card 2 -->
-      <div
-        class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-      >
-        <div class="p-5">
-          <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Summer in Barcelona
-          </h5>
-          <div class="mb-3 text-sm text-gray-700 dark:text-gray-400 space-y-1">
-            <div><span class="font-medium">Place:</span> Barcelona, Spain</div>
-            <div><span class="font-medium">Dates:</span> 15-21 Jul 2025</div>
-            <div><span class="font-medium">People:</span> 4</div>
+          <!-- Loading More -->
+          <div v-if="isLoadingMore" class="flex justify-center py-6">
+            <LoadingSpinner text="Loading more notes..." />
           </div>
-          <router-link
-            to="/notes/2"
-            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-primary-700 rounded-lg hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            View Details
-            <svg
-              class="w-3.5 h-3.5 ms-2"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 10"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5h12m0 0L9 1m4 4L9 9"
-              />
-            </svg>
-          </router-link>
+
+          <!-- Scroll to Load More -->
+          <ScrollToLoadMessage
+            v-else-if="infiniteScroll.hasMore && notes.length > 0"
+            :total-loaded="notes.length"
+            :total-available="infiniteScroll.totalItems"
+          />
+
+          <!-- End of List -->
+          <EndOfListMessage
+            v-else-if="infiniteScroll.allLoaded && notes.length > 0"
+            :total-loaded="notes.length"
+            :total-available="infiniteScroll.totalItems"
+          />
         </div>
       </div>
     </div>
 
-    <!-- Pagination - Example UI Only -->
-    <div class="flex items-center justify-center mt-6">
-      <nav aria-label="Page navigation">
-        <ul class="inline-flex -space-x-px text-sm">
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              >Previous</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              >1</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              aria-current="page"
-              class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-              >2</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              >3</a
-            >
-          </li>
-          <li>
-            <a
-              href="#"
-              class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-              >Next</a
-            >
-          </li>
-        </ul>
-      </nav>
-    </div>
+    <!-- Floating Create Button for Mobile -->
+    <CreateNoteButton variant="floating" class="md:hidden" @click="createNote" />
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useNotesStore } from '@/stores/notes'
+import { useSearchDebounce } from '@/composables/useSearchDebounce'
+import { useInfiniteScroll } from '@/composables/useInfiniteScroll'
+import NoteCard from '@/components/notes/NoteCard.vue'
+import SearchInput from '@/components/ui/SearchInput.vue'
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import EmptyStateMessage from '@/components/layout/EmptyStateMessage.vue'
+import EndOfListMessage from '@/components/layout/EndOfListMessage.vue'
+import ScrollToLoadMessage from '@/components/layout/ScrollToLoadMessage.vue'
+import CreateNoteButton from '@/components/ui/buttons/CreateNoteButton.vue'
+import { storeToRefs } from 'pinia'
+
+const router = useRouter()
+const notesStore = useNotesStore()
+
+// Store state
+const { notes, isLoading, isLoadingMore, isSearching, error, infiniteScroll } =
+  storeToRefs(notesStore)
+
+// Local state
+const isInitialLoading = ref(true)
+
+// Search functionality
+const { searchQuery, debouncedQuery, isSearching: isSearchDebouncing } = useSearchDebounce(500, 2)
+
+// Combined search state (debouncing OR store searching)
+const isSearchingCombined = computed(() => isSearchDebouncing.value || isSearching.value)
+
+// Watch for search changes
+watch(debouncedQuery, async (newSearch, oldSearch) => {
+  if (newSearch !== oldSearch) {
+    await notesStore.searchNotes(newSearch)
+  }
+})
+
+// Infinite scroll functionality
+const { setupScrollListener, cleanupScrollListener } = useInfiniteScroll(async () => {
+  console.log('Infinite scroll callback triggered!', {
+    isLoadingMore: isLoadingMore.value,
+    hasMore: infiniteScroll.value.hasMore,
+    currentOffset: infiniteScroll.value.currentOffset,
+    totalItems: infiniteScroll.value.totalItems,
+  })
+
+  // Only load more if we're not already loading and there are more items
+  if (!isLoadingMore.value && infiniteScroll.value.hasMore) {
+    console.log('Triggering load more notes...')
+    await notesStore.loadMoreNotes()
+  }
+}, 300) // Increased threshold to trigger earlier
+
+// Methods
+const createNote = () => {
+  router.push({ name: 'create-note' })
+}
+
+const clearSearch = async () => {
+  searchQuery.value = ''
+  await notesStore.clearSearch()
+}
+
+const retryLoad = async () => {
+  isInitialLoading.value = true
+  try {
+    await notesStore.fetchNotes()
+  } finally {
+    isInitialLoading.value = false
+  }
+}
+
+// Lifecycle
+onMounted(async () => {
+  try {
+    // Load initial notes
+    await notesStore.fetchNotes()
+
+    // Setup infinite scroll
+    setupScrollListener()
+  } catch (err) {
+    console.error('Failed to load notes:', err)
+  } finally {
+    isInitialLoading.value = false
+  }
+})
+
+onUnmounted(() => {
+  cleanupScrollListener()
+})
+</script>

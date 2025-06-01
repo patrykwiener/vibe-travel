@@ -1,286 +1,245 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './auth'
+import { notesNoteCbvListNotes } from '@/client/sdk.gen'
+import { apiCall } from '@/utils/api-interceptor'
+import type {
+  NoteListItemOutSchema,
+  LimitOffsetPageNoteListItemOutSchema,
+} from '@/client/types.gen'
+import { ApiError } from '@/utils/api-errors'
 
-export interface Note {
-  id: string
-  userId: string
-  title: string
-  content: string
-  createdAt: string
-  updatedAt: string
-  processingStatus?: 'pending' | 'processing' | 'completed' | 'failed'
-  tags?: string[]
+interface InfiniteScrollInfo {
+  currentOffset: number
+  itemsPerPage: number
+  totalItems: number
+  hasMore: boolean
+  allLoaded: boolean
 }
 
-export interface Plan {
-  id: string
-  noteId: string
-  userId: string
-  title: string
-  content: string
-  destination: string
-  startDate?: string
-  endDate?: string
-  createdAt: string
-  updatedAt: string
+interface NotesApiParams {
+  offset?: number
+  limit?: number
+  search_title?: string
 }
 
 export const useNotesStore = defineStore('notes', () => {
   const authStore = useAuthStore()
 
-  const notes = ref<Note[]>([])
-  const plans = ref<Plan[]>([])
+  // State
+  const notes = ref<NoteListItemOutSchema[]>([])
   const isLoading = ref(false)
+  const isLoadingMore = ref(false)
+  const isSearching = ref(false)
   const error = ref<string | null>(null)
+  const searchQuery = ref('')
 
+  // Request cancellation tracking
+  let currentSearchController: AbortController | null = null
+  let searchRequestId = 0
+
+  const infiniteScroll = ref<InfiniteScrollInfo>({
+    currentOffset: 0,
+    itemsPerPage: 10,
+    totalItems: 0,
+    hasMore: true,
+    allLoaded: false,
+  })
+
+  // Computed
   const userNotes = computed(() => {
-    if (!authStore.user) return []
-    return notes.value.filter((note) => note.userId === authStore.user?.id)
+    return notes.value
   })
 
-  const userPlans = computed(() => {
-    if (!authStore.user) return []
-    return plans.value.filter((plan) => plan.userId === authStore.user?.id)
-  })
+  // Helper to reset infinite scroll state
+  const resetInfiniteScroll = () => {
+    infiniteScroll.value = {
+      currentOffset: 0,
+      itemsPerPage: 10,
+      totalItems: 0,
+      hasMore: true,
+      allLoaded: false,
+    }
+  }
 
-  const fetchNotes = async () => {
+  // Fetch notes with pagination and search
+  const fetchNotes = async (params: NotesApiParams = {}) => {
     if (!authStore.isAuthenticated) return
 
-    isLoading.value = true
+    const isInitialLoad = params.offset === undefined || params.offset === 0
+
+    if (isInitialLoad) {
+      isLoading.value = true
+      if (!params.search_title) {
+        resetInfiniteScroll()
+      }
+    } else {
+      isLoadingMore.value = true
+    }
+
     error.value = null
 
     try {
-      // TODO: Implement actual API call once backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      const response = await apiCall(() =>
+        notesNoteCbvListNotes({
+          query: {
+            offset: params.offset || 0,
+            limit: params.limit || infiniteScroll.value.itemsPerPage,
+            search_title: params.search_title || undefined,
+          },
+        }),
+      )
 
-      // Simulated response
-      notes.value = [
-        {
-          id: '1',
-          userId: authStore.user?.id || '',
-          title: 'Weekend in Barcelona',
-          content:
-            'I want to spend a weekend in Barcelona. Looking for cultural spots, good food, and some beach time.',
-          createdAt: '2025-04-12T10:00:00Z',
-          updatedAt: '2025-04-12T10:00:00Z',
-          processingStatus: 'completed',
-          tags: ['city', 'beach', 'culture'],
-        },
-        {
-          id: '2',
-          userId: authStore.user?.id || '',
-          title: 'Japan in Cherry Blossom Season',
-          content:
-            'Planning a two-week trip to Japan during cherry blossom season. Would like to visit Tokyo, Kyoto, and Osaka.',
-          createdAt: '2025-05-01T14:30:00Z',
-          updatedAt: '2025-05-01T14:30:00Z',
-          processingStatus: 'pending',
-          tags: ['japan', 'culture', 'spring'],
-        },
-      ]
+      const data = response as LimitOffsetPageNoteListItemOutSchema
+
+      // Update infinite scroll info
+      infiniteScroll.value.totalItems = data.total || 0
+      infiniteScroll.value.currentOffset = (params.offset || 0) + (data.items?.length || 0)
+      infiniteScroll.value.hasMore =
+        infiniteScroll.value.currentOffset < infiniteScroll.value.totalItems
+      infiniteScroll.value.allLoaded = !infiniteScroll.value.hasMore
+
+      if (isInitialLoad) {
+        // Replace notes for initial load or search
+        notes.value = data.items || []
+      } else {
+        // Append notes for infinite scroll
+        notes.value = [...notes.value, ...(data.items || [])]
+      }
     } catch (e) {
-      console.error('Fetch notes error:', e)
-      error.value = 'Failed to load notes.'
+      console.error('Failed to fetch notes:', e)
+      if (e instanceof ApiError) {
+        error.value = e.userMessage
+      } else {
+        error.value = 'Failed to load notes. Please try again.'
+      }
     } finally {
       isLoading.value = false
+      isLoadingMore.value = false
+      isSearching.value = false
     }
   }
 
-  const fetchPlans = async () => {
-    if (!authStore.isAuthenticated) return
+  // Load more notes for infinite scroll
+  const loadMoreNotes = async () => {
+    console.log('loadMoreNotes called', {
+      hasMore: infiniteScroll.value.hasMore,
+      isLoadingMore: isLoadingMore.value,
+      currentOffset: infiniteScroll.value.currentOffset,
+      totalItems: infiniteScroll.value.totalItems,
+    })
 
-    isLoading.value = true
-    error.value = null
+    if (!infiniteScroll.value.hasMore || isLoadingMore.value) {
+      console.log('Early return from loadMoreNotes', {
+        hasMore: infiniteScroll.value.hasMore,
+        isLoadingMore: isLoadingMore.value,
+      })
+      return
+    }
+
+    console.log('Fetching more notes...')
+    await fetchNotes({
+      offset: infiniteScroll.value.currentOffset,
+      limit: infiniteScroll.value.itemsPerPage,
+      search_title: searchQuery.value || undefined,
+    })
+  }
+
+  // Search notes with debouncing handled by component
+  const searchNotes = async (query: string) => {
+    // Cancel any existing search request
+    if (currentSearchController) {
+      currentSearchController.abort()
+    }
+
+    // Create new AbortController for this search
+    currentSearchController = new AbortController()
+    const requestId = ++searchRequestId
+
+    isSearching.value = true
+    searchQuery.value = query
+    resetInfiniteScroll()
 
     try {
-      // TODO: Implement actual API call once backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      await fetchNotes({
+        offset: 0,
+        limit: infiniteScroll.value.itemsPerPage,
+        search_title: query || undefined,
+      })
 
-      // Simulated response
-      plans.value = [
-        {
-          id: '1',
-          noteId: '1',
-          userId: authStore.user?.id || '',
-          title: 'Barcelona Weekend Itinerary',
-          content:
-            '# Day 1\n- Morning: Visit Sagrada Familia\n- Afternoon: Explore Gothic Quarter\n- Evening: Dinner at El Nacional\n\n# Day 2\n- Morning: Park Güell\n- Afternoon: Beach time at Barceloneta\n- Evening: Tapas tour',
-          destination: 'Barcelona, Spain',
-          startDate: '2025-06-15',
-          endDate: '2025-06-17',
-          createdAt: '2025-04-12T11:30:00Z',
-          updatedAt: '2025-04-12T11:30:00Z',
-        },
-      ]
-    } catch (e) {
-      console.error('Fetch plans error:', e)
-      error.value = 'Failed to load travel plans.'
+      // Only clear the controller if this is still the latest request
+      if (requestId === searchRequestId) {
+        currentSearchController = null
+      }
+    } catch (error) {
+      // Only handle the error if this is still the latest request and not aborted
+      if (requestId === searchRequestId && currentSearchController) {
+        currentSearchController = null
+        throw error
+      }
     } finally {
-      isLoading.value = false
+      // Only update loading state if this is still the latest request
+      if (requestId === searchRequestId) {
+        isSearching.value = false
+      }
     }
   }
 
-  const createNote = async (title: string, content: string, tags?: string[]) => {
-    if (!authStore.isAuthenticated || !authStore.user) return null
-
-    isLoading.value = true
-    error.value = null
-
-    try {
-      // TODO: Implement actual API call once backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Simulated response - create a new note with a unique ID
-      const newNote: Note = {
-        id: `note-${Date.now()}`,
-        userId: authStore.user.id,
-        title,
-        content,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        processingStatus: 'pending',
-        tags,
-      }
-
-      // Add to the list
-      notes.value.push(newNote)
-
-      return newNote
-    } catch (e) {
-      console.error('Create note error:', e)
-      error.value = 'Failed to create note.'
-      return null
-    } finally {
-      isLoading.value = false
-    }
+  // Set search query without triggering search
+  const setSearchQuery = (query: string) => {
+    searchQuery.value = query
   }
 
-  const updateNote = async (id: string, updates: Partial<Note>) => {
-    if (!authStore.isAuthenticated) return false
-
-    isLoading.value = true
-    error.value = null
-
-    try {
-      // TODO: Implement actual API call once backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 800))
-
-      // Update in the local state
-      const noteIndex = notes.value.findIndex((note) => note.id === id)
-      if (noteIndex !== -1) {
-        notes.value[noteIndex] = {
-          ...notes.value[noteIndex],
-          ...updates,
-          updatedAt: new Date().toISOString(),
-        }
-      }
-
-      return true
-    } catch (e) {
-      console.error('Update note error:', e)
-      error.value = 'Failed to update note.'
-      return false
-    } finally {
-      isLoading.value = false
+  // Clear search and reload all notes
+  const clearSearch = async () => {
+    // Cancel any existing search request
+    if (currentSearchController) {
+      currentSearchController.abort()
+      currentSearchController = null
     }
+
+    searchQuery.value = ''
+    resetInfiniteScroll()
+    await fetchNotes()
   }
 
-  const deleteNote = async (id: string) => {
-    if (!authStore.isAuthenticated) return false
-
-    isLoading.value = true
-    error.value = null
-
-    try {
-      // TODO: Implement actual API call once backend is connected
-      await new Promise((resolve) => setTimeout(resolve, 800))
-
-      // Remove from the local state
-      notes.value = notes.value.filter((note) => note.id !== id)
-
-      return true
-    } catch (e) {
-      console.error('Delete note error:', e)
-      error.value = 'Failed to delete note.'
-      return false
-    } finally {
-      isLoading.value = false
+  // Reset store state
+  const resetState = () => {
+    // Cancel any pending search requests
+    if (currentSearchController) {
+      currentSearchController.abort()
+      currentSearchController = null
     }
-  }
 
-  const generatePlan = async (noteId: string) => {
-    if (!authStore.isAuthenticated || !authStore.user) return null
-
-    isLoading.value = true
+    notes.value = []
+    isLoading.value = false
+    isLoadingMore.value = false
+    isSearching.value = false
     error.value = null
-
-    try {
-      // First update the note status
-      const noteIndex = notes.value.findIndex((note) => note.id === noteId)
-      if (noteIndex !== -1) {
-        notes.value[noteIndex].processingStatus = 'processing'
-      }
-
-      // TODO: Implement actual API call to the AI service once backend is connected
-      // This would be an async operation that might take time
-      await new Promise((resolve) => setTimeout(resolve, 3000)) // Simulate AI processing
-
-      // Find the note we're generating a plan for
-      const note = notes.value.find((n) => n.id === noteId)
-      if (!note) {
-        throw new Error('Note not found')
-      }
-
-      // Simulated response - create a new plan
-      const newPlan: Plan = {
-        id: `plan-${Date.now()}`,
-        noteId,
-        userId: authStore.user.id,
-        title: `${note.title} - Plan`,
-        content: `# Generated Travel Plan for: ${note.title}\n\n## Destination Overview\nBased on your note, here's a customized travel plan.\n\n## Itinerary\n- Day 1: Arrival and settling in\n- Day 2: Main attractions\n- Day 3: Local experiences\n\n## Recommendations\n- Stay at: Hotel Example\n- Don't miss: Local cuisine\n- Travel tip: Use public transportation`,
-        destination: note.title.split(' ').pop() || 'Unknown',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-
-      // Update the note status to completed
-      if (noteIndex !== -1) {
-        notes.value[noteIndex].processingStatus = 'completed'
-      }
-
-      // Add the plan to our list
-      plans.value.push(newPlan)
-
-      return newPlan
-    } catch (e) {
-      console.error('Generate plan error:', e)
-      error.value = 'Failed to generate travel plan.'
-
-      // Update the note status to failed
-      const noteIndex = notes.value.findIndex((note) => note.id === noteId)
-      if (noteIndex !== -1) {
-        notes.value[noteIndex].processingStatus = 'failed'
-      }
-
-      return null
-    } finally {
-      isLoading.value = false
-    }
+    searchQuery.value = ''
+    searchRequestId = 0
+    resetInfiniteScroll()
   }
 
   return {
+    // State
     notes,
-    plans,
     isLoading,
+    isLoadingMore,
+    isSearching,
     error,
+    searchQuery,
+    infiniteScroll: computed(() => infiniteScroll.value),
+
+    // Computed
     userNotes,
-    userPlans,
+
+    // Actions
     fetchNotes,
-    fetchPlans,
-    createNote,
-    updateNote,
-    deleteNote,
-    generatePlan,
+    loadMoreNotes,
+    searchNotes,
+    setSearchQuery,
+    clearSearch,
+    resetState,
   }
 })

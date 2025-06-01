@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import UserProfileForm from '@/components/UserProfileForm.vue'
+import UserProfileForm from '@/components/forms/UserProfileForm.vue'
 import type { UserTravelStyleEnum, UserTravelPaceEnum, UserBudgetEnum } from '@/client/types.gen'
 import { ApiError } from '@/utils/api-errors'
 
@@ -95,7 +95,9 @@ const handleSubmit = async () => {
   <div
     class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 bg-gray-50 dark:bg-gray-900 min-h-screen"
   >
-    <div class="mx-auto max-w-2xl p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 border dark:border-gray-700">
+    <div
+      class="mx-auto max-w-2xl p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 border dark:border-gray-700"
+    >
       <!-- Header -->
       <div class="mb-6">
         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Travel Preferences</h2>

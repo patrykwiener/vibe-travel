@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import SelectInput from '@/components/SelectInput.vue'
+import SelectInput from '@/components/ui/SelectInput.vue'
 import type { UserTravelStyleEnum, UserTravelPaceEnum, UserBudgetEnum } from '@/client/types.gen'
 
 interface ProfileFormData {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import HomeHero from '@/components/HomeHero.vue'
-import HomeFeatures from '@/components/HomeFeatures.vue'
+import HomeHero from '@/components/home/HomeHero.vue'
+import HomeFeatures from '@/components/home/HomeFeatures.vue'
 </script>
 
 <template>
