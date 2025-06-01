@@ -40,7 +40,7 @@ export const useNotesStore = defineStore('notes', () => {
 
   const infiniteScroll = ref<InfiniteScrollInfo>({
     currentOffset: 0,
-    itemsPerPage: 10,
+    itemsPerPage: 5, // Load only ~3-4 notes visible on screen + 1
     totalItems: 0,
     hasMore: true,
     allLoaded: false,
@@ -55,7 +55,7 @@ export const useNotesStore = defineStore('notes', () => {
   const resetInfiniteScroll = () => {
     infiniteScroll.value = {
       currentOffset: 0,
-      itemsPerPage: 10,
+      itemsPerPage: 5, // Load only ~3-4 notes visible on screen + 1
       totalItems: 0,
       hasMore: true,
       allLoaded: false,
@@ -125,14 +125,18 @@ export const useNotesStore = defineStore('notes', () => {
     console.log('loadMoreNotes called', {
       hasMore: infiniteScroll.value.hasMore,
       isLoadingMore: isLoadingMore.value,
+      isLoading: isLoading.value,
       currentOffset: infiniteScroll.value.currentOffset,
       totalItems: infiniteScroll.value.totalItems,
     })
 
-    if (!infiniteScroll.value.hasMore || isLoadingMore.value) {
+    // Enhanced guard conditions to prevent race conditions
+    if (!infiniteScroll.value.hasMore || isLoadingMore.value || isLoading.value || isSearching.value) {
       console.log('Early return from loadMoreNotes', {
         hasMore: infiniteScroll.value.hasMore,
         isLoadingMore: isLoadingMore.value,
+        isLoading: isLoading.value,
+        isSearching: isSearching.value,
       })
       return
     }

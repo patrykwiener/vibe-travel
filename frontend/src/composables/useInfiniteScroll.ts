@@ -6,12 +6,17 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
  *
  * @param loadMore - Function to call when more items need to be loaded
  * @param threshold - Distance from bottom (in pixels) to trigger load (default: 200px)
+ * @param externalLoadingState - Optional external loading state to check (for synchronization)
  * @returns Object with scroll state and utilities
  */
-export function useInfiniteScroll(loadMore: () => Promise<void> | void, threshold: number = 200) {
+export function useInfiniteScroll(
+  loadMore: () => Promise<void> | void, 
+  threshold: number = 200,
+  externalLoadingState?: () => boolean
+) {
   const isNearBottom = ref(false)
   const scrollContainer = ref<HTMLElement | null>(null)
-  const isLoading = ref(false)
+  const lastTriggerTime = ref(0)
 
   // Check if user has scrolled near the bottom
   const checkScrollPosition = () => {
@@ -33,18 +38,25 @@ export function useInfiniteScroll(loadMore: () => Promise<void> | void, threshol
 
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
 
-    const wasNearBottom = isNearBottom.value
     isNearBottom.value = distanceFromBottom <= threshold
 
-    // Only trigger if we just entered the "near bottom" zone and we're not already loading
-    if (isNearBottom.value && !wasNearBottom && !isLoading.value) {
-      console.log('Triggering load more from infinite scroll')
-      isLoading.value = true
-      Promise.resolve(loadMore()).finally(() => {
-        // Add a small delay to prevent rapid successive calls
-        setTimeout(() => {
-          isLoading.value = false
-        }, 500)
+    // Check if we should trigger load more
+    const isCurrentlyLoading = externalLoadingState ? externalLoadingState() : false
+    const timeSinceLastTrigger = Date.now() - lastTriggerTime.value
+    const minInterval = 500 // Minimum 500ms between triggers
+
+    // Only trigger if:
+    // 1. We are near the bottom (either just entered or still there after new content loaded)
+    // 2. We're not already loading (external state)
+    // 3. Enough time has passed since last trigger
+    const shouldTrigger = isNearBottom.value && !isCurrentlyLoading && timeSinceLastTrigger >= minInterval
+    
+    if (shouldTrigger) {
+      lastTriggerTime.value = Date.now()
+      
+      // Use a try-catch and don't await to avoid blocking the scroll handler
+      Promise.resolve(loadMore()).catch((error) => {
+        console.error('Infinite scroll: Load more failed:', error)
       })
     }
   }
@@ -105,13 +117,19 @@ export function useInfiniteScroll(loadMore: () => Promise<void> | void, threshol
     checkScrollPosition()
   }
 
+  // Reset the infinite scroll state (useful when initial load completes)
+  const resetScrollState = () => {
+    lastTriggerTime.value = 0
+    isNearBottom.value = false
+  }
+
   return {
     isNearBottom,
     scrollContainer,
     setScrollContainer,
     checkScroll,
+    resetScrollState,
     setupScrollListener,
     cleanupScrollListener,
-    isLoading,
   }
 }
