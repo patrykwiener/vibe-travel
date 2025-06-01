@@ -1,7 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from fastapi_pagination import add_pagination
-from starlette.middleware.cors import CORSMiddleware
 
 from src.config import settings
 from src.routes import api_router

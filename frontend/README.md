@@ -23,6 +23,7 @@
 This is the frontend application for VibeTravels - an innovative MVP designed to transform simple travel notes into detailed trip plans using AI technology. The frontend provides an intuitive user interface for managing travel notes, user profiles, and AI-generated travel plans.
 
 VibeTravels frontend addresses key challenges in trip planning by providing:
+
 - A clean, modern interface for creating and managing travel notes
 - User profile management for saving travel preferences
 - Seamless integration with AI-powered planning features
@@ -39,6 +40,7 @@ The frontend is built with modern web technologies:
 - **ESLint & Prettier**: Code quality and formatting tools
 
 Additional packages and integrations:
+
 - **@hey-api/client-fetch**: API client for backend communication
 - **@hey-api/openapi-ts**: OpenAPI client generator for type-safe API interactions
 
@@ -48,7 +50,7 @@ VibeTravels frontend uses environment variables for configuration. Create a `.en
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VITE_API_BASE_URL` | URL of the backend API | http://localhost:8000 |
+| `VITE_API_BASE_URL` | URL of the backend API | <http://localhost:8000> |
 
 For local development, you can create a `.env.local` file:
 
@@ -105,6 +107,7 @@ The frontend implements the following core features of the VibeTravels applicati
 VibeTravels frontend is currently in MVP development stage. The application is focused on core functionality to demonstrate the concept and gather user feedback.
 
 Current limitations:
+
 - No sharing functionality between accounts
 - Limited browser support (Chrome only)
 - No offline or mobile mode

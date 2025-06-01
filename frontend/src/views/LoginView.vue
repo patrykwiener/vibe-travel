@@ -10,6 +10,11 @@ const email = ref('')
 const password = ref('')
 const localError = ref<string | null>(null)
 
+// Clear error when user starts typing in either field
+const clearError = () => {
+  localError.value = null
+}
+
 const handleLogin = async (event: Event) => {
   event.preventDefault()
   localError.value = null // Clear previous errors
@@ -63,6 +68,7 @@ const handleLogin = async (event: Event) => {
           >
           <input
             v-model="email"
+            @input="clearError"
             type="email"
             name="email"
             id="email"
@@ -79,6 +85,7 @@ const handleLogin = async (event: Event) => {
           >
           <input
             v-model="password"
+            @input="clearError"
             type="password"
             name="password"
             id="password"

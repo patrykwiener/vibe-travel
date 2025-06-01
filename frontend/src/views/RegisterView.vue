@@ -43,25 +43,15 @@ watch(passwordValid, (newValid) => {
   }
 })
 
+// Clear error when user starts typing in any field
+const clearError = () => {
+  localError.value = null
+}
+
 // Form submission handler
 const handleRegister = async (event: Event) => {
   event.preventDefault()
   localError.value = null // Clear previous errors
-
-  if (!passwordsMatch.value) {
-    localError.value = "Passwords don't match"
-    return
-  }
-
-  if (passwordTooShort.value) {
-    localError.value = 'Password must be at least 8 characters long'
-    return
-  }
-
-  if (!acceptTerms.value) {
-    localError.value = 'You must accept the Terms and Conditions'
-    return
-  }
 
   try {
     await authStore.register(email.value, password.value)
@@ -112,6 +102,7 @@ const handleRegister = async (event: Event) => {
           >
           <input
             v-model="email"
+            @input="clearError"
             type="email"
             name="email"
             id="email"
@@ -128,6 +119,7 @@ const handleRegister = async (event: Event) => {
           >
           <input
             v-model="password"
+            @input="clearError"
             type="password"
             name="password"
             id="password"
@@ -149,6 +141,7 @@ const handleRegister = async (event: Event) => {
           >
           <input
             v-model="confirmPassword"
+            @input="clearError"
             type="password"
             name="confirm-password"
             id="confirm-password"

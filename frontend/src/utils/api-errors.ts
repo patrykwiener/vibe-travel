@@ -102,32 +102,34 @@ export class ApiValidationError extends ApiResponseError {
   readonly userMessage: string
   readonly fieldErrors: Map<string, string[]>
 
-  constructor(originalError: ApiErrorResponse, validationErrors?: OpenApiValidationError[]) {
+  constructor(originalError: ApiErrorResponse) {
     super('Validation failed', originalError)
 
     this.fieldErrors = new Map()
-    this.userMessage = this.parseValidationErrors(validationErrors)
+    this.userMessage = this.parseValidationErrors(originalError.error as HttpValidationError)
   }
 
-  private parseValidationErrors(errors?: OpenApiValidationError[]): string {
-    if (!errors || errors.length === 0) {
+  private parseValidationErrors(errors?: HttpValidationError): string {
+    if (!errors) {
       return 'Please check your input and try again'
     }
 
     // Group errors by field
-    errors.forEach((error) => {
+    errors.detail?.forEach((error: OpenApiValidationError) => {
       const field = error.loc.join('.')
       const messages = this.fieldErrors.get(field) || []
       messages.push(error.msg)
       this.fieldErrors.set(field, messages)
     })
-
-    // Return first error message for simple display
-    return errors[0].msg
+    return 'Please check your input and try again'
   }
 
   getFieldError(fieldName: string): string[] {
     return this.fieldErrors.get(fieldName) || []
+  }
+
+  getFieldNamesInError(): string[] {
+    return Array.from(this.fieldErrors.keys())
   }
 
   getAllFieldErrors(): Record<string, string[]> {
