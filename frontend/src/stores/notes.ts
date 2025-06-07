@@ -1,11 +1,13 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './auth'
-import { notesNoteCbvListNotes } from '@/client/sdk.gen'
+import { notesNoteCbvListNotes, notesNoteCbvCreateNote } from '@/client/sdk.gen'
 import { apiCall } from '@/utils/api-interceptor'
 import type {
   NoteListItemOutSchema,
   LimitOffsetPageNoteListItemOutSchema,
+  NoteCreateInSchema,
+  NoteOutSchema,
 } from '@/client/types.gen'
 import { ApiError } from '@/utils/api-errors'
 
@@ -131,7 +133,12 @@ export const useNotesStore = defineStore('notes', () => {
     })
 
     // Enhanced guard conditions to prevent race conditions
-    if (!infiniteScroll.value.hasMore || isLoadingMore.value || isLoading.value || isSearching.value) {
+    if (
+      !infiniteScroll.value.hasMore ||
+      isLoadingMore.value ||
+      isLoading.value ||
+      isSearching.value
+    ) {
       console.log('Early return from loadMoreNotes', {
         hasMore: infiniteScroll.value.hasMore,
         isLoadingMore: isLoadingMore.value,
@@ -207,6 +214,26 @@ export const useNotesStore = defineStore('notes', () => {
     await fetchNotes()
   }
 
+  const createNote = async (noteData: NoteCreateInSchema): Promise<NoteOutSchema> => {
+    if (!authStore.isAuthenticated) {
+      throw new Error('User must be authenticated to create a note')
+    }
+
+    try {
+      const response = await apiCall(() =>
+        notesNoteCbvCreateNote({
+          body: noteData,
+        }),
+      )
+
+      const createdNote = response as NoteOutSchema
+      return createdNote
+    } catch (e) {
+      console.error('Failed to create note:', e)
+      throw e
+    }
+  }
+
   // Reset store state
   const resetState = () => {
     // Cancel any pending search requests
@@ -244,6 +271,7 @@ export const useNotesStore = defineStore('notes', () => {
     searchNotes,
     setSearchQuery,
     clearSearch,
+    createNote,
     resetState,
   }
 })

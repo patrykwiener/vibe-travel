@@ -94,6 +94,29 @@ export class AuthenticationError extends ApiResponseError {
 }
 
 /**
+ * Conflict errors (409)
+ * Used when a request cannot be completed due to a conflict with the current state of the resource
+ */
+export class ConflictError extends ApiResponseError {
+  readonly code = 'CONFLICT_ERROR'
+  readonly statusCode = 409
+  readonly userMessage: string
+
+  constructor(originalError: ApiErrorResponse, userMessage?: string) {
+    super('Conflict error', originalError)
+    this.userMessage =
+      userMessage ||
+      'The request could not be completed due to a conflict with the current state of the resource'
+  }
+}
+
+export class NoteAlreadyExistsError extends ConflictError {
+  constructor(originalError: ApiErrorResponse) {
+    super(originalError, 'A note with this title already exists')
+  }
+}
+
+/**
  * Validation errors (422)
  */
 export class ApiValidationError extends ApiResponseError {

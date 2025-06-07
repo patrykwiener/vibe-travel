@@ -1,5 +1,3 @@
-"""API endpoints for notes."""
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -45,6 +43,9 @@ class NoteCBV:
     update_note_use_case: UpdateNoteUseCase = Depends(get_update_note_use_case)
     delete_note_use_case: DeleteNoteUseCase = Depends(get_delete_note_use_case)
 
+    NOTE_ALREADY_EXISTS_ERROR = 'NOTE_ALREADY_EXISTS'
+    NOTE_NOT_FOUND_ERROR = 'NOTE_NOT_FOUND'
+
     @notes_router.post(
         '/',
         response_model=NoteOutSchema,
@@ -69,7 +70,7 @@ class NoteCBV:
         try:
             note = await self.create_note_use_case.execute(create_note_dto)
         except NoteTitleConflictError as e:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=self.NOTE_ALREADY_EXISTS_ERROR) from e
         return NoteOutSchema.model_validate(note)
 
     @notes_router.get(
@@ -171,9 +172,9 @@ class NoteCBV:
                 )
             )
         except NoteNotFoundError as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=self.NOTE_NOT_FOUND_ERROR) from e
         except NoteTitleConflictError as e:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=self.NOTE_ALREADY_EXISTS_ERROR) from e
 
         return NoteOutSchema.model_validate(updated_note)
 

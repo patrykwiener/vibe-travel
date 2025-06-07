@@ -63,7 +63,7 @@ services:
       # Source code and assets (frequently changed)
       - ./frontend/public:/app/public
       - ./frontend/src:/app/src
-      
+
       # Configuration files (occasionally changed)
       - ./frontend/env.d.ts:/app/env.d.ts
       - ./frontend/eslint.config.js:/app/eslint.config.js
@@ -74,7 +74,7 @@ services:
       - ./frontend/vite.config.ts:/app/vite.config.ts
       - ./frontend/.prettierrc.json:/app/.prettierrc.json
       - ./frontend/.prettierignore:/app/.prettierignore
-      
+
       # IMPORTANT: node_modules is NOT mounted from the host
       # It's built into the image to ensure consistent dependency resolution
     env_file:

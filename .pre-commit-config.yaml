@@ -1,0 +1,48 @@
+# Pre-commit hooks configuration for VibeTravels
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  # Local hooks that run our custom make commands
+  - repo: local
+    hooks:
+      - id: make-lint
+        name: Run make lint
+        entry: make lint
+        language: system
+        pass_filenames: false
+        always_run: true
+        description: "Run linting for both backend and frontend using Docker containers"
+        stages: [pre-commit]
+
+  # Additional hooks for general file quality
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.md$'
+      - id: end-of-file-fixer
+        exclude: '\.md$'
+      - id: check-yaml
+        exclude: '^frontend/node_modules/'
+      - id: check-json
+        exclude: '^frontend/node_modules/|tsconfig.*\.json$'
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+# Global configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

@@ -11,6 +11,8 @@ import {
   BadRequestError,
   UnknownError,
   UserAlreadyExistsError,
+  NoteAlreadyExistsError,
+  ConflictError,
 } from './api-errors'
 
 /**
@@ -75,6 +77,13 @@ export class ApiErrorHandler {
 
     if (status === 404) {
       return new NotFoundError(originalError)
+    }
+
+    if (status === 409) {
+      if (detail === 'NOTE_ALREADY_EXISTS') {
+        return new NoteAlreadyExistsError(originalError)
+      }
+      return new ConflictError(originalError, detail)
     }
 
     if (status === 422) {

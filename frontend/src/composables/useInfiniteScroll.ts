@@ -10,9 +10,9 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
  * @returns Object with scroll state and utilities
  */
 export function useInfiniteScroll(
-  loadMore: () => Promise<void> | void, 
+  loadMore: () => Promise<void> | void,
   threshold: number = 200,
-  externalLoadingState?: () => boolean
+  externalLoadingState?: () => boolean,
 ) {
   const isNearBottom = ref(false)
   const scrollContainer = ref<HTMLElement | null>(null)
@@ -49,11 +49,12 @@ export function useInfiniteScroll(
     // 1. We are near the bottom (either just entered or still there after new content loaded)
     // 2. We're not already loading (external state)
     // 3. Enough time has passed since last trigger
-    const shouldTrigger = isNearBottom.value && !isCurrentlyLoading && timeSinceLastTrigger >= minInterval
-    
+    const shouldTrigger =
+      isNearBottom.value && !isCurrentlyLoading && timeSinceLastTrigger >= minInterval
+
     if (shouldTrigger) {
       lastTriggerTime.value = Date.now()
-      
+
       // Use a try-catch and don't await to avoid blocking the scroll handler
       Promise.resolve(loadMore()).catch((error) => {
         console.error('Infinite scroll: Load more failed:', error)

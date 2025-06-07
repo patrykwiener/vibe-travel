@@ -23,7 +23,9 @@
         <div class="mb-8">
           <div class="mb-4">
             <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Find Your Notes</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Search through your travel notes and ideas</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Search through your travel notes and ideas
+            </p>
           </div>
           <SearchInput
             v-model="searchQuery"
@@ -37,11 +39,22 @@
         <div class="mb-6">
           <div class="flex items-center justify-between mb-4">
             <div>
-              <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Your Travel Notes</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Browse and manage your travel ideas</p>
+              <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                Your Travel Notes
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Browse and manage your travel ideas
+              </p>
             </div>
-            <div v-if="infiniteScroll.totalItems > 0" class="text-sm text-gray-500 dark:text-gray-400">
-              {{ searchQuery ? `${infiniteScroll.totalItems} result${infiniteScroll.totalItems === 1 ? '' : 's'}` : `${infiniteScroll.totalItems} note${infiniteScroll.totalItems === 1 ? '' : 's'}` }}
+            <div
+              v-if="infiniteScroll.totalItems > 0"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
+              {{
+                searchQuery
+                  ? `${infiniteScroll.totalItems} result${infiniteScroll.totalItems === 1 ? '' : 's'}`
+                  : `${infiniteScroll.totalItems} note${infiniteScroll.totalItems === 1 ? '' : 's'}`
+              }}
             </div>
           </div>
         </div>
@@ -102,39 +115,91 @@
               <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
                   <!-- Title -->
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-4">
+                  <h3
+                    class="text-lg font-semibold text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-4"
+                  >
                     {{ note.title }}
                   </h3>
                   <!-- Metadata Section - All grouped together -->
-                  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <div
+                    class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 dark:text-gray-300"
+                  >
                     <!-- Date first -->
                     <div class="flex items-center">
-                      <svg class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                       </svg>
-                      <span class="font-medium">{{ formatDateRange(note.date_from, note.date_to) }}</span>
+                      <span class="font-medium">{{
+                        formatDateRange(note.date_from, note.date_to)
+                      }}</span>
                     </div>
                     <!-- Location -->
                     <div class="flex items-center">
-                      <svg class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                       {{ note.place }}
                     </div>
                     <!-- People count -->
                     <div class="flex items-center">
-                      <svg class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      <svg
+                        class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                        />
                       </svg>
-                      {{ note.number_of_people }} {{ note.number_of_people === 1 ? 'person' : 'people' }}
+                      {{ note.number_of_people }}
+                      {{ note.number_of_people === 1 ? 'person' : 'people' }}
                     </div>
                   </div>
                 </div>
                 <!-- CTA Arrow -->
                 <div class="ml-6 flex-shrink-0 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  <svg
+                    class="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -206,17 +271,21 @@ watch(debouncedQuery, async (newSearch, oldSearch) => {
 })
 
 // Infinite scroll functionality
-const { setupScrollListener, cleanupScrollListener, resetScrollState } = useInfiniteScroll(async () => {
-  // The external loading state check is already done in the composable,
-  // so we only need to check if there are more items here
-  if (infiniteScroll.value.hasMore) {
-    try {
-      await notesStore.loadMoreNotes()
-    } catch (error) {
-      console.error('Failed to load more notes:', error)
+const { setupScrollListener, cleanupScrollListener, resetScrollState } = useInfiniteScroll(
+  async () => {
+    // The external loading state check is already done in the composable,
+    // so we only need to check if there are more items here
+    if (infiniteScroll.value.hasMore) {
+      try {
+        await notesStore.loadMoreNotes()
+      } catch (error) {
+        console.error('Failed to load more notes:', error)
+      }
     }
-  }
-}, 500, () => isLoadingMore.value || isLoading.value) // Pass combined loading state
+  },
+  500,
+  () => isLoadingMore.value || isLoading.value,
+) // Pass combined loading state
 
 // Methods
 const createNote = () => {
@@ -236,7 +305,7 @@ const formatDateRange = (dateFrom: string, dateTo: string): string => {
   const formatDate = (date: Date, includeYear: boolean = true): string => {
     const options: Intl.DateTimeFormatOptions = {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     }
     if (includeYear) {
       options.year = 'numeric'
@@ -246,20 +315,20 @@ const formatDateRange = (dateFrom: string, dateTo: string): string => {
 
   const startDate = parseDate(dateFrom)
   const endDate = parseDate(dateTo)
-  
+
   // If same date, show only once
   if (dateFrom === dateTo) {
     return formatDate(startDate)
   }
-  
+
   const startYear = startDate.getFullYear()
   const endYear = endDate.getFullYear()
-  
+
   // If same year, don't repeat the year in the start date
   if (startYear === endYear) {
     return `${formatDate(startDate, false)} - ${formatDate(endDate, true)}`
   }
-  
+
   // Different years - show both years for clarity
   // This handles cases like "Dec 31, 2024 - Jan 2, 2025"
   return `${formatDate(startDate, true)} - ${formatDate(endDate, true)}`

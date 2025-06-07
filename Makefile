@@ -28,20 +28,20 @@ logs-frontend: ## Show frontend logs
 
 .PHONY: lint
 lint: ## Run linting
-	docker compose exec backend ./scripts/lint.sh
-	docker compose exec frontend npm run lint
-	docker compose exec frontend npm run type-check
+	docker compose exec -T backend ./scripts/lint.sh
+	docker compose exec -T frontend npm run lint
+	docker compose exec -T frontend npm run type-check
 
 .PHONY: lint-fix
 lint-fix: ## Fix linting issues
-	docker compose exec backend ./scripts/lint.sh --fix
-	docker compose exec frontend npm run lint --fix
-	docker compose exec frontend npm run type-check
-	docker compose exec frontend npm run format --fix
+	docker compose exec -T backend ./scripts/lint.sh --fix
+	docker compose exec -T frontend npm run lint --fix
+	docker compose exec -T frontend npm run type-check
+	docker compose exec -T frontend npm run format --fix
 
 .PHONY: test
 test: ## Run tests. Usage: make test [path=path/to/test]
-	docker compose exec backend ./scripts/test.sh $(path)
+	docker compose exec -T backend ./scripts/test.sh $(path)
 
 .PHONY: shell
 shell: ## Enter backend shell
@@ -65,8 +65,20 @@ generate-openapi-client: ## Generate OpenAPI client
 
 .PHONY: makemigrations
 makemigrations: ## Create new migrations based on changes to your models
-	docker compose exec backend ./scripts/makemigrations.sh $(msg)
+	docker compose exec -T backend ./scripts/makemigrations.sh $(msg)
 
 .PHONY: migrate
 migrate: ## Apply migrations
-	docker compose exec backend ./scripts/migrate.sh
+	docker compose exec -T backend ./scripts/migrate.sh
+
+.PHONY: setup-precommit
+setup-precommit: ## Setup pre-commit hooks
+	./scripts/setup-precommit.sh
+
+.PHONY: precommit-run
+precommit-run: ## Run pre-commit hooks on all files
+	pre-commit run --all-files
+
+.PHONY: precommit-update
+precommit-update: ## Update pre-commit hooks to latest versions
+	pre-commit autoupdate

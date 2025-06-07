@@ -17,6 +17,8 @@
     - [Prerequisites](#prerequisites)
     - [Setup](#setup)
   - [Available Scripts](#available-scripts)
+  - [Development Setup](#development-setup)
+    - [Code Quality with Pre-commit Hooks](#code-quality-with-pre-commit-hooks)
   - [Project Scope](#project-scope)
     - [Core Features](#core-features)
     - [Current Limitations](#current-limitations)
@@ -115,6 +117,27 @@ The project uses a Makefile to simplify common operations:
 | `make init` | Initialize project (create .env, build images, start containers) |
 | `make reset-db` | Reset the database (drops all data) |
 | `make generate-openapi-client` | Generate OpenAPI client |
+| `make setup-precommit` | Setup pre-commit hooks |
+| `make precommit-run` | Run pre-commit hooks on all files |
+| `make precommit-update` | Update pre-commit hooks |
+
+## Development Setup
+
+### Code Quality with Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality and consistency. The hooks automatically run `make lint` before each commit, which includes:
+
+- Backend linting with ruff
+- Frontend linting with ESLint  
+- TypeScript type checking
+- Code formatting
+
+**Quick setup:**
+```bash
+make setup-precommit
+```
+
+For detailed setup instructions and troubleshooting, see [docs/PRECOMMIT.md](docs/PRECOMMIT.md).
 
 ## Project Scope
 
