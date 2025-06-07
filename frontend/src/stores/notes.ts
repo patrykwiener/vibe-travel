@@ -1,7 +1,12 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './auth'
-import { notesNoteCbvListNotes, notesNoteCbvCreateNote } from '@/client/sdk.gen'
+import {
+  notesNoteCbvListNotes,
+  notesNoteCbvCreateNote,
+  notesNoteCbvGetNoteById,
+  notesNoteCbvDeleteNote
+} from '@/client/sdk.gen'
 import { apiCall } from '@/utils/api-interceptor'
 import type {
   NoteListItemOutSchema,
@@ -234,6 +239,47 @@ export const useNotesStore = defineStore('notes', () => {
     }
   }
 
+  const getNoteById = async (noteId: string): Promise<NoteOutSchema | null> => {
+    if (!authStore.isAuthenticated) {
+      throw new Error('User must be authenticated to view a note')
+    }
+
+    try {
+      const response = await apiCall(() =>
+        notesNoteCbvGetNoteById({
+          path: {
+            note_id: parseInt(noteId),
+          },
+        }),
+      )
+
+      const note = response as NoteOutSchema
+      return note
+    } catch (e) {
+      console.error('Failed to fetch note:', e)
+      throw e
+    }
+  }
+
+  const deleteNote = async (noteId: string): Promise<void> => {
+    if (!authStore.isAuthenticated) {
+      throw new Error('User must be authenticated to delete a note')
+    }
+
+    try {
+      await apiCall(() =>
+        notesNoteCbvDeleteNote({
+          path: {
+            note_id: parseInt(noteId),
+          },
+        }),
+      )
+    } catch (e) {
+      console.error('Failed to delete note:', e)
+      throw e
+    }
+  }
+
   // Reset store state
   const resetState = () => {
     // Cancel any pending search requests
@@ -272,6 +318,8 @@ export const useNotesStore = defineStore('notes', () => {
     setSearchQuery,
     clearSearch,
     createNote,
+    getNoteById,
+    deleteNote,
     resetState,
   }
 })

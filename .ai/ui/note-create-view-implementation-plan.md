@@ -1,9 +1,11 @@
 # Plan implementacji widoku NoteCreateView
 
 ## 1. Przegląd
+
 Widok `NoteCreateView` umożliwia użytkownikom tworzenie nowych notatek podróżniczych. Formularz zawiera pola dla tytułu, miejsca, dat podróży, liczby osób oraz kluczowych pomysłów. Widok implementuje zarówno walidację po stronie klienta jak i serwera, obsługuje błędy oraz przekierowuje do szczegółów utworzonej notatki po pomyślnym zapisie.
 
 ## 2. Routing widoku
+
 - **Ścieżka:** `/notes/new`
 - **Typ:** Protected route (wymagana autoryzacja)
 - **Layout:** BaseLayout
@@ -13,6 +15,7 @@ Widok `NoteCreateView` umożliwia użytkownikom tworzenie nowych notatek podró�
   - Bez autoryzacji: `/login`
 
 ## 3. Struktura komponentów
+
 ```
 NoteCreateView
 ├── BaseLayout
@@ -36,9 +39,10 @@ NoteCreateView
 ## 4. Szczegóły komponentów
 
 ### NoteCreateView
+
 - **Opis komponentu:** Główny kontener widoku odpowiedzialny za routing, layout i koordynację z NoteCreateForm
 - **Główne elementy:** BaseLayout wrapper, page header z tytułem i opisem, NoteCreateForm component
-- **Obsługiwane interakcje:** 
+- **Obsługiwane interakcje:**
   - Przekazanie handler submit do NoteCreateForm
   - Nawigacja po sukcesie/anulowaniu
   - Obsługa błędów wysokopoziomowych
@@ -47,6 +51,7 @@ NoteCreateView
 - **Propsy:** Brak (główny widok)
 
 ### NoteCreateForm
+
 - **Opis komponentu:** Samodzielny komponent formularza zawierający pełną logikę tworzenia notatki, stan formularza, walidację i integrację z API
 - **Główne elementy:** HTML form element, grid layout dla dat, input components, button group, error handling
 - **Obsługiwane interakcje:**
@@ -63,6 +68,7 @@ NoteCreateView
 - **Propsy:** `@success`, `@cancel`, `@error`
 
 ### TextInput
+
 - **Opis komponentu:** Uniwersalny komponent tekstowy z walidacją i obsługą błędów
 - **Główne elementy:** Label, input field, error message, help text
 - **Obsługiwane interakcje:**
@@ -77,6 +83,7 @@ NoteCreateView
 - **Propsy:** `modelValue`, `label`, `id`, `placeholder?`, `required?`, `minLength?`, `maxLength?`, `error?`, `helpText?`
 
 ### DateInput
+
 - **Opis komponentu:** Komponent daty wykorzystujący natywny HTML5 date input z custom walidacją zakresu
 - **Główne elementy:** Label, date input field, error message, help text
 - **Obsługiwane interakcje:**
@@ -91,6 +98,7 @@ NoteCreateView
 - **Propsy:** `modelValue`, `label`, `id`, `required?`, `min?`, `max?`, `error?`, `helpText?`
 
 ### NumberInput
+
 - **Opis komponentu:** Komponent numeryczny z ograniczeniami min/max
 - **Główne elementy:** Label, number input field, error message, help text
 - **Obsługiwane interakcje:**
@@ -105,6 +113,7 @@ NoteCreateView
 - **Propsy:** `modelValue`, `label`, `id`, `min?`, `max?`, `step?`, `required?`, `error?`, `helpText?`
 
 ### TextareaInput
+
 - **Opis komponentu:** Komponent textarea z licznikiem znaków i walidacją długości
 - **Główne elementy:** Label, textarea field, character counter, error message, help text
 - **Obsługiwane interakcje:**
@@ -118,6 +127,7 @@ NoteCreateView
 - **Propsy:** `modelValue`, `label`, `id`, `placeholder?`, `rows?`, `maxLength?`, `required?`, `error?`, `helpText?`
 
 ### SubmitButton
+
 - **Opis komponentu:** Przycisk submit z obsługą loading state i walidacją formularza
 - **Główne elementy:** Button element z primary styling, loading spinner, dynamic text
 - **Obsługiwane interakcje:**
@@ -129,6 +139,7 @@ NoteCreateView
 - **Propsy:** `isLoading?`, `disabled?`, `text?`, `loadingText?`
 
 ### CancelButton
+
 - **Opis komponentu:** Przycisk anulowania z nawigacją powrotną
 - **Główne elementy:** RouterLink jako button z secondary styling
 - **Obsługiwane interakcje:** Nawigacja do poprzedniego widoku
@@ -139,6 +150,7 @@ NoteCreateView
 ## 5. Typy
 
 ### Istniejące typy (z types.gen.ts)
+
 ```typescript
 // Request/Response types
 NoteCreateInSchema: {
@@ -173,6 +185,7 @@ HttpValidationError: {
 ```
 
 ### Nowe typy (do utworzenia)
+
 ```typescript
 // Form management types
 interface FormField<T = string> {
@@ -235,6 +248,7 @@ interface BaseInputProps {
 ## 6. Zarządzanie stanem
 
 ### Lokalny stan komponentu (NoteCreateForm)
+
 ```typescript
 // Main form state w komponencie NoteCreateForm
 const formData = ref<NoteFormData>({
@@ -256,6 +270,7 @@ const formState = ref<FormState>({
 ```
 
 ### Struktura komponentu NoteCreateForm
+
 ```typescript
 // NoteCreateForm.vue - samodzielny komponent z wbudowaną logiką
 <script setup lang="ts">
@@ -275,8 +290,10 @@ interface Emits {
 ## 7. Integracja API
 
 ### Endpoint wykorzystywany
+
 - **Funkcja:** `notesNoteCbvCreateNote` (z sdk.gen.ts)
 - **Typ żądania:** `NotesNoteCbvCreateNoteData`
+
   ```typescript
   {
     body: NoteCreateInSchema
@@ -285,9 +302,11 @@ interface Emits {
     url: '/api/v1/notes/'
   }
   ```
+
 - **Typ odpowiedzi:** `NoteOutSchema` (success) | `ErrorModel` (error)
 
 ### Implementacja wywołania API w NoteCreateForm
+
 ```typescript
 const submitNote = async (noteData: NoteCreateInSchema) => {
   try {
@@ -313,21 +332,25 @@ const submitNote = async (noteData: NoteCreateInSchema) => {
 ## 8. Interakcje użytkownika
 
 ### Wypełnianie formularza
+
 - **Akcja:** Użytkownik wpisuje tekst w pole
 - **Obsługa:** Real-time validation, error clearing on focus, character counting
 - **Wynik:** Aktualizacja stanu pola, wyświetlenie/ukrycie błędów
 
 ### Submit formularza
+
 - **Akcja:** Kliknięcie przycisku "Create Note"
 - **Obsługa:** Walidacja całego formularza, API call, loading state
 - **Wynik:** Przekierowanie do szczegółów notatki lub wyświetlenie błędów
 
 ### Anulowanie
+
 - **Akcja:** Kliknięcie przycisku "Cancel"
 - **Obsługa:** Nawigacja bez zapisywania
 - **Wynik:** Przekierowanie do listy notatek
 
 ### Walidacja dat
+
 - **Akcja:** Zmiana daty w polach date_from/date_to
 - **Obsługa:** Cross-field validation, sprawdzenie zakresu 14 dni
 - **Wynik:** Aktualizacja błędów walidacji dla obu pól dat
@@ -335,6 +358,7 @@ const submitNote = async (noteData: NoteCreateInSchema) => {
 ## 9. Warunki i walidacja
 
 ### Walidacja po stronie klienta
+
 - **title:** 3-255 znaków, wymagane
 - **place:** 3-255 znaków, wymagane  
 - **date_from:** format YYYY-MM-DD, wymagane, <= date_to
@@ -343,10 +367,12 @@ const submitNote = async (noteData: NoteCreateInSchema) => {
 - **key_ideas:** max 5000 znaków, opcjonalne
 
 ### Walidacja po stronie serwera
+
 - **title:** unikalność w ramach użytkownika (409 Conflict)
 - **Wszystkie pola:** szczegółowa walidacja (422 Validation Error)
 
 ### Wpływ na interfejs
+
 - **Błędne pola:** czerwona ramka, komunikat błędu pod polem
 - **Formularz nieprawidłowy:** przycisk submit disabled
 - **Loading state:** spinner na przycisku, formularz disabled
@@ -355,6 +381,7 @@ const submitNote = async (noteData: NoteCreateInSchema) => {
 ## 10. Obsługa błędów
 
 ### Błędy walidacji (422)
+
 ```typescript
 // Mapowanie błędów API na pola formularza
 const handleValidationErrors = (errors: ValidationError[]) => {
@@ -368,18 +395,21 @@ const handleValidationErrors = (errors: ValidationError[]) => {
 ```
 
 ### Błąd konfliktu - title exists (409)
+
 ```typescript
 // Wyświetlenie błędu przy polu title
 formData.value.title.error = "Note with this title already exists"
 ```
 
 ### Błędy autoryzacji (401)
+
 ```typescript
 // Przekierowanie do logowania
 await router.push('/login')
 ```
 
 ### Błędy sieciowe
+
 ```typescript
 // Generic error message
 formState.value.errors = [{
@@ -389,6 +419,7 @@ formState.value.errors = [{
 ```
 
 ### Obsługa timeout
+
 ```typescript
 // 60s timeout dla API call
 const controller = new AbortController()
