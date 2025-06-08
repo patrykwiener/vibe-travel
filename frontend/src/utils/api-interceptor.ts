@@ -1,12 +1,51 @@
 import { ApiErrorHandler } from './error-handler'
+import { AuthenticationError } from './api-errors'
 
 /**
  * Global API Response Interceptor
  *
  * Wraps hey-api client calls to provide consistent error handling across the application.
  * Automatically converts API responses and errors into typed ApiError instances.
+ * Includes global 401 authentication error handling that automatically triggers logout.
  */
 export class ApiInterceptor {
+  /**
+   * Global 401 authentication error handler
+   * Automatically triggers logout and redirect when authentication fails
+   */
+  private static async handleAuthenticationError(error: AuthenticationError): Promise<never> {
+    try {
+      // Dynamically import auth store to avoid circular dependencies
+      const { useAuthStore } = await import('@/stores/auth')
+      const authStore = useAuthStore()
+
+      // Clear authentication state - don't call backend logout since the token is already invalid
+      authStore.clearAuthState()
+
+      // Import router dynamically to handle redirection
+      const router = await import('@/router')
+
+      // Get current route - use router instance directly instead of useRouter composable
+      const currentRoute = router.default.currentRoute.value
+      const publicRoutes = ['login', 'register', 'home']
+
+      if (!publicRoutes.includes(currentRoute.name as string)) {
+        // Redirect to login with current path for redirect after re-login
+        await router.default.push({
+          name: 'login',
+          query: {
+            redirect: currentRoute.fullPath,
+            error: 'session_expired',
+          },
+        })
+      }
+    } catch (handlerError) {
+      console.error('Authentication error handler failed:', handlerError)
+    }
+
+    // Re-throw the error for component-level handling if needed
+    throw error
+  }
   /**
    * Wrap any hey-api client call with global error handling
    *
@@ -20,16 +59,29 @@ export class ApiInterceptor {
     try {
       result = await apiCall()
     } catch (error) {
-      throw ApiErrorHandler.handleError(error)
+      const apiError = ApiErrorHandler.handleError(error)
+
+      // Handle authentication errors globally
+      if (apiError instanceof AuthenticationError) {
+        await ApiInterceptor.handleAuthenticationError(apiError)
+      }
+
+      throw apiError
     }
 
-    console.log('ApiInterceptor.call - Result:', result)
     // Check if the response indicates success
     if (result.data !== undefined && result.response?.ok) {
       return result.data
     }
 
-    throw ApiErrorHandler.handleError(result)
+    const apiError = ApiErrorHandler.handleError(result)
+
+    // Handle authentication errors globally
+    if (apiError instanceof AuthenticationError) {
+      await ApiInterceptor.handleAuthenticationError(apiError)
+    }
+
+    throw apiError
   }
 
   /**
@@ -55,18 +107,40 @@ export class ApiInterceptor {
 
       // Handle error responses
       if (result.error) {
-        throw ApiErrorHandler.handleError(result.error)
+        const apiError = ApiErrorHandler.handleError(result.error)
+
+        // Handle authentication errors globally
+        if (apiError instanceof AuthenticationError) {
+          await ApiInterceptor.handleAuthenticationError(apiError)
+        }
+
+        throw apiError
       }
 
       // If response is not ok, create error from response
       if (result.response && !result.response.ok) {
-        throw ApiErrorHandler.handleError({ response: result.response })
+        const apiError = ApiErrorHandler.handleError({ response: result.response })
+
+        // Handle authentication errors globally
+        if (apiError instanceof AuthenticationError) {
+          await ApiInterceptor.handleAuthenticationError(apiError)
+        }
+
+        throw apiError
       }
 
       // Fallback
-      throw ApiErrorHandler.handleError(new Error('Unexpected API response structure'))
+      const apiError = ApiErrorHandler.handleError(new Error('Unexpected API response structure'))
+      throw apiError
     } catch (error) {
-      throw ApiErrorHandler.handleError(error)
+      const apiError = ApiErrorHandler.handleError(error)
+
+      // Handle authentication errors globally
+      if (apiError instanceof AuthenticationError) {
+        await ApiInterceptor.handleAuthenticationError(apiError)
+      }
+
+      throw apiError
     }
   }
 
@@ -84,16 +158,38 @@ export class ApiInterceptor {
       }
 
       if (result.error) {
-        throw ApiErrorHandler.handleError(result.error)
+        const apiError = ApiErrorHandler.handleError(result.error)
+
+        // Handle authentication errors globally
+        if (apiError instanceof AuthenticationError) {
+          await ApiInterceptor.handleAuthenticationError(apiError)
+        }
+
+        throw apiError
       }
 
       if (result.response && !result.response.ok) {
-        throw ApiErrorHandler.handleError({ response: result.response })
+        const apiError = ApiErrorHandler.handleError({ response: result.response })
+
+        // Handle authentication errors globally
+        if (apiError instanceof AuthenticationError) {
+          await ApiInterceptor.handleAuthenticationError(apiError)
+        }
+
+        throw apiError
       }
 
-      throw ApiErrorHandler.handleError(new Error('Unexpected API response structure'))
+      const apiError = ApiErrorHandler.handleError(new Error('Unexpected API response structure'))
+      throw apiError
     } catch (error) {
-      throw ApiErrorHandler.handleError(error)
+      const apiError = ApiErrorHandler.handleError(error)
+
+      // Handle authentication errors globally
+      if (apiError instanceof AuthenticationError) {
+        await ApiInterceptor.handleAuthenticationError(apiError)
+      }
+
+      throw apiError
     }
   }
 }

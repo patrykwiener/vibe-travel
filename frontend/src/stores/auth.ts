@@ -72,6 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     profile.value = null
     isAuthenticated.value = false
+    isLoading.value = false // Reset loading state
     localStorage.removeItem('user')
     localStorage.removeItem('isAuthenticated')
   }
@@ -213,5 +214,6 @@ export const useAuthStore = defineStore('auth', () => {
     fetchProfile,
     checkAuthStatus,
     updateProfile,
+    clearAuthState,
   }
 })

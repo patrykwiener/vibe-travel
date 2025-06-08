@@ -1,14 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AuthLayout from '@/layouts/AuthLayout.vue'
+import ToastNotification from '@/components/ui/ToastNotification.vue'
 import { ApiError } from '@/utils/api-errors'
 
+const route = useRoute()
 const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const localError = ref<string | null>(null)
+
+// Toast state for session expiration
+const showSessionExpiredToast = ref(false)
+
+// Check for session expiration error on mount
+onMounted(() => {
+  const errorType = route.query.error as string
+  if (errorType === 'session_expired') {
+    showSessionExpiredToast.value = true
+  }
+})
 
 // Clear error when user starts typing in either field
 const clearError = () => {
@@ -28,6 +42,10 @@ const handleLogin = async (event: Event) => {
       localError.value = 'An unexpected error occurred. Please try again.'
     }
   }
+}
+
+const handleToastClose = () => {
+  showSessionExpiredToast.value = false
 }
 </script>
 
@@ -149,5 +167,16 @@ const handleLogin = async (event: Event) => {
         </p>
       </form>
     </div>
+
+    <!-- Session Expired Toast -->
+    <ToastNotification
+      :show="showSessionExpiredToast"
+      type="warning"
+      title="Session Expired"
+      message="Your session has expired. Please sign in again to continue."
+      :duration="8000"
+      position="top-right"
+      @close="handleToastClose"
+    />
   </AuthLayout>
 </template>
