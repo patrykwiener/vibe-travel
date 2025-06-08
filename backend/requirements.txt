@@ -12,3 +12,4 @@ psycopg2-binary==2.9.10
 asyncpg==0.30.0
 alembic==1.15.2
 openai==1.81.0
+loguru==0.7.3

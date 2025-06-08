@@ -57,6 +57,17 @@ class Settings(BaseSettings):
     OPENROUTER_API_URL: str = 'https://openrouter.ai/api/v1'
     OPENROUTER_TIMEOUT_SECONDS: int = 5
 
+    # Logging settings
+    LOG_LEVEL: str = 'INFO'
+    LOG_FORMAT: str = (
+        '{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | <cyan>{name}:{function}:{line}</cyan> | '
+        '<green>{message}</green> | {extra}'
+    )
+    LOG_ROTATION: str = '100 MB'
+    LOG_RETENTION: str = '30 days'
+    LOG_FILE_PATH: str = 'logs/app.log'
+    LOG_SERIALIZE: bool = False
+
     API_V1_STR: str = '/api/v1'
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ENVIRONMENT: Literal['dev', 'prod'] = 'dev'

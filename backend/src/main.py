@@ -3,8 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 from fastapi_pagination import add_pagination
 
+from src.common.logging import setup_logging
 from src.config import settings
 from src.routes import api_router
+
+# Initialize logging
+setup_logging()
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:

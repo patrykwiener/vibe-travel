@@ -282,7 +282,10 @@ export const useNotesStore = defineStore('notes', () => {
     }
   }
 
-  const updateNote = async (noteId: string, noteData: NoteUpdateInSchema): Promise<NoteOutSchema> => {
+  const updateNote = async (
+    noteId: string,
+    noteData: NoteUpdateInSchema,
+  ): Promise<NoteOutSchema> => {
     if (!authStore.isAuthenticated) {
       throw new Error('User must be authenticated to update a note')
     }
