@@ -5,6 +5,7 @@ import {
   notesNoteCbvListNotes,
   notesNoteCbvCreateNote,
   notesNoteCbvGetNoteById,
+  notesNoteCbvUpdateNote,
   notesNoteCbvDeleteNote,
 } from '@/client/sdk.gen'
 import { apiCall } from '@/utils/api-interceptor'
@@ -12,6 +13,7 @@ import type {
   NoteListItemOutSchema,
   LimitOffsetPageNoteListItemOutSchema,
   NoteCreateInSchema,
+  NoteUpdateInSchema,
   NoteOutSchema,
 } from '@/client/types.gen'
 import { ApiError } from '@/utils/api-errors'
@@ -280,6 +282,29 @@ export const useNotesStore = defineStore('notes', () => {
     }
   }
 
+  const updateNote = async (noteId: string, noteData: NoteUpdateInSchema): Promise<NoteOutSchema> => {
+    if (!authStore.isAuthenticated) {
+      throw new Error('User must be authenticated to update a note')
+    }
+
+    try {
+      const response = await apiCall(() =>
+        notesNoteCbvUpdateNote({
+          path: {
+            note_id: parseInt(noteId),
+          },
+          body: noteData,
+        }),
+      )
+
+      const updatedNote = response as NoteOutSchema
+      return updatedNote
+    } catch (e) {
+      console.error('Failed to update note:', e)
+      throw e
+    }
+  }
+
   // Reset store state
   const resetState = () => {
     // Cancel any pending search requests
@@ -319,6 +344,7 @@ export const useNotesStore = defineStore('notes', () => {
     clearSearch,
     createNote,
     getNoteById,
+    updateNote,
     deleteNote,
     resetState,
   }

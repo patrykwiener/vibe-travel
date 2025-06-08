@@ -185,9 +185,9 @@
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          Creating...
+          {{ isEditing ? 'Saving...' : 'Creating...' }}
         </span>
-        <span v-else> Create Note </span>
+        <span v-else> {{ isEditing ? 'Save Changes' : 'Create Note' }} </span>
       </button>
 
       <button
@@ -203,22 +203,24 @@
 
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
-import type { NoteCreateInSchema } from '@/client/types.gen'
+import type { NoteCreateInSchema, NoteUpdateInSchema } from '@/client/types.gen'
 
 // Props
 interface Props {
   initialData?: Partial<NoteCreateInSchema>
   isSubmitting?: boolean
+  isEditing?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   initialData: () => ({}),
   isSubmitting: false,
+  isEditing: false,
 })
 
 // Emits
 interface Emits {
-  submit: [data: NoteCreateInSchema]
+  submit: [data: NoteCreateInSchema | NoteUpdateInSchema]
   cancel: []
   change: []
 }
@@ -377,7 +379,7 @@ const handleSubmit = () => {
   }
 
   // Clear any non-empty key_ideas that's just whitespace
-  const submissionData: NoteCreateInSchema = {
+  const submissionData: NoteCreateInSchema | NoteUpdateInSchema = {
     ...formData,
     key_ideas: formData.key_ideas?.trim() || null,
   }
