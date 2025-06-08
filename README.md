@@ -35,6 +35,7 @@ VibeTravels is an innovative MVP application designed to transform simple travel
 - **AI Integration**: Leverage OpenRouter.ai services to access a wide range of AI models
 
 VibeTravels addresses common challenges in trip planning, including:
+
 - Time-consuming research and organization
 - Difficulty finding relevant attractions that match personal preferences
 - Lack of tools to transform loose ideas into cohesive travel plans
@@ -42,11 +43,13 @@ VibeTravels addresses common challenges in trip planning, including:
 ## Tech Stack
 
 ### Frontend
+
 - **Vue.js 3**: Progressive JavaScript framework for building user interfaces
 - **Tailwind CSS 4**: Utility-first CSS framework for rapid UI development
 - **Flowbite 3**: Component library built on top of Tailwind CSS
 
 ### Backend
+
 - **Python 3.13**: Core programming language
 - **FastAPI**: High-performance web framework for building APIs
 - **FastAPI Utilities**: Extension package for common FastAPI patterns
@@ -54,16 +57,19 @@ VibeTravels addresses common challenges in trip planning, including:
 - **Docker**: Containerization for consistent development and deployment
 
 ### AI Integration
+
 - **OpenRouter.ai**: Service providing access to various AI models (OpenAI, Anthropic, Google, etc.)
 - Features cost-effective model selection and financial limit setting for API keys
 
 ### CI/CD & Hosting
+
 - **GitHub Actions**: Automated CI/CD pipelines
 - **DigitalOcean**: Cloud hosting platform using Docker images
 
 ## Getting Started
 
 ### Prerequisites
+
 - Docker and Docker Compose
 - Git
 - Make (optional but recommended)
@@ -71,21 +77,25 @@ VibeTravels addresses common challenges in trip planning, including:
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/10xdevs/vibe-travel.git
    cd vibe-travel
    ```
 
 2. Initialize the project using Make:
+
    ```bash
    make init
    ```
+
    This command:
    - Creates a `.env` file from the template
    - Builds Docker images
    - Starts the containers
 
 3. Alternatively, follow these manual steps:
+
    ```bash
    cp -n .env.template .env
    docker compose build
@@ -93,9 +103,9 @@ VibeTravels addresses common challenges in trip planning, including:
    ```
 
 4. The application should now be running:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
+   - Frontend: <http://localhost:5173>
+   - Backend API: <http://localhost:8000>
+   - API Documentation: <http://localhost:8000/docs>
 
 ## Available Scripts
 
@@ -109,6 +119,7 @@ The project uses a Makefile to simplify common operations:
 | `make down` | Stop development environment |
 | `make logs` | Show logs for all services |
 | `make logs-backend` | Show backend logs |
+| `make logs-frontend` | Show frontend logs |
 | `make lint` | Run linting |
 | `make lint-fix` | Fix linting issues |
 | `make test [path=path/to/test]` | Run tests (optionally for specific path) |
@@ -117,6 +128,8 @@ The project uses a Makefile to simplify common operations:
 | `make init` | Initialize project (create .env, build images, start containers) |
 | `make reset-db` | Reset the database (drops all data) |
 | `make generate-openapi-client` | Generate OpenAPI client |
+| `make makemigrations` | Create new migrations based on changes to your models |
+| `make migrate` | Apply migrations |
 | `make setup-precommit` | Setup pre-commit hooks |
 | `make precommit-run` | Run pre-commit hooks on all files |
 | `make precommit-update` | Update pre-commit hooks |
@@ -133,6 +146,7 @@ This project uses pre-commit hooks to ensure code quality and consistency. The h
 - Code formatting
 
 **Quick setup:**
+
 ```bash
 make setup-precommit
 ```
@@ -144,33 +158,37 @@ For detailed setup instructions and troubleshooting, see [docs/PRECOMMIT.md](doc
 ### Core Features
 
 1. **User Authentication & Profiles**
-   - Registration and login with JWT authentication
+   - Registration and login with JWT authentication (7-day validity)
    - User profile with travel preferences (travel style, pace, budget)
+   - Secure password handling
 
 2. **Notes Management**
    - Create, read, update, delete (CRUD) operations for travel notes
    - Each note contains title, place, dates, number of people, and key ideas
    - Search and pagination functionality
+   - Data validation for all fields
 
 3. **AI-Powered Travel Planning**
-   - Generate detailed travel plans from notes using AI
+   - Integration with OpenRouter.ai for AI model access
+   - Generate detailed travel plans from notes
    - Edit, accept, or reject AI-generated plans
    - Manual plan creation option
 
 ### Current Limitations
 
+Current limitations as this is an MVP:
+
 - No sharing functionality between accounts
 - No advanced multimedia processing
 - No advanced logistics planning
 - No password reset or email confirmation
-- Limited browser support (Chrome only)
-- No offline or mobile mode
 
 ## Project Status
 
 VibeTravels is currently in MVP development stage. The application implements core functionality to demonstrate the concept and gather user feedback.
 
 **Key Success Metrics:**
+
 - 90% of users complete their preference profiles
 - 75% of users generate at least 3 travel plans annually
 
