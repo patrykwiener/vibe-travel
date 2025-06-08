@@ -5,7 +5,7 @@ import {
   notesPlanRouterGetActivePlan,
   notesPlanRouterGeneratePlan,
   notesPlanRouterCreateOrAcceptPlan,
-  notesPlanRouterUpdatePlan
+  notesPlanRouterUpdatePlan,
 } from '@/client/sdk.gen'
 import { apiCall, apiCallOptional } from '@/utils/api-interceptor'
 import type {
@@ -13,7 +13,7 @@ import type {
   PlanGenerateOutSchema,
   PlanCreateInSchema,
   PlanUpdateInSchema,
-  PlanTypeEnum
+  PlanTypeEnum,
 } from '@/client/types.gen'
 
 export const usePlanStore = defineStore('plan', () => {
@@ -91,7 +91,10 @@ export const usePlanStore = defineStore('plan', () => {
     isModified.value = false
     // For AI and HYBRID plans with generation_id, we might still have the original AI text reference
     // For HYBRID plans without generation_id, this will be null, which is correct
-    originalPlanTextForAI.value = (planData.type === 'AI' || planData.type === 'HYBRID') && planData.generation_id ? planData.plan_text : null
+    originalPlanTextForAI.value =
+      (planData.type === 'AI' || planData.type === 'HYBRID') && planData.generation_id
+        ? planData.plan_text
+        : null
   }
 
   const clearPlanData = () => {
@@ -104,7 +107,7 @@ export const usePlanStore = defineStore('plan', () => {
       currentPlanType: currentPlanType.value,
       originalPlanTextForAI: originalPlanTextForAI.value,
       originalSavedPlanText: originalSavedPlanText.value,
-      isModified: isModified.value
+      isModified: isModified.value,
     })
 
     planText.value = newText
@@ -148,7 +151,7 @@ export const usePlanStore = defineStore('plan', () => {
     originalPlanTextForAI.value = data.plan_text
     // Don't update originalSavedPlanText here - keep the last saved state for discard
     isModified.value = false // Świeżo wygenerowany, niezmodyfikowany
-    planId.value = null      // To nowa propozycja, nie zapisana, więc nie ma planId
+    planId.value = null // To nowa propozycja, nie zapisana, więc nie ma planId
   }
 
   const setSavedPlan = (savedPlanData: PlanOutSchema) => {
@@ -161,7 +164,11 @@ export const usePlanStore = defineStore('plan', () => {
     generationId.value = savedPlanData.generation_id
     // For AI and HYBRID plans with generation_id, we might still have the original AI text reference
     // For HYBRID plans without generation_id, this will be null, which is correct
-    originalPlanTextForAI.value = (savedPlanData.type === 'AI' || savedPlanData.type === 'HYBRID') && savedPlanData.generation_id ? savedPlanData.plan_text : null
+    originalPlanTextForAI.value =
+      (savedPlanData.type === 'AI' || savedPlanData.type === 'HYBRID') &&
+      savedPlanData.generation_id
+        ? savedPlanData.plan_text
+        : null
   }
 
   const discardChanges = async () => {
@@ -187,8 +194,8 @@ export const usePlanStore = defineStore('plan', () => {
     try {
       const planData = await apiCallOptional(() =>
         notesPlanRouterGetActivePlan({
-          path: { note_id: Number(noteId) }
-        })
+          path: { note_id: Number(noteId) },
+        }),
       )
 
       if (planData) {
@@ -214,8 +221,8 @@ export const usePlanStore = defineStore('plan', () => {
     try {
       const response = await apiCall(() =>
         notesPlanRouterGeneratePlan({
-          path: { note_id: Number(activeNoteId.value) }
-        })
+          path: { note_id: Number(activeNoteId.value) },
+        }),
       )
 
       setGeneratedAIPlan(response)
@@ -241,7 +248,7 @@ export const usePlanStore = defineStore('plan', () => {
       if (planId.value) {
         // Update existing plan
         const updateData: PlanUpdateInSchema = {
-          plan_text: planText.value
+          plan_text: planText.value,
         }
 
         console.log('Updating existing plan with:', updateData)
@@ -249,8 +256,8 @@ export const usePlanStore = defineStore('plan', () => {
         response = await apiCall(() =>
           notesPlanRouterUpdatePlan({
             path: { note_id: Number(activeNoteId.value) },
-            body: updateData
-          })
+            body: updateData,
+          }),
         )
       } else {
         // Create new plan - handle different scenarios based on plan type and generation_id
@@ -276,8 +283,8 @@ export const usePlanStore = defineStore('plan', () => {
         response = await apiCall(() =>
           notesPlanRouterCreateOrAcceptPlan({
             path: { note_id: Number(activeNoteId.value) },
-            body: createData
-          })
+            body: createData,
+          }),
         )
       }
 
@@ -328,6 +335,6 @@ export const usePlanStore = defineStore('plan', () => {
     loadPlanForNote,
     generatePlan,
     savePlan,
-    resetState
+    resetState,
   }
 })

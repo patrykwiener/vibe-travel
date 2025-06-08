@@ -15,8 +15,9 @@ export interface ConfirmationModalEmits {
 
 withDefaults(defineProps<ConfirmationModalProps>(), {
   confirmText: 'Confirm',
-  confirmButtonClass: 'text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800',
-  cancelText: 'Cancel'
+  confirmButtonClass:
+    'text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800',
+  cancelText: 'Cancel',
 })
 
 defineEmits<ConfirmationModalEmits>()
@@ -39,11 +40,7 @@ defineEmits<ConfirmationModalEmits>()
         >
           {{ cancelText }}
         </button>
-        <button
-          @click="$emit('confirm')"
-          type="button"
-          :class="confirmButtonClass"
-        >
+        <button @click="$emit('confirm')" type="button" :class="confirmButtonClass">
           {{ confirmText }}
         </button>
       </div>

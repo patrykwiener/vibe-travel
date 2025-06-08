@@ -18,7 +18,7 @@ export interface PlanGenerationModalEmits {
 
 withDefaults(defineProps<PlanGenerationModalProps>(), {
   confirmText: 'Generate Plan',
-  cancelText: 'Cancel'
+  cancelText: 'Cancel',
 })
 
 defineEmits<PlanGenerationModalEmits>()

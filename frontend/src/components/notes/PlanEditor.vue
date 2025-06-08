@@ -15,9 +15,9 @@ export interface PlanEditorEmits {
 
 const props = withDefaults(defineProps<PlanEditorProps>(), {
   maxCharacters: 3000,
-  rows: 12,
+  rows: 25,
   placeholder: 'Your travel plan will appear here...',
-  disabled: false
+  disabled: false,
 })
 
 const emit = defineEmits<PlanEditorEmits>()
@@ -43,7 +43,7 @@ const updateValue = (event: Event) => {
       :class="[
         'bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500',
         isCharacterLimitExceeded ? 'border-red-300 dark:border-red-600' : 'border-gray-300',
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+        disabled ? 'opacity-50 cursor-not-allowed' : '',
       ]"
       :placeholder="placeholder"
     ></textarea>

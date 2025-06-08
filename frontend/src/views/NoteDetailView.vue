@@ -148,11 +148,15 @@ const discardChanges = async () => {
 }
 
 // Watch for route changes and load data immediately
-watch(() => route.params.noteId, () => {
-  if (route.params.noteId) {
-    loadNoteData()
-  }
-}, { immediate: true })
+watch(
+  () => route.params.noteId,
+  () => {
+    if (route.params.noteId) {
+      loadNoteData()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -182,7 +186,9 @@ watch(() => route.params.noteId, () => {
             ></path>
           </svg>
           <p class="text-lg font-medium text-gray-900 dark:text-white">Loading note...</p>
-          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Please wait while we fetch your travel details</p>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Please wait while we fetch your travel details
+          </p>
         </div>
       </div>
 
@@ -242,16 +248,16 @@ watch(() => route.params.noteId, () => {
         <!-- Main Content -->
         <div class="space-y-8">
           <!-- Note Details Section -->
-          <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8">
-            <NoteDisplaySection
-              :note="note"
-              :note-id="noteId"
-              @delete="confirmDelete"
-            />
+          <div
+            class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8"
+          >
+            <NoteDisplaySection :note="note" :note-id="noteId" @delete="confirmDelete" />
           </div>
 
           <!-- Plan Section -->
-          <div class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8">
+          <div
+            class="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8"
+          >
             <PlanSection
               :plan-text="planStore.planText || ''"
               :plan-type="planStore.currentPlanType"

@@ -5,7 +5,7 @@ import {
   notesNoteCbvListNotes,
   notesNoteCbvCreateNote,
   notesNoteCbvGetNoteById,
-  notesNoteCbvDeleteNote
+  notesNoteCbvDeleteNote,
 } from '@/client/sdk.gen'
 import { apiCall } from '@/utils/api-interceptor'
 import type {
