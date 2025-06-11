@@ -62,7 +62,7 @@ This test plan defines the strategy, scope, and procedures for testing the VibeT
 
 **Code Coverage:** minimum 80%
 
-#### Frontend - Vitest/Jest
+#### Frontend - Vitest
 
 - **Composables** - Vue business logic
 - **Stores** - Pinia state management

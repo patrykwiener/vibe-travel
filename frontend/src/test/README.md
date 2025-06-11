@@ -126,15 +126,18 @@ describe('MyComponent', () => {
 According to VITEST guidelines:
 
 1.  **Use `vi` object for test doubles**
+
     - `vi.fn()` for function mocks
     - `vi.spyOn()` for monitoring existing functions
     - `vi.stubGlobal()` for global mocks
 
 2.  **Master `vi.mock()` factory patterns**
+
     - Place mock factory at the top of the test file
     - Use `mockImplementation()` for dynamic control
 
 3.  **Structure tests for maintainability**
+
     - Group tests in `describe` blocks
     - Use the Arrange-Act-Assert pattern
     - Add descriptive assertion messages
