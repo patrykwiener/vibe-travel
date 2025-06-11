@@ -1199,7 +1199,7 @@ describe('Notes Store', () => {
     })
   })
 
-  describe('Coverage Completion Tests', () => {
+  describe('Advanced Request Management', () => {
     describe('Search Request Race Conditions and Cleanup', () => {
       it('should handle error when search request is aborted but still latest', async () => {
         // Mock the fetch to throw an error during the search
@@ -1217,7 +1217,7 @@ describe('Notes Store', () => {
       })
     })
 
-    describe('AbortController Cleanup Coverage', () => {
+    describe('Request Cancellation Cleanup', () => {
       it('should cover clearSearch abort controller cleanup path', async () => {
         // Reset mocks to start fresh
         vi.clearAllMocks()
@@ -1261,7 +1261,7 @@ describe('Notes Store', () => {
         }
         vi.mocked(notesNoteCbvListNotes).mockResolvedValueOnce(clearResponse as any)
 
-        // Call clearSearch while search is pending - this should hit the abort controller cleanup lines
+        // Call clearSearch while search is pending - this should trigger abort controller cleanup
         const clearPromise = notesStore.clearSearch()
 
         // Complete the pending search (but it should be aborted and ignored)
@@ -1298,7 +1298,7 @@ describe('Notes Store', () => {
         expect(notesStore.isSearching).toBe(true)
         expect(notesStore.searchQuery).toBe('pending search')
 
-        // Call resetState while search is pending - this should hit the abort controller cleanup lines
+        // Call resetState while search is pending - this should trigger abort controller cleanup
         notesStore.resetState()
 
         // Verify resetState worked immediately

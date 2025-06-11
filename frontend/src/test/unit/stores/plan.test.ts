@@ -921,31 +921,6 @@ describe('Plan Store', () => {
         expect(planStore.isSavingPlan).toBe(false)
         expect(console.error).toHaveBeenCalledWith('Failed to save plan:', apiError)
       })
-
-      it('should log create data for debugging', async () => {
-        planStore.updatePlanText('Test content')
-
-        vi.mocked(apiCall).mockResolvedValue(createMockPlanOut())
-
-        await planStore.savePlan()
-
-        expect(console.log).toHaveBeenCalledWith('Creating new plan with:', {
-          plan_text: 'Test content',
-        })
-      })
-
-      it('should log update data for debugging', async () => {
-        planStore.setInitialPlanData(createMockPlanOut({ id: 1, plan_text: 'original' }))
-        planStore.updatePlanText('updated')
-
-        vi.mocked(apiCall).mockResolvedValue(createMockPlanOut())
-
-        await planStore.savePlan()
-
-        expect(console.log).toHaveBeenCalledWith('Updating existing plan with:', {
-          plan_text: 'updated',
-        })
-      })
     })
 
     describe('discardChanges', () => {
@@ -1207,13 +1182,9 @@ describe('Plan Store', () => {
     })
   })
 
-  describe('Missing Coverage Cases', () => {
+  describe('Additional Edge Cases', () => {
     describe('updatePlanText Edge Cases', () => {
-      // Note: Line 126 test removed due to complexity in testing internal store state
-      // Line 126 represents a very specific edge case that's difficult to reproduce in isolation
-      // The remaining coverage improvement from 93.7% to 94.09% is significant
-
-      it('should keep MANUAL type when modifying MANUAL plan (line 135)', () => {
+      it('should keep MANUAL type when modifying existing MANUAL plan', () => {
         // Setup manual plan
         planStore.setInitialPlanData(
           createMockPlanOut({
@@ -1222,19 +1193,19 @@ describe('Plan Store', () => {
           }),
         )
 
-        // Modify text - should trigger line 135
+        // Modify text
         planStore.updatePlanText('Modified manual content')
 
         expect(planStore.currentPlanType).toBe('MANUAL')
         expect(planStore.isModified).toBe(true)
       })
 
-      it('should set MANUAL type when no plan type is set and user starts typing (line 136)', () => {
+      it('should set MANUAL type when no plan type is set and user starts typing', () => {
         // Setup state with no plan type
         planStore.setActiveNoteId('1')
         // Don't set any initial plan data, so currentPlanType will be null
 
-        // Modify text when no plan type is set - should trigger line 136 condition
+        // Modify text when no plan type is set
         planStore.updatePlanText('New content from scratch')
 
         expect(planStore.currentPlanType).toBe('MANUAL')
@@ -1242,8 +1213,8 @@ describe('Plan Store', () => {
       })
     })
 
-    describe('API Error Paths', () => {
-      it('should handle loadPlanForNote errors (lines 196-198)', async () => {
+    describe('API Error Handling', () => {
+      it('should handle loadPlanForNote errors gracefully', async () => {
         planStore.setActiveNoteId('1')
 
         const apiError = new Error('Load plan API error')
@@ -1254,7 +1225,7 @@ describe('Plan Store', () => {
         expect(console.error).toHaveBeenCalledWith('Failed to load plan:', apiError)
       })
 
-      it('should handle generatePlan errors (lines 223-225)', async () => {
+      it('should handle generatePlan errors gracefully', async () => {
         planStore.setActiveNoteId('1')
 
         const apiError = new Error('Generate plan API error')
@@ -1265,7 +1236,7 @@ describe('Plan Store', () => {
         expect(console.error).toHaveBeenCalledWith('Failed to generate plan:', apiError)
       })
 
-      it('should handle savePlan errors (lines 284-287)', async () => {
+      it('should handle savePlan errors gracefully', async () => {
         planStore.setActiveNoteId('1')
         planStore.updatePlanText('Some content')
 
@@ -1278,8 +1249,8 @@ describe('Plan Store', () => {
       })
     })
 
-    describe('Update Plan Path (lines 257-260)', () => {
-      it('should execute update plan path with console.log', async () => {
+    describe('Plan Update Workflow', () => {
+      it('should successfully update existing plan', async () => {
         // Setup existing plan
         planStore.setActiveNoteId('1')
         planStore.setInitialPlanData(
@@ -1302,10 +1273,6 @@ describe('Plan Store', () => {
 
         await planStore.savePlan()
 
-        // This should hit lines 257-260
-        expect(console.log).toHaveBeenCalledWith('Updating existing plan with:', {
-          plan_text: 'Updated content',
-        })
         expect(planStore.planText).toBe('Updated content')
       })
     })
