@@ -109,3 +109,5 @@ pydocstyle.convention = "google"
   "D205",
   "D415",
 ]
+
+# ...existing mypy config...

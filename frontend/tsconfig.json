@@ -24,8 +24,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    /* Testing */
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.test.ts", "src/**/*.spec.ts"],
   "exclude": ["node_modules", "dist"]
 }

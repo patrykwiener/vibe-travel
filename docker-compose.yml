@@ -72,6 +72,7 @@ services:
       - ./frontend/openapi.json:/app/openapi.json
       - ./frontend/tsconfig.json:/app/tsconfig.json
       - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/vitest.config.ts:/app/vitest.config.ts
       - ./frontend/.prettierrc.json:/app/.prettierrc.json
       - ./frontend/.prettierignore:/app/.prettierignore
 

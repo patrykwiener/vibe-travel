@@ -29,3 +29,15 @@ openapi.json
 *.sw?
 
 *.tsbuildinfo
+
+# Vitest coverage directory
+coverage/
+
+# Test results
+test-results/
+*.test-results.html
+
+# Vitest cache
+.vitest/
+
+html/

@@ -12,6 +12,7 @@
     - [Frontend](#frontend)
     - [Backend](#backend)
     - [AI Integration](#ai-integration)
+    - [Testing](#testing)
     - [CI/CD \& Hosting](#cicd--hosting)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -60,6 +61,30 @@ VibeTravels addresses common challenges in trip planning, including:
 
 - **OpenRouter.ai**: Service providing access to various AI models (OpenAI, Anthropic, Google, etc.)
 - Features cost-effective model selection and financial limit setting for API keys
+
+### Testing
+
+#### Backend Testing
+
+- **pytest**: Framework for Python unit and integration tests
+- **pytest-cov**: Code coverage reporting
+- **pytest-asyncio**: Support for asynchronous tests
+- **httpx**: HTTP client for API testing
+- **unittest.mock**: Mocking dependencies
+- **factory_boy**: Test data generation
+- **faker**: Random data generation
+
+#### Frontend Testing
+
+- **Vitest**: Fast unit testing framework for Vue.js
+- **Vue Test Utils**: Official testing utilities for Vue components
+- **@testing-library/vue**: Testing utilities for better test practices
+- **MSW (Mock Service Worker)**: API mocking for frontend tests
+
+#### End-to-End Testing
+
+- **Playwright**: Modern framework for E2E testing
+- **@playwright/test**: Test runner for cross-browser testing
 
 ### CI/CD & Hosting
 

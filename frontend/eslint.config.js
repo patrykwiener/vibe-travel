@@ -8,7 +8,7 @@ import globals from 'globals'
 export default [
   // Global ignores
   {
-    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/client/*.gen.ts'],
+    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/client/*.gen.ts', '**/html/**'],
   },
 
   // Base configuration for all files
@@ -71,6 +71,30 @@ export default [
         ...globals.browser,
         ...globals.node,
       },
+    },
+  },
+
+  // Test files configuration
+  {
+    files: ['**/*.{test,spec}.{js,ts,jsx,tsx}', '**/test/**/*.{js,ts,jsx,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        // Vitest globals
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off', // Allow any in test files
     },
   },
 
