@@ -9,9 +9,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ### Backend Unit Tests (Python/pytest)
 
 #### 1. Create Note Use Case
+
 **File:** `backend/tests/unit/usecases/test_create_note_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Valid note creation with all required fields
 - ❌ **Empty Title Validation** - Should raise `ValueError` for empty/whitespace title
 - ❌ **Invalid Date Range** - End date before start date should raise `InvalidDateRangeError`
@@ -23,6 +25,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Repository Interaction** - Verify repository.create() called with correct data
 
 **Test Coverage:**
+
 ```python
 # Use Case Logic
 - validate_note_data()
@@ -37,9 +40,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ```
 
 #### 2. Update Note Use Case
+
 **File:** `backend/tests/unit/usecases/test_update_note_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Valid note update with changed fields
 - ❌ **Note Not Found** - Should raise `NoteNotFoundError` for non-existent note
 - 🔒 **Ownership Validation** - User can only update their own notes
@@ -47,18 +52,22 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Partial Updates** - Only changed fields are updated in repository
 
 #### 3. Delete Note Use Case
+
 **File:** `backend/tests/unit/usecases/test_delete_note_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Note successfully deleted
 - ❌ **Note Not Found** - Should raise `NoteNotFoundError`
 - 🔒 **Ownership Validation** - User can only delete their own notes
 - 📊 **Repository Interaction** - Verify repository.delete() called
 
 #### 4. Search Notes Use Case
+
 **File:** `backend/tests/unit/usecases/test_search_notes_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Find notes by title substring
 - ✅ **Case Insensitive Search** - Should find notes regardless of case
 - ✅ **Empty Results** - Return empty list when no matches
@@ -66,9 +75,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Repository Interaction** - Verify search parameters passed correctly
 
 #### 5. Note Repository Tests
+
 **File:** `backend/tests/unit/repositories/test_note_repository.py`
 
 **Test Scenarios:**
+
 - ✅ **CRUD Operations** - Create, read, update, delete functionality
 - 🔍 **Search Methods** - Title search, user filtering
 - ❌ **Database Constraints** - Foreign key violations, unique constraints
@@ -77,9 +88,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ### Frontend Unit Tests (Vitest)
 
 #### 1. useCreateNote Composable
+
 **File:** `frontend/tests/unit/composables/useCreateNote.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Note created and returned
 - ❌ **Client-side Validation** - Validate before API call
 - 🔄 **Loading States** - isLoading true during request, false after
@@ -87,6 +100,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Form Data Transformation** - Dates formatted correctly for API
 
 **Test Coverage:**
+
 ```typescript
 // Composable Functions
 - createNote()
@@ -101,18 +115,22 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ```
 
 #### 2. useUpdateNote Composable
+
 **File:** `frontend/tests/unit/composables/useUpdateNote.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Note updated successfully
 - ❌ **Validation Errors** - Handle validation from backend
 - 🔄 **Optimistic Updates** - UI updates immediately, rollback on error
 - ❌ **Conflict Handling** - Handle concurrent update scenarios
 
 #### 3. Notes Store (Pinia)
+
 **File:** `frontend/tests/unit/stores/notesStore.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **State Management** - Notes list maintained correctly
 - 🔍 **Search Functionality** - Real-time filtering with debounce
 - 📄 **Pagination** - Handle large note lists
@@ -120,6 +138,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - ❌ **Error States** - Error handling for all operations
 
 **Test Coverage:**
+
 ```typescript
 // Store Actions
 - fetchNotes()
@@ -147,9 +166,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ### Backend Unit Tests (Python/pytest)
 
 #### 1. Generate Plan Use Case
+
 **File:** `backend/tests/unit/usecases/test_generate_plan_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Plan generated from valid note
 - ❌ **Note Not Found** - Should raise `NoteNotFoundError`
 - 🔒 **Ownership Validation** - User can only generate plans for their notes
@@ -162,6 +183,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 🏷️ **Plan Metadata** - Plan marked as "AI Generated" type
 
 **Test Coverage:**
+
 ```python
 # Use Case Logic
 - validate_prerequisites()
@@ -176,9 +198,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ```
 
 #### 2. AI Service (OpenRouter Integration)
+
 **File:** `backend/tests/unit/services/test_openrouter_service.py`
 
 **Test Scenarios:**
+
 - ✅ **Prompt Building** - User preferences + note data = correct prompt
 - ✅ **Response Parsing** - AI response converted to structured plan
 - ❌ **Malformed Response** - Handle invalid AI responses
@@ -188,6 +212,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Token Usage Tracking** - Monitor API usage
 
 **Test Coverage:**
+
 ```python
 # Service Methods
 - build_travel_prompt()
@@ -202,9 +227,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ```
 
 #### 3. Edit Plan Use Case
+
 **File:** `backend/tests/unit/usecases/test_edit_plan_usecase.py`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Plan content updated
 - ❌ **Plan Not Found** - Should raise `PlanNotFoundError`
 - 🔒 **Ownership Validation** - User can only edit their plans
@@ -213,9 +240,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 📊 **Content Validation** - Plan content meets format requirements
 
 #### 4. Plan Repository Tests
+
 **File:** `backend/tests/unit/repositories/test_plan_repository.py`
 
 **Test Scenarios:**
+
 - ✅ **CRUD Operations** - Create, read, update, delete functionality
 - 🏷️ **Plan Type Management** - Handle different plan types
 - 📝 **Version Tracking** - History and versioning
@@ -224,9 +253,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ### Frontend Unit Tests (Vitest)
 
 #### 1. useGeneratePlan Composable
+
 **File:** `frontend/tests/unit/composables/useGeneratePlan.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Plan generated and displayed
 - 🔄 **Loading States** - Show progress during 30s generation
 - ❌ **Timeout Handling** - Handle 30s timeout with user message
@@ -235,6 +266,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - ❌ **User Cancellation** - Allow user to cancel generation
 
 **Test Coverage:**
+
 ```typescript
 // Composable Functions
 - generatePlan()
@@ -250,9 +282,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ```
 
 #### 2. usePlanEditor Composable
+
 **File:** `frontend/tests/unit/composables/usePlanEditor.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **Success Case** - Plan edited and saved
 - 🔄 **Auto-save** - Periodic saving of changes
 - 📝 **Change Tracking** - Track unsaved changes
@@ -260,9 +294,11 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - 🎨 **Rich Text Editing** - Handle formatted content
 
 #### 3. Plans Store (Pinia)
+
 **File:** `frontend/tests/unit/stores/plansStore.test.ts`
 
 **Test Scenarios:**
+
 - ✅ **State Management** - Plans list and current plan
 - 🔄 **Generation Status** - Track generation progress
 - 🏷️ **Plan Types** - Handle different plan types (AI, Manual, Hybrid)
@@ -270,6 +306,7 @@ This document outlines the comprehensive unit test cases for **Note Management**
 - ❌ **Error Handling** - All error scenarios covered
 
 **Test Coverage:**
+
 ```typescript
 // Store Actions
 - generatePlan()
@@ -293,36 +330,44 @@ This document outlines the comprehensive unit test cases for **Note Management**
 ## Cross-Cutting Test Cases
 
 ### 1. Data Validation
+
 **Files:** Various validation test files
 
 **Test Scenarios:**
+
 - 📅 **Date Formats** - ISO date format validation
 - 🌍 **Destination Formats** - Valid destination strings
 - 📊 **Data Serialization** - DTO transformations
 - 🔤 **Text Encoding** - Unicode and special characters
 
 ### 2. Error Handling
+
 **Files:** Error handling test files
 
 **Test Scenarios:**
+
 - 🌐 **Network Errors** - Connection failures, timeouts
 - ⚠️ **Validation Errors** - Client and server-side validation
 - 🔒 **Authorization Errors** - Unauthorized access attempts
 - 📊 **Data Consistency** - Concurrent modification handling
 
 ### 3. Performance
+
 **Files:** Performance test files
 
 **Test Scenarios:**
+
 - ⏱️ **Response Times** - All operations under performance thresholds
 - 🔍 **Search Performance** - Efficient note searching
 - 🤖 **AI Generation Time** - 30s timeout respected
 - 💾 **Memory Usage** - Efficient data handling
 
 ### 4. Security
+
 **Files:** Security test files
 
 **Test Scenarios:**
+
 - 🔒 **User Isolation** - Users can only access their data
 - 🛡️ **Input Sanitization** - XSS and injection prevention
 - 🔑 **Authentication** - JWT token validation
@@ -382,12 +427,14 @@ describe('NotesStore', () => {
 ## Coverage Requirements
 
 ### Backend Coverage Targets
+
 - **Use Cases:** 100% coverage (core business logic)
 - **Repositories:** 95% coverage (data access layer)
 - **Services:** 90% coverage (domain services)
 - **Overall Backend:** ≥80% coverage
 
 ### Frontend Coverage Targets
+
 - **Composables:** 95% coverage (business logic)
 - **Stores:** 90% coverage (state management)
 - **Utils:** 85% coverage (utility functions)
@@ -396,16 +443,19 @@ describe('NotesStore', () => {
 ## Test Execution Strategy
 
 ### Development Phase
+
 1. **TDD Approach** - Write tests before implementation
 2. **Continuous Testing** - Run tests on every change
 3. **Mock External Dependencies** - Isolate units under test
 
 ### CI/CD Integration
+
 1. **Automated Test Runs** - On every commit and PR
 2. **Coverage Reports** - Generate and track coverage metrics
 3. **Quality Gates** - Block deployment if tests fail
 
 ### Test Maintenance
+
 1. **Regular Updates** - Keep tests aligned with code changes
 2. **Refactoring** - Improve test quality and maintainability
 3. **Documentation** - Maintain test documentation

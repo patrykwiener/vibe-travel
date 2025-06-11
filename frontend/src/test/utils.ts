@@ -11,6 +11,7 @@ const createMockRouter = () => {
       { path: '/', component: { template: '<div>Home</div>' } },
       { path: '/login', component: { template: '<div>Login</div>' } },
       { path: '/notes', component: { template: '<div>Notes</div>' } },
+      { path: '/notes/:noteId/edit', component: { template: '<div>Edit Note</div>' } },
     ],
   })
 }
