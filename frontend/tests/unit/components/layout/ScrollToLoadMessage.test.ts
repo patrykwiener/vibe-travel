@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import ScrollToLoadMessage from '@/components/layout/ScrollToLoadMessage.vue'
 
 // Helper to create mock props

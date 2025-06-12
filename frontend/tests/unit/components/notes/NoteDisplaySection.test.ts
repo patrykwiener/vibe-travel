@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, fireEvent } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import NoteDisplaySection from '@/components/notes/NoteDisplaySection.vue'
 import type { NoteOutSchema } from '@/client/types.gen'
 

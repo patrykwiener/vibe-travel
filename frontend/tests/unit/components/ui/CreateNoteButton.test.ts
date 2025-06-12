@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import CreateNoteButton from '@/components/ui/buttons/CreateNoteButton.vue'
 import { useAuthStore } from '@/stores/auth'
 

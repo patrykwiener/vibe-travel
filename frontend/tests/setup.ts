@@ -6,7 +6,7 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
   observe: vi.fn(),
   unobserve: vi.fn(),
-})) as any
+})) as unknown as typeof IntersectionObserver
 
 // Mock ResizeObserver for components that use it
 global.ResizeObserver = vi.fn(() => ({

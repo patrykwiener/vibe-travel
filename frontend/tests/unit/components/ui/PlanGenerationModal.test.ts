@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import PlanGenerationModal from '@/components/ui/PlanGenerationModal.vue'
 
 // Helper to create mock props

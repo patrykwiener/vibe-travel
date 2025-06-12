@@ -63,6 +63,7 @@ services:
       # Source code and assets (frequently changed)
       - ./frontend/public:/app/public
       - ./frontend/src:/app/src
+      - ./frontend/tests:/app/tests
 
       # Configuration files (occasionally changed)
       - ./frontend/env.d.ts:/app/env.d.ts

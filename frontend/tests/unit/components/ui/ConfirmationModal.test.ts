@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import ConfirmationModal from '@/components/ui/ConfirmationModal.vue'
 
 describe('ConfirmationModal', () => {

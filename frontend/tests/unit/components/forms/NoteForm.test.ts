@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import NoteForm from '@/components/forms/NoteForm.vue'
 import type { NoteCreateInSchema } from '@/client/types.gen'
 

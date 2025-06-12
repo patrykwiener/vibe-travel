@@ -17,7 +17,7 @@ const createMockRouter = () => {
 }
 
 // Custom render function with providers
-export const renderWithProviders = (component: Component, options: RenderOptions<any> = {}) => {
+export const renderWithProviders = (component: Component, options: RenderOptions<Component> = {}) => {
   const pinia = createPinia()
   const router = createMockRouter()
 

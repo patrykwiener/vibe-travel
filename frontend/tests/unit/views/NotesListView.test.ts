@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
 import { fireEvent, screen, waitFor } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import NotesListView from '@/views/NotesListView.vue'
 import { useNotesStore } from '@/stores/notes'
 import type { NoteListItemOutSchema } from '@/client/types.gen'

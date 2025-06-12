@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import PlanTypeLabel from '@/components/notes/PlanTypeLabel.vue'
 import type { PlanTypeLabelProps } from '@/components/notes/PlanTypeLabel.vue'
 

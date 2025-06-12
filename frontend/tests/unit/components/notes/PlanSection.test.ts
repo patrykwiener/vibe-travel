@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import PlanSection from '@/components/notes/PlanSection.vue'
 import type { PlanSectionProps } from '@/components/notes/PlanSection.vue'
 

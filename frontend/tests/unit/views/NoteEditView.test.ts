@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import NoteEditView from '@/views/NoteEditView.vue'
 import { useNotesStore } from '@/stores/notes'
 import { ApiError, type ApiErrorResponse } from '@/utils/api-errors'

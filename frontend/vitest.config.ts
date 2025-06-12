@@ -13,10 +13,10 @@ export default defineConfig({
     environment: 'jsdom',
 
     // Setup files run before each test file
-    setupFiles: ['./src/test/setup.ts'],
+    setupFiles: ['./tests/setup.ts'],
 
     // Include test files pattern
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
 
     // Coverage configuration
     coverage: {
@@ -24,7 +24,7 @@ export default defineConfig({
       reporter: ['text', 'json'],
       exclude: [
         'node_modules/',
-        'src/test/',
+        'tests/',
         '**/*.d.ts',
         '**/*.config.*',
         'dist/',
@@ -60,6 +60,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@tests': fileURLToPath(new URL('./tests', import.meta.url)),
     },
   },
 })

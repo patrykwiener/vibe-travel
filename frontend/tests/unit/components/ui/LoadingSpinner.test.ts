@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen } from '@testing-library/vue'
-import { renderWithProviders } from '@/test/utils'
+import { renderWithProviders } from '@tests/utils'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 
 describe('LoadingSpinner - Core Functionality', () => {
