@@ -491,10 +491,10 @@ describe('PlanTypeLabel - Core Functionality', () => {
     it('should maintain consistent DOM structure across all states', () => {
       const configurations = [
         { planType: null, isDraft: false },
-        { planType: 'AI', isDraft: false },
-        { planType: 'AI', isDraft: true },
+        { planType: 'AI' as const, isDraft: false },
+        { planType: 'AI' as const, isDraft: true },
         { planType: null, isDraft: true },
-      ] as const
+      ]
 
       configurations.forEach((config) => {
         const { unmount } = renderWithProviders(PlanTypeLabel, {

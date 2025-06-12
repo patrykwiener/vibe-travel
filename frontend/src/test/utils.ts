@@ -24,6 +24,11 @@ export const renderWithProviders = (component: Component, options: RenderOptions
   return render(component, {
     global: {
       plugins: [pinia, router],
+      stubs: {
+        // Completely bypass Transition component to render content directly
+        Transition: false,
+        ...options.global?.stubs,
+      },
       ...options.global,
     },
     ...options,
