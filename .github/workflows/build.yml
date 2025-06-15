@@ -17,7 +17,7 @@ env:
   # FastAPI Settings for CI
   PROJECT_NAME: VibeTravels
   SECRET_KEY: test-secret-key-for-ci
-  ENVIRONMENT: test
+  ENVIRONMENT: dev
   API_V1_STR: /api/v1
   BACKEND_CORS_ORIGINS: '["http://localhost:3000", "http://localhost:8080"]'
 
@@ -148,13 +148,21 @@ jobs:
         build-args: |
           VITE_BACKEND_URL=http://localhost:8000
 
+    - name: Debug frontend environment
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/frontend:/app \
+          -w /app \
+          frontend:latest \
+          sh -c "which node && which npm && npm --version && ls -la node_modules/.bin/ | head -10"
+
     - name: Run frontend linting
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/frontend:/app \
           -w /app \
           frontend:latest \
-          npm run lint
+          sh -c "npm run lint"
 
     - name: Run frontend type checking
       run: |
@@ -162,7 +170,7 @@ jobs:
           -v ${{ github.workspace }}/frontend:/app \
           -w /app \
           frontend:latest \
-          npm run type-check
+          sh -c "npm run type-check"
 
     - name: Run frontend tests with coverage
       run: |
@@ -170,7 +178,7 @@ jobs:
           -v ${{ github.workspace }}/frontend:/app \
           -w /app \
           frontend:latest \
-          npm run test:coverage
+          sh -c "npm run test:coverage"
 
     - name: Upload frontend coverage reports
       uses: actions/upload-artifact@v4
