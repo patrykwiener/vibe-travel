@@ -79,6 +79,6 @@ class UpdatePlanOutDTO(BaseModel):
     plan_text: str
     type: PlanTypeEnum
     status: PlanStatusEnum
-    generation_id: UUID
+    generation_id: UUID | None
     created_at: datetime
     updated_at: datetime
