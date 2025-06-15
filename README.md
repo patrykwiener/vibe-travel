@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Project Status: MVP Development](https://img.shields.io/badge/Project%20Status-MVP%20Development-yellow)](https://github.com/10xdevs/vibe-travel)
+[![Build and Test](https://github.com/patrykwiener/vibe-travel/workflows/Build%20and%20Test/badge.svg)](https://github.com/patrykwiener/vibe-travel/actions)
 
 ## Table of Contents
 
@@ -13,6 +14,9 @@
     - [Backend](#backend)
     - [AI Integration](#ai-integration)
     - [Testing](#testing)
+      - [Backend Testing](#backend-testing)
+      - [Frontend Testing](#frontend-testing)
+      - [End-to-End Testing](#end-to-end-testing)
     - [CI/CD \& Hosting](#cicd--hosting)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
