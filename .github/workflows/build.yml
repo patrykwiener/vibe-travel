@@ -151,8 +151,6 @@ jobs:
     - name: Debug frontend environment
       run: |
         docker run --rm \
-          -v ${{ github.workspace }}/frontend:/app \
-          -w /app \
           frontend:latest \
           sh -c "which node && which npm && npm --version && ls -la node_modules/.bin/ | head -10"
 
@@ -160,6 +158,7 @@ jobs:
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/frontend:/app \
+          -v /app/node_modules \
           -w /app \
           frontend:latest \
           sh -c "npm run lint"
@@ -168,14 +167,18 @@ jobs:
       run: |
         docker run --rm \
           -v ${{ github.workspace }}/frontend:/app \
+          -v /app/node_modules \
           -w /app \
           frontend:latest \
           sh -c "npm run type-check"
 
     - name: Run frontend tests with coverage
       run: |
+        mkdir -p ${{ github.workspace }}/frontend-coverage
         docker run --rm \
           -v ${{ github.workspace }}/frontend:/app \
+          -v /app/node_modules \
+          -v ${{ github.workspace }}/frontend-coverage:/app/coverage \
           -w /app \
           frontend:latest \
           sh -c "npm run test:coverage"
@@ -184,7 +187,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: frontend-coverage
-        path: frontend/coverage/
+        path: frontend-coverage/
         retention-days: 7
 
   status-comment:
