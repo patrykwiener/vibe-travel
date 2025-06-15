@@ -118,7 +118,7 @@ jobs:
           -v ${{ github.workspace }}/backend:/app \
           -w /app \
           backend:latest \
-          sh -c "sh scripts/test.sh --title=backend-coverage && coverage report && coverage xml && coverage html"
+          sh -c "coverage run --source=src -m pytest -vv && coverage report && coverage xml && coverage html"
 
     - name: Upload backend coverage reports
       uses: actions/upload-artifact@v4
@@ -154,12 +154,6 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           VITE_BACKEND_URL=http://localhost:8000
-
-    - name: Debug frontend environment
-      run: |
-        docker run --rm \
-          frontend:latest \
-          sh -c "which node && which npm && npm --version && ls -la node_modules/.bin/ | head -10"
 
     - name: Run frontend linting
       run: |
