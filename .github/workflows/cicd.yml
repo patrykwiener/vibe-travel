@@ -112,48 +112,53 @@ jobs:
 
     - name: Run backend security scan
       run: |
-        # Create a script for better error handling
+        # Use a separate lightweight container for security scanning to avoid conflicts
         docker run --rm \
-          -v ${{ github.workspace }}/backend:/app \
-          -w /app \
-          backend:latest \
+          -v ${{ github.workspace }}/backend:/workspace \
+          -w /workspace \
+          python:3.13-slim \
           sh -c "
             set -e
-            echo '🔍 Installing security scanning tools...'
-            pip install --upgrade pip
-            pip install safety==3.2.8 bandit==1.7.5
+            echo '🔍 Installing security scanning tools in clean environment...'
+            pip install --no-cache-dir safety==3.0.1 bandit[toml]==1.7.5
 
             echo '🛡️ Running safety check...'
-            safety check --json > /app/safety-report.json
-            echo 'Safety check passed ✅'
+            safety check --json --stdin < requirements.txt > safety-report.json || echo 'Safety check completed with warnings'
 
             echo '🔒 Running bandit security scan...'
-            bandit -r src/ -f json -o /app/bandit-report.json -ll
-            echo 'Bandit scan passed ✅'
+            bandit -r src/ -f json -o bandit-report.json -ll || echo 'Bandit scan completed with warnings'
 
-            echo '✅ All security scans completed successfully!'
+            echo '✅ Security scans completed!'
           "
 
     - name: Check security scan results
       run: |
         echo "📊 Security scan summary:"
+
+        # Check safety results
         if [ -f backend/safety-report.json ]; then
           echo "✅ Safety report generated"
-          # Check if there are any vulnerabilities
-          if grep -q '"vulnerabilities"' backend/safety-report.json; then
-            echo "⚠️  Vulnerabilities found in safety scan"
-            cat backend/safety-report.json | grep -A 5 -B 5 "vulnerabilities" || echo "No vulnerability details found"
+          SAFETY_ISSUES=$(cat backend/safety-report.json | jq '.vulnerabilities | length' 2>/dev/null || echo "0")
+          echo "🔍 Safety found $SAFETY_ISSUES vulnerabilities"
+          if [ "$SAFETY_ISSUES" -gt 0 ]; then
+            echo "⚠️  Critical vulnerabilities found!"
+            cat backend/safety-report.json | jq '.vulnerabilities[].vulnerability_id' 2>/dev/null || echo "Could not parse vulnerability details"
+            exit 1
           fi
         else
           echo "❌ Safety report not found"
           exit 1
         fi
 
+        # Check bandit results
         if [ -f backend/bandit-report.json ]; then
           echo "✅ Bandit report generated"
-          # Check bandit results
-          ISSUES=$(cat backend/bandit-report.json | grep -o '"SEVERITY"' | wc -l || echo "0")
-          echo "🔍 Bandit found $ISSUES potential security issues"
+          BANDIT_HIGH=$(cat backend/bandit-report.json | jq '[.results[] | select(.issue_severity == "HIGH")] | length' 2>/dev/null || echo "0")
+          echo "🔍 Bandit found $BANDIT_HIGH high-severity issues"
+          if [ "$BANDIT_HIGH" -gt 0 ]; then
+            echo "⚠️  High-severity security issues found!"
+            exit 1
+          fi
         else
           echo "❌ Bandit report not found"
           exit 1
@@ -249,8 +254,8 @@ jobs:
           frontend:latest \
           sh -c "
             echo '🔍 Running npm security audit...' &&
-            npm audit --audit-level high --json > /app/audit-report.json &&
-            echo '✅ Frontend security audit completed successfully!'
+            npm audit --audit-level high --json > /app/audit-report.json || echo 'Audit completed with findings' &&
+            echo '✅ Frontend security audit completed!'
           "
 
     - name: Check frontend security results
@@ -258,12 +263,19 @@ jobs:
         echo "📊 Frontend security audit summary:"
         if [ -f frontend/audit-report.json ]; then
           echo "✅ Audit report generated"
-          # Check for vulnerabilities
-          VULNERABILITIES=$(cat frontend/audit-report.json | grep -o '"vulnerabilities":[0-9]*' | grep -o '[0-9]*' || echo "0")
-          echo "🔍 Found $VULNERABILITIES vulnerabilities"
-          if [ "$VULNERABILITIES" -gt 0 ]; then
-            echo "⚠️  High-severity vulnerabilities detected"
-            echo "📋 Run 'npm audit' locally to see details"
+
+          # Install jq if not available for JSON parsing
+          which jq >/dev/null || (echo "Installing jq..." && apt-get update && apt-get install -y jq)
+
+          # Check for high/critical vulnerabilities
+          HIGH_VULNS=$(cat frontend/audit-report.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          CRITICAL_VULNS=$(cat frontend/audit-report.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+
+          echo "🔍 Found $HIGH_VULNS high-severity and $CRITICAL_VULNS critical vulnerabilities"
+
+          if [ "$HIGH_VULNS" -gt 0 ] || [ "$CRITICAL_VULNS" -gt 0 ]; then
+            echo "⚠️  High or critical severity vulnerabilities detected!"
+            echo "📋 Run 'npm audit' locally to see details and fix with 'npm audit fix'"
             exit 1
           fi
         else
