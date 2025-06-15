@@ -132,14 +132,6 @@ jobs:
       with:
         name: backend-coverage
         path: backend-coverage/
-        retention-days: 7
-
-    - name: Upload backend coverage XML
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-coverage-xml
-        path: backend-coverage/coverage.xml
-        retention-days: 7
 
   frontend:
     runs-on: ubuntu-latest
@@ -200,7 +192,6 @@ jobs:
       with:
         name: frontend-coverage
         path: frontend-coverage/
-        retention-days: 7
 
   generate-badges:
     runs-on: ubuntu-latest
@@ -211,11 +202,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download backend coverage XML
+    - name: Download backend coverage
       uses: actions/download-artifact@v4
       with:
-        name: backend-coverage-xml
-        path: ./backend-coverage-xml/
+        name: backend-coverage
+        path: ./backend-coverage/
       continue-on-error: true
 
     - name: Download frontend coverage
@@ -228,7 +219,7 @@ jobs:
     - name: Generate Backend Coverage Badge
       uses: 5monkeys/cobertura-action@master
       with:
-        path: backend-coverage-xml/coverage.xml
+        path: backend-coverage/coverage.xml
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         minimum_coverage: 70
         fail_below_threshold: false
@@ -246,8 +237,22 @@ jobs:
           COVERAGE=$(node -pe "
             const fs = require('fs');
             const coverage = JSON.parse(fs.readFileSync('./frontend-coverage/coverage-final.json', 'utf8'));
-            const totals = coverage.total;
-            Math.round((totals.statements.covered / totals.statements.total) * 100);
+
+            let totalStatements = 0;
+            let coveredStatements = 0;
+
+            // Iterate through all files in coverage
+            Object.values(coverage).forEach(file => {
+              if (file.s && file.statementMap) {
+                // Get statement coverage
+                const statements = Object.values(file.s);
+                const covered = statements.filter(count => count > 0).length;
+                totalStatements += statements.length;
+                coveredStatements += covered;
+              }
+            });
+
+            Math.round((coveredStatements / totalStatements) * 100);
           ")
 
           # Determine color based on coverage
@@ -323,7 +328,22 @@ jobs:
             // Frontend coverage
             if (fs.existsSync('./frontend-coverage/coverage-final.json')) {
               const frontendCoverage = JSON.parse(fs.readFileSync('./frontend-coverage/coverage-final.json', 'utf8'));
-              const frontendPercent = Math.round((frontendCoverage.total.statements.covered / frontendCoverage.total.statements.total) * 100);
+
+              let totalStatements = 0;
+              let coveredStatements = 0;
+
+              // Iterate through all files in coverage
+              Object.values(frontendCoverage).forEach(file => {
+                if (file.s && file.statementMap) {
+                  // Get statement coverage
+                  const statements = Object.values(file.s);
+                  const covered = statements.filter(count => count > 0).length;
+                  totalStatements += statements.length;
+                  coveredStatements += covered;
+                }
+              });
+
+              const frontendPercent = Math.round((coveredStatements / totalStatements) * 100);
               coverageInfo += `\n- **Frontend Coverage:** ${frontendPercent}%`;
             }
           } catch (e) {
