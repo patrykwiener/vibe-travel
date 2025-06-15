@@ -138,11 +138,22 @@ jobs:
         # Check safety results
         if [ -f backend/safety-report.json ]; then
           echo "✅ Safety report generated"
-          SAFETY_ISSUES=$(cat backend/safety-report.json | jq '.vulnerabilities | length' 2>/dev/null || echo "0")
+
+          # Debug: show safety JSON structure
+          echo "🔍 Safety report sample:" && head -n 3 backend/safety-report.json
+
+          # Parse safety results with proper fallback
+          SAFETY_ISSUES=$(cat backend/safety-report.json | jq -r '.vulnerabilities | length // 0' 2>/dev/null)
+          # Ensure we have a valid number
+          if [ -z "$SAFETY_ISSUES" ] || ! [[ "$SAFETY_ISSUES" =~ ^[0-9]+$ ]]; then
+            echo "⚠️ Could not parse safety results, defaulting to 0"
+            SAFETY_ISSUES=0
+          fi
+
           echo "🔍 Safety found $SAFETY_ISSUES vulnerabilities"
           if [ "$SAFETY_ISSUES" -gt 0 ]; then
             echo "⚠️  Critical vulnerabilities found!"
-            cat backend/safety-report.json | jq '.vulnerabilities[].vulnerability_id' 2>/dev/null || echo "Could not parse vulnerability details"
+            cat backend/safety-report.json | jq -r '.vulnerabilities[].vulnerability_id' 2>/dev/null || echo "Could not parse vulnerability details"
             exit 1
           fi
         else
@@ -153,7 +164,18 @@ jobs:
         # Check bandit results
         if [ -f backend/bandit-report.json ]; then
           echo "✅ Bandit report generated"
-          BANDIT_HIGH=$(cat backend/bandit-report.json | jq '[.results[] | select(.issue_severity == "HIGH")] | length' 2>/dev/null || echo "0")
+
+          # Debug: show bandit JSON structure
+          echo "🔍 Bandit report sample:" && head -n 3 backend/bandit-report.json
+
+          # Parse bandit results with proper fallback
+          BANDIT_HIGH=$(cat backend/bandit-report.json | jq -r '[.results[] | select(.issue_severity == "HIGH")] | length // 0' 2>/dev/null)
+          # Ensure we have a valid number
+          if [ -z "$BANDIT_HIGH" ] || ! [[ "$BANDIT_HIGH" =~ ^[0-9]+$ ]]; then
+            echo "⚠️ Could not parse bandit results, defaulting to 0"
+            BANDIT_HIGH=0
+          fi
+
           echo "🔍 Bandit found $BANDIT_HIGH high-severity issues"
           if [ "$BANDIT_HIGH" -gt 0 ]; then
             echo "⚠️  High-severity security issues found!"
@@ -267,9 +289,17 @@ jobs:
           # Install jq if not available for JSON parsing
           which jq >/dev/null || (echo "Installing jq..." && apt-get update && apt-get install -y jq)
 
-          # Check for high/critical vulnerabilities
-          HIGH_VULNS=$(cat frontend/audit-report.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
-          CRITICAL_VULNS=$(cat frontend/audit-report.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
+          # Check for high/critical vulnerabilities with proper fallback
+          HIGH_VULNS=$(cat frontend/audit-report.json | jq -r '.metadata.vulnerabilities.high // 0' 2>/dev/null)
+          CRITICAL_VULNS=$(cat frontend/audit-report.json | jq -r '.metadata.vulnerabilities.critical // 0' 2>/dev/null)
+
+          # Ensure we have valid numbers
+          if [ -z "$HIGH_VULNS" ] || ! [[ "$HIGH_VULNS" =~ ^[0-9]+$ ]]; then
+            HIGH_VULNS=0
+          fi
+          if [ -z "$CRITICAL_VULNS" ] || ! [[ "$CRITICAL_VULNS" =~ ^[0-9]+$ ]]; then
+            CRITICAL_VULNS=0
+          fi
 
           echo "🔍 Found $HIGH_VULNS high-severity and $CRITICAL_VULNS critical vulnerabilities"
 
