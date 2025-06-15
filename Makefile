@@ -51,7 +51,9 @@ test-frontend: ## Run frontend tests with coverage
 
 .PHONY: test-all
 test-all: ## Run all tests (backend + frontend) with coverage
-	docker compose exec -T backend ./scripts/test.sh
+	docker compose build
+	docker compose up -d
+	docker compose exec -T backend sh scripts/tests-start.sh $(path)
 	docker compose exec -T frontend npm run test:coverage
 
 .PHONY: shell
