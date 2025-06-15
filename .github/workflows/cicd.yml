@@ -1,10 +1,15 @@
 name: CI/CD Pipeline
 
+# CI/CD Strategy:
+# - develop branch → automatic deploy to staging
+# - master branch → manual approval → deploy to production
+# - pull requests → only CI checks (no deployment)
+
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 env:
   # Container Registry
@@ -234,7 +239,7 @@ jobs:
   push-images:
     needs: [backend, frontend]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
 
     permissions:
       contents: read
@@ -301,7 +306,7 @@ jobs:
   deploy-staging:
     needs: push-images
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     environment: staging
 
     steps:
@@ -310,6 +315,7 @@ jobs:
           echo "🚀 Deploying to staging environment..."
           echo "Backend image: ${{ needs.push-images.outputs.backend-image }}"
           echo "Frontend image: ${{ needs.push-images.outputs.frontend-image }}"
+          echo "Environment: Staging"
           echo "✅ Staging deployment completed successfully!"
 
       - name: Health Check
@@ -318,17 +324,26 @@ jobs:
           echo "✅ All health checks passed!"
 
   deploy-production:
-    needs: [push-images, deploy-staging]
+    needs: push-images
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    environment: production
+    environment:
+      name: production
+      url: https://vibe-travels-production.com
 
     steps:
+      - name: Manual Approval Required
+        run: |
+          echo "⏳ Waiting for manual approval..."
+          echo "This deployment requires approval in GitHub Actions tab"
+          echo "Navigate to Actions → This workflow → Review deployments"
+
       - name: Mock Deploy to Production
         run: |
           echo "🚀 Deploying to production environment..."
           echo "Backend image: ${{ needs.push-images.outputs.backend-image }}"
           echo "Frontend image: ${{ needs.push-images.outputs.frontend-image }}"
+          echo "Environment: Production"
           echo "✅ Production deployment completed successfully!"
 
       - name: Health Check
@@ -339,3 +354,4 @@ jobs:
       - name: Notify Success
         run: |
           echo "🎉 VibeTravels has been successfully deployed to production!"
+          echo "🌐 Application is now live at: https://vibe-travels-production.com"
