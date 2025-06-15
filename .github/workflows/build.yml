@@ -174,14 +174,18 @@ jobs:
 
     - name: Run frontend tests with coverage
       run: |
-        mkdir -p ${{ github.workspace }}/frontend-coverage
-        docker run --rm \
+        # Run tests without mounting coverage directory
+        docker run --name frontend-test \
           -v ${{ github.workspace }}/frontend:/app \
           -v /app/node_modules \
-          -v ${{ github.workspace }}/frontend-coverage:/app/coverage \
           -w /app \
           frontend:latest \
           sh -c "npm run test:coverage"
+
+        # Copy coverage from container to host
+        mkdir -p ${{ github.workspace }}/frontend-coverage
+        docker cp frontend-test:/app/coverage/. ${{ github.workspace }}/frontend-coverage/
+        docker rm frontend-test
 
     - name: Upload frontend coverage reports
       uses: actions/upload-artifact@v4
