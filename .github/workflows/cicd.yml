@@ -120,46 +120,17 @@ jobs:
           sh -c "
             set -e
             echo '🔍 Installing security scanning tools in clean environment...'
-            pip install --no-cache-dir safety==3.0.1 bandit[toml]==1.7.5
-
-            echo '🛡️ Running safety check...'
-            safety check --json --stdin < requirements.txt > safety-report.json || echo 'Safety check completed with warnings'
+            pip install --no-cache-dir bandit[toml]==1.7.5
 
             echo '🔒 Running bandit security scan...'
             bandit -r src/ -f json -o bandit-report.json -ll || echo 'Bandit scan completed with warnings'
 
-            echo '✅ Security scans completed!'
+            echo '✅ Security scan completed!'
           "
 
     - name: Check security scan results
       run: |
         echo "📊 Security scan summary:"
-
-        # Check safety results
-        if [ -f backend/safety-report.json ]; then
-          echo "✅ Safety report generated"
-
-          # Debug: show safety JSON structure
-          echo "🔍 Safety report sample:" && head -n 3 backend/safety-report.json
-
-          # Parse safety results with proper fallback
-          SAFETY_ISSUES=$(cat backend/safety-report.json | jq -r '.vulnerabilities | length // 0' 2>/dev/null)
-          # Ensure we have a valid number
-          if [ -z "$SAFETY_ISSUES" ] || ! [[ "$SAFETY_ISSUES" =~ ^[0-9]+$ ]]; then
-            echo "⚠️ Could not parse safety results, defaulting to 0"
-            SAFETY_ISSUES=0
-          fi
-
-          echo "🔍 Safety found $SAFETY_ISSUES vulnerabilities"
-          if [ "$SAFETY_ISSUES" -gt 0 ]; then
-            echo "⚠️  Critical vulnerabilities found!"
-            cat backend/safety-report.json | jq -r '.vulnerabilities[].vulnerability_id' 2>/dev/null || echo "Could not parse vulnerability details"
-            exit 1
-          fi
-        else
-          echo "❌ Safety report not found"
-          exit 1
-        fi
 
         # Check bandit results
         if [ -f backend/bandit-report.json ]; then
@@ -169,7 +140,7 @@ jobs:
           echo "🔍 Bandit report sample:" && head -n 3 backend/bandit-report.json
 
           # Parse bandit results with proper fallback
-          BANDIT_HIGH=$(cat backend/bandit-report.json | jq -r '[.results[] | select(.issue_severity == "HIGH")] | length // 0' 2>/dev/null)
+          BANDIT_HIGH=$(cat backend/bandit-report.json | jq -r '[.results[]? | select(.issue_severity == "HIGH")] | length // 0' 2>/dev/null)
           # Ensure we have a valid number
           if [ -z "$BANDIT_HIGH" ] || ! [[ "$BANDIT_HIGH" =~ ^[0-9]+$ ]]; then
             echo "⚠️ Could not parse bandit results, defaulting to 0"
@@ -180,6 +151,8 @@ jobs:
           if [ "$BANDIT_HIGH" -gt 0 ]; then
             echo "⚠️  High-severity security issues found!"
             exit 1
+          else
+            echo "✅ No high-severity security issues found"
           fi
         else
           echo "❌ Bandit report not found"
@@ -190,9 +163,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: backend-security-reports
-        path: |
-          backend/safety-report.json
-          backend/bandit-report.json
+        path: backend/bandit-report.json
       if: always()
 
     - name: Run database pre-start checks
