@@ -27,5 +27,3 @@ done
 
 # Run the tests with the specified parameters
 coverage run --source=src -m pytest $TEST_PATH
-coverage report --show-missing
-coverage html --title "$TITLE"
