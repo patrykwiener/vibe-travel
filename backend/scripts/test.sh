@@ -25,4 +25,4 @@ while [ $# -gt 0 ]; do
 done
 
 # Run the tests with the specified parameters
-coverage run --source=src -m pytest $TEST_PATH
+coverage run --source=src -m pytest -vv $TEST_PATH
