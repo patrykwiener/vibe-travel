@@ -3,7 +3,6 @@
 set -e
 set -x
 
-
 # Default test path is empty (runs all tests)
 TEST_PATH=""
 
@@ -11,7 +10,7 @@ TEST_PATH=""
 TITLE="coverage"
 
 # Parse command line arguments
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case $1 in
     --title=*)
       TITLE="${1#*=}"

@@ -17,3 +17,4 @@ aiosqlite==0.20.0
 alembic==1.15.2
 openai==1.81.0
 loguru==0.7.3
+tenacity==9.0.0

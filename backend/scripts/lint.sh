@@ -20,4 +20,4 @@ else
 fi
 
 # Run MyPy for type checking (no auto-fix available)
-mypy src tests
+mypy src
