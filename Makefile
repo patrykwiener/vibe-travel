@@ -40,7 +40,7 @@ lint-fix: ## Fix linting issues
 	docker compose exec -T frontend npm run format --fix
 
 .PHONY: test-backend
-test: ## Run tests with proper database setup. Usage: make test [path=path/to/test]
+test-backend: ## Run tests with proper database setup. Usage: make test [path=path/to/test]
 	docker compose build
 	docker compose up -d
 	docker compose exec -T backend sh scripts/tests-start.sh $(path)
