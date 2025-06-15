@@ -112,11 +112,52 @@ jobs:
 
     - name: Run backend security scan
       run: |
+        # Create a script for better error handling
         docker run --rm \
           -v ${{ github.workspace }}/backend:/app \
           -w /app \
           backend:latest \
-          sh -c "pip install safety bandit && safety check --json --output safety-report.json || true && bandit -r src/ -f json -o bandit-report.json || true"
+          sh -c "
+            set -e
+            echo '🔍 Installing security scanning tools...'
+            pip install --upgrade pip
+            pip install safety==3.2.8 bandit==1.7.5
+
+            echo '🛡️ Running safety check...'
+            safety check --json > /app/safety-report.json
+            echo 'Safety check passed ✅'
+
+            echo '🔒 Running bandit security scan...'
+            bandit -r src/ -f json -o /app/bandit-report.json -ll
+            echo 'Bandit scan passed ✅'
+
+            echo '✅ All security scans completed successfully!'
+          "
+
+    - name: Check security scan results
+      run: |
+        echo "📊 Security scan summary:"
+        if [ -f backend/safety-report.json ]; then
+          echo "✅ Safety report generated"
+          # Check if there are any vulnerabilities
+          if grep -q '"vulnerabilities"' backend/safety-report.json; then
+            echo "⚠️  Vulnerabilities found in safety scan"
+            cat backend/safety-report.json | grep -A 5 -B 5 "vulnerabilities" || echo "No vulnerability details found"
+          fi
+        else
+          echo "❌ Safety report not found"
+          exit 1
+        fi
+
+        if [ -f backend/bandit-report.json ]; then
+          echo "✅ Bandit report generated"
+          # Check bandit results
+          ISSUES=$(cat backend/bandit-report.json | grep -o '"SEVERITY"' | wc -l || echo "0")
+          echo "🔍 Bandit found $ISSUES potential security issues"
+        else
+          echo "❌ Bandit report not found"
+          exit 1
+        fi
 
     - name: Upload security scan results
       uses: actions/upload-artifact@v4
@@ -206,7 +247,29 @@ jobs:
           -v /app/node_modules \
           -w /app \
           frontend:latest \
-          sh -c "npm audit --audit-level high --json > audit-report.json || true"
+          sh -c "
+            echo '🔍 Running npm security audit...' &&
+            npm audit --audit-level high --json > /app/audit-report.json &&
+            echo '✅ Frontend security audit completed successfully!'
+          "
+
+    - name: Check frontend security results
+      run: |
+        echo "📊 Frontend security audit summary:"
+        if [ -f frontend/audit-report.json ]; then
+          echo "✅ Audit report generated"
+          # Check for vulnerabilities
+          VULNERABILITIES=$(cat frontend/audit-report.json | grep -o '"vulnerabilities":[0-9]*' | grep -o '[0-9]*' || echo "0")
+          echo "🔍 Found $VULNERABILITIES vulnerabilities"
+          if [ "$VULNERABILITIES" -gt 0 ]; then
+            echo "⚠️  High-severity vulnerabilities detected"
+            echo "📋 Run 'npm audit' locally to see details"
+            exit 1
+          fi
+        else
+          echo "❌ Audit report not found"
+          exit 1
+        fi
 
     - name: Upload frontend security audit
       uses: actions/upload-artifact@v4
