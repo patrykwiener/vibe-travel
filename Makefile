@@ -54,11 +54,6 @@ test-all: ## Run all tests (backend + frontend) with coverage
 	docker compose exec -T backend ./scripts/test.sh
 	docker compose exec -T frontend npm run test:coverage
 
-.PHONY: test-ci
-test-ci: ## Run tests with coverage for CI/CD pipeline
-	docker compose exec -T -e CI=true backend ./scripts/test.sh
-	docker compose exec -T -e CI=true frontend npm run test:coverage
-
 .PHONY: shell
 shell: ## Enter backend shell
 	docker compose exec backend sh
