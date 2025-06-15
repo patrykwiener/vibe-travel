@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Project Status: MVP Development](https://img.shields.io/badge/Project%20Status-MVP%20Development-yellow)](https://github.com/10xdevs/vibe-travel)
-[![Build and Test](https://github.com/10xdevs/vibe-travel/workflows/Build%20and%20Test/badge.svg)](https://github.com/10xdevs/vibe-travel/actions)
+[![CI/CD Pipeline](https://github.com/patrykwiener/vibe-travel/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/patrykwiener/vibe-travel/actions)
 
 ## Table of Contents
 
