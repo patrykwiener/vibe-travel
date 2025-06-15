@@ -236,8 +236,8 @@ jobs:
         name: frontend-coverage
         path: frontend-coverage/
 
-  push-images:
-    needs: [backend, frontend]
+  push-backend-image:
+    needs: backend
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
 
@@ -247,7 +247,6 @@ jobs:
 
     outputs:
       backend-image: ${{ steps.backend-meta.outputs.tags }}
-      frontend-image: ${{ steps.frontend-meta.outputs.tags }}
 
     steps:
       - name: Checkout code
@@ -283,6 +282,32 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  push-frontend-image:
+    needs: frontend
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      frontend-image: ${{ steps.frontend-meta.outputs.tags }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract frontend metadata
         id: frontend-meta
         uses: docker/metadata-action@v5
@@ -304,7 +329,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy-staging:
-    needs: push-images
+    needs: [push-backend-image, push-frontend-image]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     environment: staging
@@ -313,8 +338,8 @@ jobs:
       - name: Mock Deploy to Staging
         run: |
           echo "🚀 Deploying to staging environment..."
-          echo "Backend image: ${{ needs.push-images.outputs.backend-image }}"
-          echo "Frontend image: ${{ needs.push-images.outputs.frontend-image }}"
+          echo "Backend image: ${{ needs.push-backend-image.outputs.backend-image }}"
+          echo "Frontend image: ${{ needs.push-frontend-image.outputs.frontend-image }}"
           echo "Environment: Staging"
           echo "✅ Staging deployment completed successfully!"
 
@@ -324,7 +349,7 @@ jobs:
           echo "✅ All health checks passed!"
 
   deploy-production:
-    needs: push-images
+    needs: [push-backend-image, push-frontend-image]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     environment:
@@ -341,8 +366,8 @@ jobs:
       - name: Mock Deploy to Production
         run: |
           echo "🚀 Deploying to production environment..."
-          echo "Backend image: ${{ needs.push-images.outputs.backend-image }}"
-          echo "Frontend image: ${{ needs.push-images.outputs.frontend-image }}"
+          echo "Backend image: ${{ needs.push-backend-image.outputs.backend-image }}"
+          echo "Frontend image: ${{ needs.push-frontend-image.outputs.frontend-image }}"
           echo "Environment: Production"
           echo "✅ Production deployment completed successfully!"
 
