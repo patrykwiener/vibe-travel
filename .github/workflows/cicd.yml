@@ -10,6 +10,25 @@ on:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for deployment'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip test execution (not recommended for production)'
+        required: false
+        default: false
+        type: boolean
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        type: string
 
 env:
   # Container Registry
@@ -177,6 +196,7 @@ jobs:
           python tests_pre_start.py
 
     - name: Run backend tests with coverage
+      if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true'
       run: |
         # Run tests with coverage (using setup.cfg configuration)
         docker run --name backend-test \
@@ -194,6 +214,7 @@ jobs:
         docker rm backend-test
 
     - name: Upload backend coverage reports
+      if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true'
       uses: actions/upload-artifact@v4
       with:
         name: backend-coverage
@@ -292,6 +313,7 @@ jobs:
       if: always()
 
     - name: Run frontend tests with coverage
+      if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true'
       run: |
         # Run tests without mounting coverage directory
         docker run --name frontend-test \
@@ -307,6 +329,7 @@ jobs:
         docker rm frontend-test
 
     - name: Upload frontend coverage reports
+      if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_tests != 'true'
       uses: actions/upload-artifact@v4
       with:
         name: frontend-coverage
@@ -315,7 +338,7 @@ jobs:
   push-backend-image:
     needs: backend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) || github.event_name == 'workflow_dispatch'
 
     permissions:
       contents: read
@@ -361,7 +384,7 @@ jobs:
   push-frontend-image:
     needs: frontend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) || github.event_name == 'workflow_dispatch'
 
     permissions:
       contents: read
@@ -407,10 +430,19 @@ jobs:
   deploy-staging:
     needs: [push-backend-image, push-frontend-image]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     environment: staging
 
     steps:
+      - name: Log Manual Trigger Info
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "🎯 Manual workflow trigger detected"
+          echo "Target environment: ${{ github.event.inputs.environment }}"
+          echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Triggered by: ${{ github.actor }}"
+
       - name: Mock Deploy to Staging
         run: |
           echo "🚀 Deploying to staging environment..."
@@ -427,12 +459,21 @@ jobs:
   deploy-production:
     needs: [push-backend-image, push-frontend-image]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     environment:
       name: production
       url: https://vibe-travels-production.com
 
     steps:
+      - name: Log Manual Trigger Info
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "🎯 Manual workflow trigger detected"
+          echo "Target environment: ${{ github.event.inputs.environment }}"
+          echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Triggered by: ${{ github.actor }}"
+
       - name: Manual Approval Required
         run: |
           echo "⏳ Waiting for manual approval..."
