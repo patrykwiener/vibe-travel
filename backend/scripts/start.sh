@@ -54,6 +54,5 @@ exec uvicorn src.main:app \
     --workers "${WORKERS:-1}" \
     --loop uvloop \
     --http httptools \
-    --log-level "${LOG_LEVEL:-info}" \
     --access-log \
     --use-colors

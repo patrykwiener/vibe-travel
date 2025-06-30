@@ -34,7 +34,7 @@ services:
       - key: API_V1_STR
         value: /api/v1
       - key: LOG_LEVEL
-        value: info
+        value: INFO
       - key: LOG_FORMAT
         value: json
       - key: LOG_FILE_ENABLED
