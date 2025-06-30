@@ -13,35 +13,42 @@ def setup_logging() -> None:
 
     This function sets up:
     - Console logging with colored output for development
-    - File logging with rotation and retention
+    - File logging with rotation and retention (only if enabled in settings)
     - JSON formatting for production environments
     - Different log levels based on environment
     """
     # Remove default handler
     logger.remove()
 
-    # Create logs directory if it doesn't exist
-    log_file_path = Path(settings.LOG_FILE_PATH)
-    log_file_path.parent.mkdir(parents=True, exist_ok=True)
-
     # Console handler configuration
     console_config = _get_console_config()
     logger.add(sys.stdout, **console_config)
 
-    # File handler configuration
-    file_config = _get_file_config()
-    logger.add(str(log_file_path), **file_config)
+    # Only attempt file logging if enabled via configuration
+    if settings.LOG_FILE_ENABLED:
+        log_file_path = Path(settings.LOG_FILE_PATH)
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Add error file handler for better error tracking
-    error_file_config = _get_error_file_config()
-    logger.add(str(log_file_path.parent / 'errors.log'), **error_file_config)
+        # File handler configuration
+        file_config = _get_file_config()
+        logger.add(str(log_file_path), **file_config)
 
-    logger.info(
-        'Logging configuration completed.',
-        log_file_path=str(log_file_path),
-        environment=settings.ENVIRONMENT,
-        log_level=settings.LOG_LEVEL,
-    )
+        # Add error file handler for better error tracking
+        error_file_config = _get_error_file_config()
+        logger.add(str(log_file_path.parent / 'errors.log'), **error_file_config)
+
+        logger.info(
+            'Logging configuration completed with file logging.',
+            log_file_path=str(log_file_path),
+            environment=settings.ENVIRONMENT,
+            log_level=settings.LOG_LEVEL,
+        )
+    else:
+        logger.info(
+            'File logging disabled via configuration. Using console logging only.',
+            environment=settings.ENVIRONMENT,
+            log_level=settings.LOG_LEVEL,
+        )
 
 
 def _get_console_config() -> dict[str, Any]:

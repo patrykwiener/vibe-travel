@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     LOG_ROTATION: str = '100 MB'
     LOG_RETENTION: str = '30 days'
     LOG_FILE_PATH: str = 'logs/app.log'
+    LOG_FILE_ENABLED: bool = True
     LOG_SERIALIZE: bool = False
 
     API_V1_STR: str = '/api/v1'
