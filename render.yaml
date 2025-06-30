@@ -22,6 +22,7 @@ services:
     rootDir: backend
     dockerfilePath: ./Dockerfile.prod
     healthCheckPath: /api/v1/utils/health-check/
+    autoDeploy: false  # Disable auto-deployment
 
     # Environment variables
     envVars:
@@ -105,8 +106,6 @@ services:
         value: "true"
       - key: JWT_COOKIE_SAMESITE
         value: "none"
-      - key: JWT_COOKIE_DOMAIN
-        value: ".onrender.com"
 
       # Security Configuration
       - key: ALLOWED_HOSTS
@@ -124,6 +123,7 @@ services:
     branch: master
     rootDir: frontend
     dockerfilePath: ./Dockerfile.prod
+    autoDeploy: false  # Disable auto-deployment
 
     # Environment variables for build
     envVars:
