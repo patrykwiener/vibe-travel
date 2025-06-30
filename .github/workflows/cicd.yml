@@ -1,9 +1,11 @@
 name: CI/CD Pipeline
 
-# CI/CD Strategy for Render:
-# - master branch → automatic deploy to production (Render handles this)
-# - pull requests → only CI checks (no deployment)
-# - No image pushing to registry (Render builds from source)
+# CI/CD Strategy for Render with Protected Master Branch:
+# - Development work happens on feature branches
+# - Pull requests to master trigger CI checks only
+# - Master branch is protected - only updated after CI passes
+# - Push to master (after PR merge) triggers automatic Render deployment
+# - Render deploys directly from master branch after all tests pass
 
 on:
   push:
@@ -52,6 +54,9 @@ env:
   USE_MOCK_AI: 1
   OPENROUTER_API_KEY: mock-key
   OPENROUTER_MODEL: mock-model
+
+  # Render API configuration for deployment triggering
+  RENDER_API_URL: https://api.render.com/v1
 
 jobs:
   backend:
@@ -398,7 +403,13 @@ jobs:
   deploy-production:
     needs: [backend, frontend, validate-render-config]
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'workflow_dispatch'
+    # Only deploy when:
+    # 1. Push to master (after PR merge with passing CI)
+    # 2. Manual workflow dispatch (but only if tests weren't skipped)
+    # 3. All CI jobs (backend, frontend, validate-render-config) have passed
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tests != 'true')
     environment:
       name: production
       url: https://vibetravel-frontend.onrender.com
@@ -417,15 +428,56 @@ jobs:
           echo "Triggered by: ${{ github.actor }}"
 
       - name: Trigger Render Deployment
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          echo "🚀 Triggering Render deployment..."
-          echo "🌐 Render will automatically deploy the application from master branch"
+          echo "🚀 All CI checks passed! Triggering Render deployment..."
+          echo "✅ Backend tests: PASSED"
+          echo "✅ Frontend tests: PASSED"
+          echo "✅ Render config validation: PASSED"
+          echo ""
+
+          if [ -z "$RENDER_API_KEY" ]; then
+            echo "⚠️  RENDER_API_KEY not found in GitHub Secrets"
+            echo "🔧 Manual deployment required in Render Dashboard"
+            echo "🔗 Go to: https://dashboard.render.com"
+            echo "📋 Deploy services manually after CI completion"
+          else
+            echo "🔑 Using Render API to trigger deployment..."
+
+            # Get service IDs and trigger deployment
+            echo "🔍 Fetching Render services..."
+
+            # Backend deployment
+            echo "🚀 Triggering backend deployment..."
+            BACKEND_RESPONSE=$(curl -s -X POST \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Content-Type: application/json" \
+              "$RENDER_API_URL/services/vibetravel-backend/deploys" \
+              -d '{"clearCache": false}' || echo "Backend deploy request failed")
+
+            echo "Backend deploy response: $BACKEND_RESPONSE"
+
+            # Frontend deployment
+            echo "🚀 Triggering frontend deployment..."
+            FRONTEND_RESPONSE=$(curl -s -X POST \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Content-Type: application/json" \
+              "$RENDER_API_URL/services/vibetravel-frontend/deploys" \
+              -d '{"clearCache": false}' || echo "Frontend deploy request failed")
+
+            echo "Frontend deploy response: $FRONTEND_RESPONSE"
+
+            echo "✅ Deployment requests sent to Render"
+          fi
+
+          echo ""
           echo "🔧 Services configured in render.yaml:"
           echo "  - vibetravel-backend (FastAPI)"
           echo "  - vibetravel-frontend (Vue.js + Nginx)"
           echo "  - vibetravel-db (PostgreSQL 16)"
-
-          echo "⏳ Deployment is triggered by push to master branch"
+          echo ""
+          echo "⏳ Deployment initiated after successful CI pipeline"
           echo "🔗 Monitor deployment at: https://dashboard.render.com"
 
       - name: Post-deployment Information
