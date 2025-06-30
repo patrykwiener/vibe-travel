@@ -92,6 +92,7 @@ jobs:
         tags: backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        outputs: type=docker
 
     - name: Build backend production image (Render compatibility test)
       uses: docker/build-push-action@v6
@@ -102,6 +103,7 @@ jobs:
         tags: backend:prod
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        outputs: type=docker
 
     - name: Create .env file
       run: |
@@ -247,6 +249,7 @@ jobs:
         tags: frontend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        outputs: type=docker
         build-args: |
           VITE_BACKEND_URL=http://localhost:8000
 
@@ -259,6 +262,7 @@ jobs:
         tags: frontend:prod
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        outputs: type=docker
         build-args: |
           VITE_API_BASE_URL=https://vibetravel-backend.onrender.com
           VITE_ENVIRONMENT=production
