@@ -409,11 +409,11 @@ jobs:
     runs-on: ubuntu-latest
     # Only deploy when:
     # 1. Push to master (after PR merge with passing CI)
-    # 2. Manual workflow dispatch (but only if tests weren't skipped)
+    # 2. Manual workflow dispatch (regardless of skip_tests value since needs ensure jobs passed)
     # 3. All CI jobs (backend, frontend, validate-render-config) have passed
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_tests != 'true')
+      (github.event_name == 'workflow_dispatch')
     environment:
       name: production
       url: https://vibetravel-frontend.onrender.com

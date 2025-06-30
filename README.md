@@ -101,8 +101,9 @@ VibeTravels addresses common challenges in trip planning, including:
 
 ### CI/CD & Hosting
 
-- **GitHub Actions**: Automated CI/CD pipelines
+- **GitHub Actions**: Automated CI/CD pipelines with protected master branch workflow
 - **Render**: Cloud hosting platform with Infrastructure as Code (render.yaml)
+- **Comprehensive DevOps Documentation**: See [DevOps Pipeline & Deployment Guide](docs/DEVOPS_PIPELINE_DEPLOYMENT.md) for detailed CI/CD strategy, deployment flow, and troubleshooting
 
 ## Getting Started
 
