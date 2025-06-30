@@ -262,6 +262,59 @@ workflow_dispatch:
 
 - Navigate to service → Manual Deploy → Deploy latest commit
 
+### Deployment Triggering & Render Integration
+
+#### Render Deploy Hooks (Recommended)
+
+- **Use Deploy Hooks for each service instead of the Render API.**
+- Obtain Deploy Hook URLs from Render Dashboard → Service → Settings → Deploy Hook.
+- Add these as GitHub Secrets:
+
+```bash
+RENDER_BACKEND_DEPLOY_HOOK=https://api.render.com/deploy/srv-xxxxx?key=yyyyy
+RENDER_FRONTEND_DEPLOY_HOOK=https://api.render.com/deploy/srv-zzzzz?key=wwwww
+```
+
+- The CI/CD pipeline will POST to these URLs after all jobs pass, triggering deployment only after successful CI.
+- **No need for Render API Key unless you want to use the API fallback.**
+
+
+#### GitHub Secrets Required
+
+- `RENDER_BACKEND_DEPLOY_HOOK` (recommended)
+- `RENDER_FRONTEND_DEPLOY_HOOK` (recommended)
+
+#### Branch Protection for Solo Developers
+
+- If you are the only developer, you can disable "Require pull request before merging" and approvals, but keep status checks required:
+  - ✅ Require status checks to pass before merging
+  - ✅ Require branches to be up to date before merging
+  - Add required checks: `backend`, `frontend`, `validate-render-config`
+- If you want to keep PR workflow, allow self-approval and do not require code owner reviews.
+
+### Updated Deployment Flow
+
+1. **Feature Branch → PR → CI**
+2. **Merge to master (protected, only after CI passes)**
+3. **CI triggers deploy hooks for backend and frontend**
+4. **Render builds and deploys latest commit**
+
+### Example: GitHub Actions Deployment Step
+
+```yaml
+- name: Trigger Render Deployment
+  env:
+    RENDER_BACKEND_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+    RENDER_FRONTEND_DEPLOY_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+  run: |
+    if [ -n "$RENDER_BACKEND_DEPLOY_HOOK" ]; then
+      curl -s -X POST "$RENDER_BACKEND_DEPLOY_HOOK"
+    fi
+    if [ -n "$RENDER_FRONTEND_DEPLOY_HOOK" ]; then
+      curl -s -X POST "$RENDER_FRONTEND_DEPLOY_HOOK"
+    fi
+```
+
 ### Deployment Verification
 
 **Automated Health Checks:**
@@ -273,10 +326,7 @@ workflow_dispatch:
 
 ### Secrets Management
 
-**GitHub Secrets (Required):**
-```bash
-RENDER_API_KEY=your-render-api-key-here
-```
+
 
 **Render Environment Variables (Secrets):**
 ```bash
@@ -475,9 +525,10 @@ databases:
 - **FastAPI Deployment**: https://fastapi.tiangolo.com/deployment/
 - **Vue.js Production Deployment**: https://vuejs.org/guide/best-practices/production-deployment.html
 
+
 ## ✅ Quick Start Checklist
 
-- [ ] Configure GitHub Secrets (`RENDER_API_KEY`)
+- [ ] Configure GitHub Secrets (`RENDER_BACKEND_DEPLOY_HOOK`, `RENDER_FRONTEND_DEPLOY_HOOK`)
 - [ ] Set up protected master branch rules
 - [ ] Configure Render secrets in Dashboard
 - [ ] Verify `render.yaml` configuration

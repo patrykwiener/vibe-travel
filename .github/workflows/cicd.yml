@@ -433,48 +433,33 @@ jobs:
 
       - name: Trigger Render Deployment
         env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_BACKEND_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+          RENDER_FRONTEND_DEPLOY_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
         run: |
           echo "🚀 All CI checks passed! Triggering Render deployment..."
           echo "✅ Backend tests: PASSED"
           echo "✅ Frontend tests: PASSED"
           echo "✅ Render config validation: PASSED"
           echo ""
-
-          if [ -z "$RENDER_API_KEY" ]; then
-            echo "⚠️  RENDER_API_KEY not found in GitHub Secrets"
+          # Use deploy hooks only
+          if [ -n "$RENDER_BACKEND_DEPLOY_HOOK" ] && [ -n "$RENDER_FRONTEND_DEPLOY_HOOK" ]; then
+            echo "🔗 Using Render Deploy Hooks..."
+            echo "🚀 Triggering backend deployment via deploy hook..."
+            BACKEND_RESPONSE=$(curl -s -X POST "$RENDER_BACKEND_DEPLOY_HOOK" || echo "Backend deploy hook failed")
+            echo "Backend hook response: $BACKEND_RESPONSE"
+            echo "🚀 Triggering frontend deployment via deploy hook..."
+            FRONTEND_RESPONSE=$(curl -s -X POST "$RENDER_FRONTEND_DEPLOY_HOOK" || echo "Frontend deploy hook failed")
+            echo "Frontend hook response: $FRONTEND_RESPONSE"
+            echo "✅ Deploy hooks triggered successfully"
+          else
+            echo "⚠️  No deployment method available"
             echo "🔧 Manual deployment required in Render Dashboard"
             echo "🔗 Go to: https://dashboard.render.com"
             echo "📋 Deploy services manually after CI completion"
-          else
-            echo "🔑 Using Render API to trigger deployment..."
-
-            # Get service IDs and trigger deployment
-            echo "🔍 Fetching Render services..."
-
-            # Backend deployment
-            echo "🚀 Triggering backend deployment..."
-            BACKEND_RESPONSE=$(curl -s -X POST \
-              -H "Authorization: Bearer $RENDER_API_KEY" \
-              -H "Content-Type: application/json" \
-              "$RENDER_API_URL/services/vibetravel-backend/deploys" \
-              -d '{"clearCache": false}' || echo "Backend deploy request failed")
-
-            echo "Backend deploy response: $BACKEND_RESPONSE"
-
-            # Frontend deployment
-            echo "🚀 Triggering frontend deployment..."
-            FRONTEND_RESPONSE=$(curl -s -X POST \
-              -H "Authorization: Bearer $RENDER_API_KEY" \
-              -H "Content-Type: application/json" \
-              "$RENDER_API_URL/services/vibetravel-frontend/deploys" \
-              -d '{"clearCache": false}' || echo "Frontend deploy request failed")
-
-            echo "Frontend deploy response: $FRONTEND_RESPONSE"
-
-            echo "✅ Deployment requests sent to Render"
+            echo ""
+            echo "💡 To automate deployment, add these to GitHub Secrets:"
+            echo "   RENDER_BACKEND_DEPLOY_HOOK and RENDER_FRONTEND_DEPLOY_HOOK"
           fi
-
           echo ""
           echo "🔧 Services configured in render.yaml:"
           echo "  - vibetravel-backend (FastAPI)"
