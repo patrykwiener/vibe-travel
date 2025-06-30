@@ -475,7 +475,7 @@ jobs:
           echo "🌐 Application URLs (available after deployment):"
           echo "  - Frontend: https://vibetravel-frontend.onrender.com"
           echo "  - Backend API: https://vibetravel-backend.onrender.com"
-          echo "  - API Documentation: https://vibetravel-backend.onrender.com/docs"
+          echo "  - API Documentation: https://vibetravel-backend.onrender.com/api/v1/docs"
           echo "  - Health Check: https://vibetravel-backend.onrender.com/api/v1/utils/health-check/"
 
           echo "🔧 Render Dashboard: https://dashboard.render.com"
