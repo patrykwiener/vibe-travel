@@ -91,12 +91,22 @@ services:
       # Secrets (to be set manually in Render Dashboard)
       - key: SECRET_KEY
         sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
       - key: OPENROUTER_API_KEY
         sync: false
       - key: FIRST_SUPERUSER
         sync: false
       - key: FIRST_SUPERUSER_PASSWORD
         sync: false
+
+      # JWT Cookie Configuration for Production
+      - key: JWT_COOKIE_SECURE
+        value: "true"
+      - key: JWT_COOKIE_SAMESITE
+        value: "none"
+      - key: JWT_COOKIE_DOMAIN
+        value: ".onrender.com"
 
       # Security Configuration
       - key: ALLOWED_HOSTS
