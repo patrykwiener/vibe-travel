@@ -1,0 +1,141 @@
+# Render Infrastructure as Code Configuration
+# This file defines the complete application architecture for VibeTravels on Render
+
+# Database configuration
+databases:
+  - name: vibetravel-db
+    databaseName: vibetravel_prod
+    user: vibetravel_user
+    plan: free
+    postgresMajorVersion: "16"
+
+# Services configuration
+services:
+  # Backend FastAPI Service
+  - type: web
+    name: vibetravel-backend
+    runtime: docker
+    repo: https://github.com/patrykwiener/vibe-travel.git
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: backend
+    dockerfilePath: ./Dockerfile.prod
+    healthCheckPath: /api/v1/utils/health-check/
+
+    # Environment variables
+    envVars:
+      - key: ENVIRONMENT
+        value: prod
+      - key: DEBUG
+        value: "false"
+      - key: PROJECT_NAME
+        value: VibeTravels
+      - key: API_V1_STR
+        value: /api/v1
+      - key: LOG_LEVEL
+        value: INFO
+      - key: LOG_FORMAT
+        value: json
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: "10000"
+      - key: WORKERS
+        value: "1"
+      - key: MAX_CONNECTIONS
+        value: "100"
+      - key: POOL_SIZE
+        value: "20"
+      - key: POOL_OVERFLOW
+        value: "30"
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: ALGORITHM
+        value: HS256
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-3.5-turbo
+      - key: OPENROUTER_TIMEOUT_SECONDS
+        value: "300"
+
+      # Database connection (automatically populated by Render)
+      - key: POSTGRES_SERVER
+        fromDatabase:
+          name: vibetravel-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: vibetravel-db
+          property: port
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: vibetravel-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: vibetravel-db
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: vibetravel-db
+          property: database
+
+      # CORS configuration (will be set to frontend URL)
+      - key: BACKEND_CORS_ORIGINS
+        value: '["https://vibetravel-frontend.onrender.com"]'
+
+      # Secrets (to be set manually in Render Dashboard)
+      - key: SECRET_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FIRST_SUPERUSER
+        sync: false
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false
+
+      # Security Configuration
+      - key: ALLOWED_HOSTS
+        value: vibetravel-backend.onrender.com
+      - key: SECURE_SSL_REDIRECT
+        value: "true"
+
+  # Frontend Vue.js Service
+  - type: web
+    name: vibetravel-frontend
+    runtime: docker
+    repo: https://github.com/patrykwiener/vibe-travel.git
+    region: oregon
+    plan: free
+    branch: master
+    rootDir: frontend
+    dockerfilePath: ./Dockerfile.prod
+
+    # Environment variables for build
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://vibetravel-backend.onrender.com
+      - key: VITE_ENVIRONMENT
+        value: production
+      - key: VITE_DEV_TOOLS
+        value: "false"
+      - key: VITE_API_TIMEOUT
+        value: "300000"
+
+# Static sites (alternative to Docker for frontend if preferred)
+# Uncomment this section and comment out the frontend service above if you prefer static site deployment
+#
+# - type: static
+#   name: vibetravel-frontend-static
+#   repo: https://github.com/patrykwiener/vibe-travel
+#   branch: master
+#   rootDir: frontend
+#   buildCommand: npm ci && npm run build
+#   staticPublishPath: ./dist
+#   envVars:
+#     - key: VITE_API_BASE_URL
+#       value: https://vibetravel-backend.onrender.com
+#     - key: VITE_ENVIRONMENT
+#       value: production

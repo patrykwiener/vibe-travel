@@ -1,24 +1,23 @@
 name: CI/CD Pipeline
 
-# CI/CD Strategy:
-# - develop branch → automatic deploy to staging
-# - master branch → manual approval → deploy to production
+# CI/CD Strategy for Render:
+# - master branch → automatic deploy to production (Render handles this)
 # - pull requests → only CI checks (no deployment)
+# - No image pushing to registry (Render builds from source)
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master ]
   workflow_dispatch:
     inputs:
       environment:
         description: 'Target environment for deployment'
         required: false
-        default: 'staging'
+        default: 'production'
         type: choice
         options:
-          - staging
           - production
       skip_tests:
         description: 'Skip test execution (not recommended for production)'
@@ -31,19 +30,14 @@ on:
         type: string
 
 env:
-  # Container Registry
-  REGISTRY: ghcr.io
-  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
-
-  # Database configuration for CI
+  # Database configuration for CI tests
   POSTGRES_SERVER: localhost
   POSTGRES_PORT: 5432
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
   POSTGRES_DB: vibetravel_test
 
-  # FastAPI Settings for CI
+  # FastAPI Settings for CI tests
   PROJECT_NAME: VibeTravels
   SECRET_KEY: test-secret-key-for-ci
   ENVIRONMENT: dev
@@ -85,12 +79,22 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build backend image
-      uses: docker/build-push-action@v5
+    - name: Build backend development image
+      uses: docker/build-push-action@v6
       with:
         context: ./backend
         load: true
         tags: backend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build backend production image (Render compatibility test)
+      uses: docker/build-push-action@v6
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile.prod
+        load: true
+        tags: backend:prod
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -230,8 +234,8 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build frontend image
-      uses: docker/build-push-action@v5
+    - name: Build frontend development image
+      uses: docker/build-push-action@v6
       with:
         context: ./frontend
         load: true
@@ -240,6 +244,21 @@ jobs:
         cache-to: type=gha,mode=max
         build-args: |
           VITE_BACKEND_URL=http://localhost:8000
+
+    - name: Build frontend production image (Render compatibility test)
+      uses: docker/build-push-action@v6
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile.prod
+        load: true
+        tags: frontend:prod
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          VITE_API_BASE_URL=https://vibetravel-backend.onrender.com
+          VITE_ENVIRONMENT=production
+          VITE_API_TIMEOUT=300000
+          VITE_DEV_TOOLS=false
 
     - name: Run frontend linting
       run: |
@@ -335,136 +354,59 @@ jobs:
         name: frontend-coverage
         path: frontend-coverage/
 
-  push-backend-image:
-    needs: backend
+  validate-render-config:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) || github.event_name == 'workflow_dispatch'
-
-    permissions:
-      contents: read
-      packages: write
-
-    outputs:
-      backend-image: ${{ steps.backend-meta.outputs.tags }}
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    - name: Validate Render Configuration
+      run: |
+        echo "🔍 Validating Render configuration..."
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        if [ ! -f "render.yaml" ]; then
+          echo "❌ render.yaml file not found"
+          exit 1
+        fi
 
-      - name: Extract backend metadata
-        id: backend-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+        echo "✅ render.yaml configuration file found"
+        echo "📋 Configuration summary:"
+        grep -E "^  - name:|^    type:|^    dockerfilePath:|^    startCommand:" render.yaml || true
 
-      - name: Build and push backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ steps.backend-meta.outputs.tags }}
-          labels: ${{ steps.backend-meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        # Validate Dockerfile paths exist
+        echo "🔍 Validating Dockerfile paths..."
+        if grep -q "dockerfilePath: ./backend/Dockerfile.prod" render.yaml; then
+          if [ -f "backend/Dockerfile.prod" ]; then
+            echo "✅ Backend Dockerfile.prod found"
+          else
+            echo "❌ Backend Dockerfile.prod not found"
+            exit 1
+          fi
+        fi
 
-  push-frontend-image:
-    needs: frontend
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')) || github.event_name == 'workflow_dispatch'
+        if grep -q "dockerfilePath: ./frontend/Dockerfile.prod" render.yaml; then
+          if [ -f "frontend/Dockerfile.prod" ]; then
+            echo "✅ Frontend Dockerfile.prod found"
+          else
+            echo "❌ Frontend Dockerfile.prod not found"
+            exit 1
+          fi
+        fi
 
-    permissions:
-      contents: read
-      packages: write
-
-    outputs:
-      frontend-image: ${{ steps.frontend-meta.outputs.tags }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract frontend metadata
-        id: frontend-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ steps.frontend-meta.outputs.tags }}
-          labels: ${{ steps.frontend-meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy-staging:
-    needs: [push-backend-image, push-frontend-image]
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/develop') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    environment: staging
-
-    steps:
-      - name: Log Manual Trigger Info
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "🎯 Manual workflow trigger detected"
-          echo "Target environment: ${{ github.event.inputs.environment }}"
-          echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
-          echo "Reason: ${{ github.event.inputs.reason }}"
-          echo "Triggered by: ${{ github.actor }}"
-
-      - name: Mock Deploy to Staging
-        run: |
-          echo "🚀 Deploying to staging environment..."
-          echo "Backend image: ${{ needs.push-backend-image.outputs.backend-image }}"
-          echo "Frontend image: ${{ needs.push-frontend-image.outputs.frontend-image }}"
-          echo "Environment: Staging"
-          echo "✅ Staging deployment completed successfully!"
-
-      - name: Health Check
-        run: |
-          echo "🔍 Running health checks on staging..."
-          echo "✅ All health checks passed!"
+        echo "✅ All Render configuration validation passed"
 
   deploy-production:
-    needs: [push-backend-image, push-frontend-image]
+    needs: [backend, frontend, validate-render-config]
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event_name == 'workflow_dispatch'
     environment:
       name: production
-      url: https://vibe-travels-production.com
+      url: https://vibetravel-frontend.onrender.com
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Log Manual Trigger Info
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -474,26 +416,31 @@ jobs:
           echo "Reason: ${{ github.event.inputs.reason }}"
           echo "Triggered by: ${{ github.actor }}"
 
-      - name: Manual Approval Required
+      - name: Trigger Render Deployment
         run: |
-          echo "⏳ Waiting for manual approval..."
-          echo "This deployment requires approval in GitHub Actions tab"
-          echo "Navigate to Actions → This workflow → Review deployments"
+          echo "🚀 Triggering Render deployment..."
+          echo "🌐 Render will automatically deploy the application from master branch"
+          echo "🔧 Services configured in render.yaml:"
+          echo "  - vibetravel-backend (FastAPI)"
+          echo "  - vibetravel-frontend (Vue.js + Nginx)"
+          echo "  - vibetravel-db (PostgreSQL 16)"
 
-      - name: Mock Deploy to Production
-        run: |
-          echo "🚀 Deploying to production environment..."
-          echo "Backend image: ${{ needs.push-backend-image.outputs.backend-image }}"
-          echo "Frontend image: ${{ needs.push-frontend-image.outputs.frontend-image }}"
-          echo "Environment: Production"
-          echo "✅ Production deployment completed successfully!"
+          echo "⏳ Deployment is triggered by push to master branch"
+          echo "🔗 Monitor deployment at: https://dashboard.render.com"
 
-      - name: Health Check
+      - name: Post-deployment Information
         run: |
-          echo "🔍 Running health checks on production..."
-          echo "✅ All health checks passed!"
+          echo "🎉 Render deployment initiated successfully!"
+          echo "🌐 Application URLs (available after deployment):"
+          echo "  - Frontend: https://vibetravel-frontend.onrender.com"
+          echo "  - Backend API: https://vibetravel-backend.onrender.com"
+          echo "  - API Documentation: https://vibetravel-backend.onrender.com/docs"
+          echo "  - Health Check: https://vibetravel-backend.onrender.com/api/v1/utils/health-check/"
 
-      - name: Notify Success
-        run: |
-          echo "🎉 VibeTravels has been successfully deployed to production!"
-          echo "🌐 Application is now live at: https://vibe-travels-production.com"
+          echo "🔧 Render Dashboard: https://dashboard.render.com"
+          echo "✨ Services will be created automatically based on render.yaml"
+          echo "⚠️  Remember to set environment secrets in Render Dashboard:"
+          echo "     - SECRET_KEY"
+          echo "     - OPENROUTER_API_KEY"
+          echo "     - FIRST_SUPERUSER"
+          echo "     - FIRST_SUPERUSER_PASSWORD"

@@ -1,0 +1,82 @@
+# Production Dockerfile for VibeTravels Backend - Render Platform
+# Optimized for Render deployment
+
+# Stage 1: Build dependencies and create wheels
+FROM python:3.13-alpine AS builder
+
+# Build-time environment variables
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install build dependencies for Python packages
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps \
+        build-base \
+        postgresql-dev \
+        linux-headers \
+        gcc \
+        musl-dev \
+        libffi-dev && \
+    apk add --no-cache \
+        curl \
+        netcat-openbsd
+
+WORKDIR /app
+
+# Copy requirements first for better Docker layer caching
+COPY requirements.txt .
+
+# Create wheels for all dependencies
+RUN pip install --upgrade pip && \
+    pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+# Stage 2: Production runtime
+FROM python:3.13-alpine
+
+# Runtime environment variables - Render uses PORT env var
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/home/appuser/.local/bin:$PATH"
+
+# Install only runtime dependencies
+RUN apk update && \
+    apk add --no-cache \
+        libpq \
+        curl \
+        netcat-openbsd \
+        bash && \
+    rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -S appgroup && \
+    adduser -S appuser -G appgroup -h /home/appuser
+
+WORKDIR /app
+
+# Install Python packages from wheels (faster and more reliable)
+COPY --from=builder /wheels /wheels
+COPY requirements.txt .
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt && \
+    rm -rf /wheels requirements.txt
+
+# Copy application code with proper ownership and executable permissions
+# Note: We need to set permissions before switching to non-root user
+COPY --chown=appuser:appgroup . .
+RUN chmod +x /app/scripts/*.sh
+
+# Switch to non-root user for security
+USER appuser
+
+# Add health check for Render
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${PORT:-10000}/api/v1/utils/health-check/ || exit 1
+
+# Render automatically sets PORT environment variable
+EXPOSE ${PORT:-10000}
+
+# Use exec form for proper signal handling with absolute path
+CMD ["/app/scripts/start.sh"]

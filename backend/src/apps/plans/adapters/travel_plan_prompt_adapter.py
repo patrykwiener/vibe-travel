@@ -11,6 +11,8 @@ class TravelPlanPromptAdapter(AbstractTravelPlanPromptAdapter):
     into the appropriate format for AI model communication.
     """
 
+    MAX_LENGTH_CORRECTION = 1000
+
     def __init__(self, model: str):
         """
         Initialize prompt adapter with model ID.
@@ -81,7 +83,9 @@ class TravelPlanPromptAdapter(AbstractTravelPlanPromptAdapter):
         if pref_lines:
             content += '\n\nConsider these preferences:\n' + '\n'.join(pref_lines)
 
-        content += f'\n\nTravel plan max length: {travel_plan_dto.max_length} characters\n\n'
+        content += (
+            f'\n\nTravel plan max length: {travel_plan_dto.max_length - self.MAX_LENGTH_CORRECTION} characters\n\n'
+        )
 
         return Message(role='system', content=content)
 

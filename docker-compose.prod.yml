@@ -1,0 +1,112 @@
+# Production Docker Compose for VibeTravels
+# Optimized for Render deployment with local testing support
+# Note: On Render, database is a managed service defined in render.yaml
+
+services:
+  # PostgreSQL database (for local production testing only)
+  # On Render, use managed PostgreSQL database defined in render.yaml
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - app-db-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-vibetravel_prod}
+      - POSTGRES_USER=${POSTGRES_USER:-vibetravel_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-vibetravel_password}
+    networks:
+      - vibe-net
+    # Only expose port for local testing
+    ports:
+      - "5432:5432"
+
+  # Backend API service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    image: vibetravel/backend:prod-local
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Application port
+      - PORT=${PORT:-10000}
+      # Database connection (use local db for testing, managed DB on Render)
+      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB:-vibetravel_prod}
+      - POSTGRES_USER=${POSTGRES_USER:-vibetravel_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-vibetravel_password}
+      # Application settings
+      - ENVIRONMENT=prod
+      - DEBUG=false
+      - PROJECT_NAME=${PROJECT_NAME:-VibeTravels}
+      - API_V1_STR=${API_V1_STR:-/api/v1}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-'["http://localhost", "http://localhost:3000", "http://localhost:8000"]'}
+      # AI configuration
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-your-openrouter-key}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-3.5-turbo}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENROUTER_TIMEOUT_SECONDS=${OPENROUTER_TIMEOUT_SECONDS:-300}
+      # Admin user
+      - FIRST_SUPERUSER=${FIRST_SUPERUSER:-admin@vibetravel.com}
+      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD:-admin123}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - vibe-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/api/v1/utils/health-check/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Port mapping for local testing (Render uses dynamic ports)
+    ports:
+      - "8000:10000"
+
+  # Frontend web service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000}
+        - VITE_ENVIRONMENT=production
+        - VITE_API_TIMEOUT=${VITE_API_TIMEOUT:-300000}
+        - VITE_DEV_TOOLS=${VITE_DEV_TOOLS:-false}
+    image: vibetravel/frontend:prod-local
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - vibe-net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:10000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    # Port mapping for local testing (Render handles routing automatically)
+    ports:
+      - "3000:10000"
+
+volumes:
+  app-db-data:
+    driver: local
+
+networks:
+  vibe-net:
+    driver: bridge

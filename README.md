@@ -102,7 +102,7 @@ VibeTravels addresses common challenges in trip planning, including:
 ### CI/CD & Hosting
 
 - **GitHub Actions**: Automated CI/CD pipelines
-- **DigitalOcean**: Cloud hosting platform using Docker images
+- **Render**: Cloud hosting platform with Infrastructure as Code (render.yaml)
 
 ## Getting Started
 

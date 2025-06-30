@@ -105,7 +105,8 @@ class TestTravelPlanPromptAdapter:
         assert 'Budget level:' not in message.content
         assert 'Travel pace:' not in message.content
         assert 'Travel style:' not in message.content
-        assert f'Travel plan max length: {minimal_travel_plan_dto.max_length} characters' in message.content
+        expected_max_length = minimal_travel_plan_dto.max_length - adapter.MAX_LENGTH_CORRECTION
+        assert f'Travel plan max length: {expected_max_length} characters' in message.content
 
     def test_build_system_message_full(
         self, adapter: TravelPlanPromptAdapter, full_travel_plan_dto: TravelPlanGenerationDTO
@@ -117,7 +118,8 @@ class TestTravelPlanPromptAdapter:
         assert f'Budget level: {full_travel_plan_dto.budget}' in message.content
         assert f'Travel pace: {full_travel_plan_dto.preferred_pace}' in message.content
         assert f'Travel style: {full_travel_plan_dto.travel_style}' in message.content
-        assert f'Travel plan max length: {full_travel_plan_dto.max_length} characters' in message.content
+        expected_max_length = full_travel_plan_dto.max_length - adapter.MAX_LENGTH_CORRECTION
+        assert f'Travel plan max length: {expected_max_length} characters' in message.content
 
     def test_build_user_message_minimal(
         self, adapter: TravelPlanPromptAdapter, minimal_travel_plan_dto: TravelPlanGenerationDTO
