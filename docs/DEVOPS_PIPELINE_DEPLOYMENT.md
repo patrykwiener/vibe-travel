@@ -98,6 +98,7 @@ Feature Branch → Pull Request → CI Validation → Master Merge → Auto Depl
 #### 2. Frontend Job (`frontend`)
 
 **Vue.js Build & Test:**
+
 ```yaml
 - Build development image for testing
 - Build production image with Nginx
@@ -108,6 +109,7 @@ Feature Branch → Pull Request → CI Validation → Master Merge → Auto Depl
 ```
 
 **Key Features:**
+
 - Production build validation
 - Static analysis and type checking
 - Coverage reporting
@@ -116,6 +118,7 @@ Feature Branch → Pull Request → CI Validation → Master Merge → Auto Depl
 #### 3. Configuration Validation (`validate-render-config`)
 
 **Infrastructure Validation:**
+
 ```yaml
 - Validate render.yaml syntax
 - Check Dockerfile paths exist
@@ -136,6 +139,7 @@ Feature Branch → Pull Request → CI Validation → Master Merge → Auto Depl
 ### Branch Protection Rules
 
 **Master Branch Protection:**
+
 - ✅ Require pull request before merging
 - ✅ Require status checks to pass before merging
 - ✅ Require branches to be up to date before merging
@@ -183,6 +187,7 @@ services:
 ### Docker Production Images
 
 #### Backend (`backend/Dockerfile.prod`)
+
 ```dockerfile
 # Multi-stage build for optimization
 FROM python:3.13-slim as builder
@@ -195,6 +200,7 @@ CMD ["python", "-m", "gunicorn", "main:app"]
 ```
 
 #### Frontend (`frontend/Dockerfile.prod`)
+
 ```dockerfile
 # Build stage
 FROM node:22-alpine as builder
@@ -211,6 +217,7 @@ COPY nginx-render.conf /etc/nginx/conf.d/default.conf
 ### Automatic Deployment Process
 
 1. **Developer Creates PR**
+
    ```bash
    git checkout -b feature/new-feature
    git push origin feature/new-feature
@@ -223,6 +230,7 @@ COPY nginx-render.conf /etc/nginx/conf.d/default.conf
    - Build validation must succeed
 
 3. **PR Merge to Master**
+
    ```bash
    # After code review and CI success
    git checkout master
@@ -253,6 +261,7 @@ workflow_dispatch:
 ```
 
 **Important Notes:**
+
 - When `skip_tests: false` (default): All CI jobs run normally, deployment proceeds after success
 - When `skip_tests: true`: Test steps are skipped but linting and security scans still run
 - Deployment always occurs if prerequisite jobs pass, regardless of `skip_tests` value
@@ -277,7 +286,6 @@ RENDER_FRONTEND_DEPLOY_HOOK=https://api.render.com/deploy/srv-zzzzz?key=wwwww
 
 - The CI/CD pipeline will POST to these URLs after all jobs pass, triggering deployment only after successful CI.
 - **No need for Render API Key unless you want to use the API fallback.**
-
 
 #### GitHub Secrets Required
 
@@ -318,6 +326,7 @@ RENDER_FRONTEND_DEPLOY_HOOK=https://api.render.com/deploy/srv-zzzzz?key=wwwww
 ### Deployment Verification
 
 **Automated Health Checks:**
+
 - Backend: `https://vibetravel-backend.onrender.com/api/v1/utils/health-check/`
 - Frontend: `https://vibetravel-frontend.onrender.com`
 - Database: Automatic monitoring by Render
@@ -326,9 +335,8 @@ RENDER_FRONTEND_DEPLOY_HOOK=https://api.render.com/deploy/srv-zzzzz?key=wwwww
 
 ### Secrets Management
 
-
-
 **Render Environment Variables (Secrets):**
+
 ```bash
 SECRET_KEY=production-secret-key
 JWT_SECRET_KEY=jwt-secret-key
@@ -340,11 +348,13 @@ FIRST_SUPERUSER_PASSWORD=secure-password
 ### Security Scanning
 
 **Backend Security:**
+
 - Bandit for Python security issues
 - Dependency vulnerability scanning
 - Docker image security validation
 
 **Frontend Security:**
+
 - npm audit for dependency vulnerabilities
 - TypeScript strict mode for type safety
 - ESLint security rules
@@ -369,12 +379,14 @@ BACKEND_CORS_ORIGINS: '["https://vibetravel-frontend.onrender.com"]'
 ### Monitoring Solutions
 
 **Render Dashboard Monitoring:**
+
 - Real-time logs for all services
 - Performance metrics (CPU, Memory, Response time)
 - Deploy history and rollback options
 - Automatic health checks
 
 **GitHub Actions Monitoring:**
+
 - CI/CD pipeline success/failure notifications
 - Build time and performance metrics
 - Artifact storage for debugging
@@ -384,6 +396,7 @@ BACKEND_CORS_ORIGINS: '["https://vibetravel-frontend.onrender.com"]'
 #### 1. Build Failures
 
 **Backend Issues:**
+
 ```bash
 # Check logs in Render Dashboard
 # Verify Python dependencies in requirements.txt
@@ -392,6 +405,7 @@ BACKEND_CORS_ORIGINS: '["https://vibetravel-frontend.onrender.com"]'
 ```
 
 **Frontend Issues:**
+
 ```bash
 # Check Node.js build logs
 # Verify npm dependencies
@@ -419,6 +433,7 @@ BACKEND_CORS_ORIGINS: '["https://vibetravel-frontend.onrender.com"]'
 ### Rollback Procedures
 
 #### 1. Application Rollback
+
 ```bash
 # Via Render Dashboard
 Service → Events → Previous Deploy → Redeploy
@@ -429,6 +444,7 @@ git push origin master
 ```
 
 #### 2. Infrastructure Rollback
+
 ```bash
 # Revert render.yaml changes
 git revert <infrastructure-commit>
@@ -441,17 +457,20 @@ git push origin master
 ### Current Free Tier Usage
 
 **Services on Free Plan:**
+
 - Backend: 750 hours/month, sleeps after 15 min inactivity
 - Frontend: 750 hours/month, sleeps after 15 min inactivity  
 - Database: 1GB storage, 100 connections
 
 **Build Resources:**
+
 - 500 build minutes/month shared across services
 - GitHub Actions: 2000 minutes/month on free plan
 
 ### Optimization Strategies
 
 #### 1. Docker Image Optimization
+
 ```dockerfile
 # Multi-stage builds to reduce image size
 # Alpine base images where possible
@@ -460,6 +479,7 @@ git push origin master
 ```
 
 #### 2. Build Time Optimization
+
 ```yaml
 # GitHub Actions cache for Docker layers
 cache-from: type=gha
@@ -470,6 +490,7 @@ cache-to: type=gha,mode=max
 ```
 
 #### 3. Resource Monitoring
+
 - Monitor service sleep patterns
 - Optimize build frequency
 - Track resource usage in Render Dashboard
@@ -492,24 +513,28 @@ databases:
 ## 🎯 Best Practices Summary
 
 ### Development Workflow
+
 1. **Feature Branch Development**: All work on separate branches
 2. **Pull Request Review**: Code review before merge
 3. **Automated Testing**: Comprehensive test coverage
 4. **Security First**: Regular security scanning
 
 ### Deployment Strategy
+
 1. **Infrastructure as Code**: All configuration in version control
 2. **Automated Deployment**: Reduce manual intervention
 3. **Health Checks**: Validate deployments automatically
 4. **Rollback Capability**: Quick recovery from issues
 
 ### Security Practices
+
 1. **Secrets Management**: Never commit secrets to repository
 2. **Environment Separation**: Clear boundaries between environments
 3. **Access Control**: Limited access to production systems
 4. **Regular Updates**: Keep dependencies up to date
 
 ### Monitoring & Maintenance
+
 1. **Proactive Monitoring**: Track performance and errors
 2. **Log Management**: Centralized logging for debugging
 3. **Regular Backups**: Automated database backups
@@ -519,12 +544,11 @@ databases:
 
 ## 📚 Additional Resources
 
-- **Render Documentation**: https://render.com/docs
-- **GitHub Actions Documentation**: https://docs.github.com/en/actions
-- **Docker Best Practices**: https://docs.docker.com/develop/dev-best-practices/
-- **FastAPI Deployment**: https://fastapi.tiangolo.com/deployment/
-- **Vue.js Production Deployment**: https://vuejs.org/guide/best-practices/production-deployment.html
-
+- **Render Documentation**: <https://render.com/docs>
+- **GitHub Actions Documentation**: <https://docs.github.com/en/actions>
+- **Docker Best Practices**: <https://docs.docker.com/develop/dev-best-practices/>
+- **FastAPI Deployment**: <https://fastapi.tiangolo.com/deployment/>
+- **Vue.js Production Deployment**: <https://vuejs.org/guide/best-practices/production-deployment.html>
 
 ## ✅ Quick Start Checklist
 

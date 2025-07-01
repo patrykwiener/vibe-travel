@@ -4,6 +4,11 @@
 [![Project Status: MVP Development](https://img.shields.io/badge/Project%20Status-MVP%20Development-yellow)](https://github.com/10xdevs/vibe-travel)
 [![CI/CD Pipeline](https://github.com/patrykwiener/vibe-travel/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/patrykwiener/vibe-travel/actions)
 
+![Frontend Check](https://api.cron-job.org/jobs/6288615/9dd25ee70c7046d5/status-7.svg)
+![Backend Check](https://api.cron-job.org/jobs/6288606/c94dd79cb8574dfb/status-7.svg)
+
+[![VibeTravel Status](https://img.shields.io/badge/VibeTravel%20Deployment-Status-blue?logo=cron&labelColor=gray)](https://79w3xdtv.status.cron-job.org/)
+
 ## Table of Contents
 
 - [VibeTravels](#vibetravels)
